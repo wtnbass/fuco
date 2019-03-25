@@ -1,0 +1,21 @@
+{
+  "name": "lit-function",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && rollup -c",
+    "test": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "Keisuke Watanabe",
+  "license": "MIT",
+  "dependencies": {
+    "lit-html": "1.0.0"
+  },
+  "devDependencies": {
+    "rollup": "1.7.0",
+    "rollup-plugin-node-resolve": "4.0.1",
+    "typescript": "3.3.4000"
+  }
+}
