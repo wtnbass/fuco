@@ -1,9 +1,9 @@
 import {
   Hook,
-  UseEffectHook,
+  EffectHook,
   setCurrent,
   getProperties,
-  InitElement
+  createInitElement
 } from "./hooks";
 
 export interface ComponentClass {
@@ -12,17 +12,9 @@ export interface ComponentClass {
 }
 
 export class Component extends HTMLElement {
-  hooks: Hook[] = [];
-  effects: UseEffectHook[] = [];
-
-  constructor() {
-    super();
-    this.attachShadow({ mode: "open" });
-
-    this.hooks = [];
-    this.effects = [];
-    this.update();
-  }
+  public rootElement = this.attachShadow({ mode: "open" });
+  public hooks: Hook[] = [];
+  public effects: EffectHook[] = [];
 
   protected static initialize() {}
 
@@ -46,21 +38,17 @@ export class Component extends HTMLElement {
   }
 
   protected attributeChangedCallback() {
-    this.render();
+    this.update();
+  }
+
+  protected conntectedCallback() {
+    this.update();
   }
 
   protected disconnectedCallback() {
     this.hooks.forEach(hook => {
-      const h = hook as UseEffectHook;
+      const h = hook as EffectHook;
       if (h.cleanup) h.cleanup();
     });
   }
-}
-
-function createInitElement(): InitElement {
-  return {
-    __init: {
-      properties: []
-    }
-  };
 }

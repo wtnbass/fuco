@@ -1,30 +1,56 @@
 import { Component } from "./component";
+import { Context } from "./context";
 
 type Option<T> = T | undefined;
 
-type Fn = () => void;
+type Callback<Arg = void, Return = void> = (arg: Arg) => Return;
 
-export type Hook = UseStateHook | UseEffectHook;
+export type Hook<T = any> =
+  | StateHook<T>
+  | ContextHook
+  | EffectHook
+  | MemoHook<T>;
 
-type UseStateHook<T = any> = {
+interface StateHook<T> {
   value?: T;
-  setter?: (value: T) => void;
-};
+  setter?: (value: T | Callback<T, T>) => void;
+}
 
-export type UseEffectHook = {
-  handler?: () => Option<Fn>;
+interface ContextHook {
+  called?: boolean;
+}
+
+export interface EffectHook {
+  handler?: () => Option<Callback>;
   fields?: any[];
-  cleanup?: Fn;
-};
+  cleanup?: Callback;
+}
 
-export type InitElement = {
+interface MemoHook<T> {
+  value?: T;
+  fields?: any[];
+}
+
+interface InitElement {
   __init: {
     properties: string[];
   };
-};
+}
 
 let currentCursor: number;
 let currentElement: Component | InitElement;
+
+export function createInitElement(): InitElement {
+  return {
+    __init: {
+      properties: []
+    }
+  };
+}
+
+function isInit(el: Component | InitElement): el is InitElement {
+  return "__init" in el;
+}
 
 export function setCurrent(el: Component | InitElement, cursor: number) {
   currentElement = el;
@@ -32,20 +58,35 @@ export function setCurrent(el: Component | InitElement, cursor: number) {
 }
 
 export function getProperties() {
-  if (!whenInit(currentElement)) return [];
+  if (!isInit(currentElement)) return [];
   return currentElement.__init.properties;
 }
 
-function whenInit(el: Component | InitElement): el is InitElement {
-  return !!(el as InitElement).__init;
+function getHook(index: number) {
+  const el = currentElement as Component;
+  while (el.hooks.length <= index) {
+    el.hooks.push({});
+  }
+  return el.hooks[index];
 }
+
+function createHook<T>(
+  callback: (hook: Hook, el: Component) => T,
+  initialize: (el: InitElement) => T
+) {
+  if (isInit(currentElement)) {
+    return initialize(currentElement);
+  }
+  return callback(getHook(currentCursor++), currentElement);
+}
+
+const fieldsChanged = (prev: any[] | undefined, next: any[]) =>
+  prev == null || next.some((f, i) => f !== prev[i]);
 
 export const useProperty = (name: string) =>
   createHook(
-    (_, el: any) => {
-      if (el[name]) return el[name];
-      const attr = el.attributes[name];
-      return attr ? attr.value : null;
+    (_, el) => {
+      return el.getAttribute(name);
     },
     el => {
       el.__init.properties.push(name);
@@ -53,15 +94,15 @@ export const useProperty = (name: string) =>
     }
   );
 
-export const useState = (initValue: any) =>
+export const useState = <T>(initValue: T) =>
   createHook(
-    (_hook, el) => {
-      const hook = _hook as UseStateHook;
+    (arg, el) => {
+      const hook = arg as StateHook<T>;
       if (!hook.setter) {
         hook.value = initValue;
         hook.setter = function(newValue) {
           if (typeof newValue === "function") {
-            newValue = newValue(hook.value);
+            newValue = (newValue as Callback<Option<T>, T>)(hook.value);
           }
           hook.value = newValue;
           el.update();
@@ -72,13 +113,25 @@ export const useState = (initValue: any) =>
     () => []
   );
 
-const fieldsChanged = (prev: any[] | undefined, next: any[]) =>
-  prev == null || next.some((f, i) => f === prev[i]);
-
-export const useEffect = (handler: () => Option<Fn>, fields: any[] = []) =>
+export const useContext = <T>(context: Context<T>) =>
   createHook(
-    (_hook, el) => {
-      const hook = _hook as UseEffectHook;
+    (arg, el) => {
+      const hook = arg as ContextHook;
+      if (!hook.called) {
+        hook.called = true;
+        context.components.push(el);
+      }
+      return context.value;
+    },
+    () => {}
+  );
+export const useEffect = (
+  handler: () => Option<Callback>,
+  fields: any[] = []
+) =>
+  createHook(
+    (arg, el) => {
+      const hook = arg as EffectHook;
       if (fieldsChanged(hook.fields, fields)) {
         hook.fields = fields;
         hook.handler = handler;
@@ -88,20 +141,18 @@ export const useEffect = (handler: () => Option<Fn>, fields: any[] = []) =>
     () => null
   );
 
-function createHook<T>(
-  callback: (hook: Hook, el: Component) => T,
-  initialize: (el: InitElement) => T
-) {
-  if (whenInit(currentElement)) {
-    return initialize(currentElement);
-  }
-  return callback(getHook(currentCursor++), currentElement);
-}
+export const useMemo = <T>(fn: Callback<void, T>, fields: any[] = []) =>
+  createHook(
+    arg => {
+      const hook = arg as MemoHook<T>;
+      if (fieldsChanged(hook.fields, fields)) {
+        hook.fields = fields;
+        hook.value = fn();
+      }
+      return hook.value;
+    },
+    () => null
+  );
 
-function getHook(index: number) {
-  const el = currentElement as Component;
-  while (el.hooks.length <= index) {
-    el.hooks.push({});
-  }
-  return el.hooks[index];
-}
+export const useCallback = (callback: Callback, fields: any[] = []) =>
+  useMemo(() => callback, fields);

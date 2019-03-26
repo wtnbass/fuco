@@ -1,24 +1,35 @@
-export { html } from "lit-html";
 import { render, TemplateResult } from "lit-html";
 import { Component, ComponentClass } from "./component";
-export { useState, useProperty, useEffect } from "./hooks";
+
+export { html } from "lit-html";
+export { Context, createContext } from "./context";
+export {
+  useProperty,
+  useState,
+  useContext,
+  useEffect,
+  useMemo,
+  useCallback
+} from "./hooks";
 
 type FunctionalComponent = () => TemplateResult;
 
-export const defineElement = (name: string, func: FunctionalComponent) =>
-  component(name)(func);
+export function defineElement(
+  name: string,
+  func: FunctionalComponent
+): ComponentClass {
+  let C = class extends Component {
+    protected static initialize() {
+      func();
+    }
+    protected render() {
+      render(func(), this.rootElement);
+    }
+  };
+  window.customElements.define(name, C);
+  return C;
+}
 
 export const component = (name: string) => (
   func: FunctionalComponent
-): ComponentClass => {
-  let element = class extends Component {
-    static initialize() {
-      func();
-    }
-    render() {
-      render(func(), this.shadowRoot!);
-    }
-  };
-  customElements.define(name, element);
-  return element;
-};
+): ComponentClass => defineElement(name, func);
