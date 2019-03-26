@@ -1,11 +1,21 @@
 {
-  "name": "lit-function",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "functional-web-component",
+  "version": "0.0.1",
+  "description": "custom elements with lit-html and hooks",
+  "main": "dist/functional-web-component.js",
+  "module": "dist/functional-web-component.mjs",
+  "main:min": "dist/functional-web-component.min.js",
+  "module:min": "dist/functional-web-component.min.mjs",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc && rollup -c",
-    "test": "tsc --noEmit"
+    "clean": "rm -fr dist",
+    "distclean": "rm -fr dist node_modules package-lock.json",
+    "lint": "eslint src/**/*",
+    "fmt": "npm run lint -- --fix"
   },
   "keywords": [],
   "author": "Keisuke Watanabe",
@@ -14,8 +24,14 @@
     "lit-html": "1.0.0"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "1.5.0",
+    "eslint": "5.15.3",
+    "eslint-config-prettier": "4.1.0",
+    "eslint-plugin-prettier": "3.0.1",
+    "prettier": "1.16.4",
     "rollup": "1.7.0",
     "rollup-plugin-node-resolve": "4.0.1",
+    "rollup-plugin-terser": "4.0.4",
     "typescript": "3.3.4000"
   }
 }
