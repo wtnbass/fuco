@@ -1,7 +1,7 @@
 {
   "name": "functional-web-component",
   "version": "0.0.1",
-  "description": "custom elements with lit-html and hooks",
+  "description": "WebComponents with lit-html and Hooks",
   "main": "dist/functional-web-component.js",
   "module": "dist/functional-web-component.mjs",
   "main:min": "dist/functional-web-component.min.js",
@@ -20,6 +20,8 @@
   "keywords": [],
   "author": "Keisuke Watanabe",
   "license": "MIT",
+  "homepage": "https://github.com/wtnbass/functional-web-component",
+  "repository": "wtnbass/functional-web-component",
   "dependencies": {
     "lit-html": "1.0.0"
   },
