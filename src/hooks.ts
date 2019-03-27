@@ -5,15 +5,26 @@ type Option<T> = T | undefined;
 
 type Callback<Arg = void, Return = void> = (arg: Arg) => Return;
 
-export type Hook<T = any> =
-  | StateHook<T>
+export type Hook =
+  | PropertyHook<any>
+  | StateHook<any>
+  | ReducerHook<any, any>
   | ContextHook
   | EffectHook
-  | MemoHook<T>;
+  | MemoHook<any>;
+
+interface PropertyHook<T> {
+  value?: T;
+}
 
 interface StateHook<T> {
   value?: T;
   setter?: (value: T | Callback<T, T>) => void;
+}
+
+interface ReducerHook<S, A> {
+  state?: S;
+  dispatch?: (action: A) => void;
 }
 
 interface ContextHook {
@@ -62,28 +73,25 @@ export function getProperties() {
   return currentElement.__init.properties;
 }
 
-function getHook(index: number) {
-  const el = currentElement as Component;
-  while (el.hooks.length <= index) {
-    el.hooks.push({});
-  }
-  return el.hooks[index];
-}
+const defaultInitialize = (_: InitElement) => undefined;
 
 function createHook<T>(
   callback: (hook: Hook, el: Component) => T,
-  initialize: (el: InitElement) => T
+  initialize: (el: InitElement) => Option<T> = defaultInitialize
 ) {
   if (isInit(currentElement)) {
     return initialize(currentElement);
   }
-  return callback(getHook(currentCursor++), currentElement);
+  while (currentElement.hooks.length < currentCursor) {
+    currentElement.hooks.push({});
+  }
+  return callback(currentElement.hooks[currentCursor++], currentElement);
 }
 
 const fieldsChanged = (prev: any[] | undefined, next: any[]) =>
   prev == null || next.some((f, i) => f !== prev[i]);
 
-export const useProperty = (name: string) =>
+export const useAttribute = (name: string) =>
   createHook(
     (_, el) => {
       return el.getAttribute(name);
@@ -93,6 +101,24 @@ export const useProperty = (name: string) =>
       return "";
     }
   );
+
+export const useProperty = <T>(name: string) =>
+  createHook((arg, el) => {
+    const hook = arg as PropertyHook<T>;
+    if (hook.value == null) {
+      hook.value = (el as any)[name];
+      Object.defineProperty(el, name, {
+        get() {
+          return hook.value;
+        },
+        set(newValue) {
+          hook.value = newValue;
+          el.update();
+        }
+      });
+    }
+    return hook.value;
+  });
 
 export const useState = <T>(initValue: T) =>
   createHook(
@@ -110,49 +136,61 @@ export const useState = <T>(initValue: T) =>
       }
       return [hook.value, hook.setter];
     },
-    () => []
+    () => [initValue]
+  );
+
+const initAction = { type: "__@@init__" };
+
+export const useReducer = <S, A>(
+  reducer: (state: Option<S>, action: A | typeof initAction) => S,
+  initialState: S
+) =>
+  createHook(
+    (arg, el) => {
+      const hook = arg as ReducerHook<S, A>;
+      if (hook.state == null) {
+        hook.state = reducer(initialState, initAction);
+        hook.dispatch = (action: A) => {
+          hook.state = reducer(hook.state, action);
+          el.update();
+        };
+      }
+      return [hook.state, hook.dispatch];
+    },
+    () => [reducer(initialState, initAction)]
   );
 
 export const useContext = <T>(context: Context<T>) =>
-  createHook(
-    (arg, el) => {
-      const hook = arg as ContextHook;
-      if (!hook.called) {
-        hook.called = true;
-        context.components.push(el);
-      }
-      return context.value;
-    },
-    () => {}
-  );
+  createHook((arg, el) => {
+    const hook = arg as ContextHook;
+    if (!hook.called) {
+      hook.called = true;
+      context.components.push(el);
+    }
+    return context.value;
+  });
 export const useEffect = (
   handler: () => Option<Callback>,
   fields: any[] = []
 ) =>
-  createHook(
-    (arg, el) => {
-      const hook = arg as EffectHook;
-      if (fieldsChanged(hook.fields, fields)) {
-        hook.fields = fields;
-        hook.handler = handler;
-        el.effects.push(hook);
-      }
-    },
-    () => null
-  );
+  createHook((arg, el) => {
+    const hook = arg as EffectHook;
+    if (fieldsChanged(hook.fields, fields)) {
+      hook.fields = fields;
+      hook.handler = handler;
+      el.effects.push(hook);
+    }
+  });
 
 export const useMemo = <T>(fn: Callback<void, T>, fields: any[] = []) =>
-  createHook(
-    arg => {
-      const hook = arg as MemoHook<T>;
-      if (fieldsChanged(hook.fields, fields)) {
-        hook.fields = fields;
-        hook.value = fn();
-      }
-      return hook.value;
-    },
-    () => null
-  );
+  createHook(arg => {
+    const hook = arg as MemoHook<T>;
+    if (fieldsChanged(hook.fields, fields)) {
+      hook.fields = fields;
+      hook.value = fn();
+    }
+    return hook.value;
+  });
 
 export const useCallback = (callback: Callback, fields: any[] = []) =>
   useMemo(() => callback, fields);

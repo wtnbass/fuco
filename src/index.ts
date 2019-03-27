@@ -4,8 +4,10 @@ import { Component, ComponentClass } from "./component";
 export { html } from "lit-html";
 export { Context, createContext } from "./context";
 export {
+  useAttribute,
   useProperty,
   useState,
+  useReducer,
   useContext,
   useEffect,
   useMemo,
