@@ -41,7 +41,7 @@ export class Component extends HTMLElement {
     this.update();
   }
 
-  protected conntectedCallback() {
+  protected connectedCallback() {
     this.update();
   }
 
