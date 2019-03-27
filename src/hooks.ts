@@ -1,5 +1,5 @@
 import { Component } from "./component";
-import { Context } from "./context";
+import { Context, createConsumerLoadedEvent } from "./context";
 
 type Option<T> = T | undefined;
 
@@ -165,9 +165,9 @@ export const useContext = <T>(context: Context<T>) =>
     const hook = arg as ContextHook;
     if (!hook.called) {
       hook.called = true;
-      context.components.push(el);
+      el.dispatchEvent(createConsumerLoadedEvent(context, el));
     }
-    return context.value;
+    return context._value;
   });
 export const useEffect = (
   handler: () => Option<Callback>,
