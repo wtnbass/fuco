@@ -32,7 +32,7 @@ interface ContextHook {
 }
 
 export interface EffectHook {
-  handler?: () => Option<Callback>;
+  handler?: () => Callback | void;
   fields?: any[];
   cleanup?: Callback;
 }
@@ -167,12 +167,10 @@ export const useContext = <T>(context: Context<T>) =>
       hook.called = true;
       el.dispatchEvent(createConsumerLoadedEvent(context, el));
     }
-    return context._value;
+    return context.value;
   });
-export const useEffect = (
-  handler: () => Option<Callback>,
-  fields: any[] = []
-) =>
+
+export const useEffect = (handler: () => Callback | void, fields: any[] = []) =>
   createHook((arg, el) => {
     const hook = arg as EffectHook;
     if (fieldsChanged(hook.fields, fields)) {
@@ -192,5 +190,7 @@ export const useMemo = <T>(fn: Callback<void, T>, fields: any[] = []) =>
     return hook.value;
   });
 
-export const useCallback = (callback: Callback, fields: any[] = []) =>
-  useMemo(() => callback, fields);
+export const useCallback = <A, R>(
+  callback: Callback<A, R>,
+  fields: any[] = []
+) => useMemo(() => callback, fields);

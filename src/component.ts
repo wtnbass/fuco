@@ -1,3 +1,4 @@
+import { render, TemplateResult } from "lit-html";
 import {
   Hook,
   EffectHook,
@@ -26,7 +27,12 @@ export class Component extends HTMLElement {
 
     this.effects.forEach(hook => {
       if (hook.cleanup) hook.cleanup();
-      if (hook.handler) hook.cleanup = hook.handler();
+      if (hook.handler) {
+        const cleanup = hook.handler();
+        if (typeof cleanup === "function") {
+          hook.cleanup = cleanup;
+        }
+      }
     });
     this.effects = [];
   }
@@ -51,4 +57,22 @@ export class Component extends HTMLElement {
       if (h.cleanup) h.cleanup();
     });
   }
+}
+
+export type FunctionalComponent = () => TemplateResult;
+
+export function defineElement(
+  name: string,
+  func: FunctionalComponent
+): ComponentClass {
+  let C = class extends Component {
+    protected static initialize() {
+      func();
+    }
+    protected render() {
+      render(func(), this.rootElement);
+    }
+  };
+  window.customElements.define(name, C);
+  return C;
 }

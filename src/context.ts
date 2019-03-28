@@ -1,54 +1,49 @@
-import { Component } from "./component";
+import { html } from "lit-html";
+import { useProperty, useCallback, useEffect } from "./hooks";
+import { Component, FunctionalComponent } from "./component";
 
 let contextId = 0;
 
 export interface Context<T> {
-  _id: number;
-  _value: T | undefined;
-  Provider: ProviderClass;
-}
-
-interface ProviderClass {
-  prototype: {
-    _id: number;
-  };
+  readonly id: number;
+  readonly value: T | undefined;
+  readonly Provider: FunctionalComponent;
 }
 
 export function createContext<T>(defaultValue?: T): Context<T> {
   const components: Component[] = [];
-  const _id = contextId++;
+  const id = contextId++;
+
   let _value = defaultValue;
 
-  const Provider = class extends HTMLElement {
-    public _id = _id;
+  function Provider() {
+    const value = useProperty<T>("value");
 
-    public constructor() {
-      super();
+    useEffect(() => {
+      _value = value;
+      components.forEach(c => c.update());
+    }, [value]);
 
-      this.attachShadow({ mode: "open" }).appendChild(
-        document.createElement("slot")
-      );
+    const loadConsumer = useCallback((event: Event) => {
+      const e = event as ConsumerLoadedEvent<T>;
+      const { type, component } = e.detail;
+      if (type.id === id) {
+        components.push(component);
+      }
+    });
 
-      this.addEventListener("context-consumer-loaded", event => {
-        const e = event as ConsumerLoadedEvent<T>;
-        const { type, component } = e.detail;
-        if (type._id === this._id) {
-          components.push(component);
-        }
-      });
+    return html`
+      <slot @context-consumer-loaded=${loadConsumer}></slot>
+    `;
+  }
 
-      Object.defineProperty(this, "value", {
-        get() {
-          return _value;
-        },
-        set(newValue) {
-          _value = newValue;
-          components.forEach(c => c.update());
-        }
-      });
+  return {
+    Provider,
+    id,
+    get value() {
+      return _value;
     }
   };
-  return { Provider, _id, _value };
 }
 
 type ConsumerLoadedEvent<T> = CustomEvent<{
@@ -61,11 +56,11 @@ export function createConsumerLoadedEvent<T>(
   component: Component
 ) {
   return new CustomEvent("context-consumer-loaded", {
+    bubbles: true,
+    composed: true,
     detail: {
       type,
       component
-    },
-    composed: true,
-    bubbles: true
+    }
   });
 }

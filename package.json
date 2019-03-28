@@ -4,8 +4,6 @@
   "description": "WebComponents with lit-html and Hooks",
   "main": "dist/functional-web-component.js",
   "module": "dist/functional-web-component.mjs",
-  "main:min": "dist/functional-web-component.min.js",
-  "module:min": "dist/functional-web-component.min.mjs",
   "typings": "dist/index.d.ts",
   "files": [
     "dist"

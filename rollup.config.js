@@ -4,10 +4,6 @@ import { terser } from "rollup-plugin-terser";
 
 const source = "dist/index.js";
 
-const terserOption = {
-  warnings: true
-};
-
 export default [
   {
     input: source,
@@ -15,16 +11,7 @@ export default [
       file: pkg.main,
       format: "cjs"
     },
-    external: ["lit-html"]
-  },
-  {
-    input: source,
-    output: {
-      file: pkg["main:min"],
-      format: "cjs"
-    },
-    external: ["lit-html"],
-    plugins: [terser(terserOption)]
+    external: [...Object.keys(pkg.dependencies)]
   },
   {
     input: source,
@@ -32,14 +19,6 @@ export default [
       file: pkg.module,
       format: "esm"
     },
-    plugins: [resolve()]
-  },
-  {
-    input: source,
-    output: {
-      file: pkg["module:min"],
-      format: "esm"
-    },
-    plugins: [resolve(), terser(terserOption)]
+    plugins: [resolve(), terser()]
   }
 ];
