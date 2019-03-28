@@ -82,7 +82,7 @@ function createHook<T>(
   if (isInit(currentElement)) {
     return initialize(currentElement);
   }
-  while (currentElement.hooks.length < currentCursor) {
+  while (currentElement.hooks.length <= currentCursor) {
     currentElement.hooks.push({});
   }
   return callback(currentElement.hooks[currentCursor++], currentElement);
