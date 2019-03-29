@@ -1,11 +1,5 @@
 import { render, TemplateResult } from "lit-html";
-import {
-  Hook,
-  EffectHook,
-  setCurrent,
-  getProperties,
-  createInitElement
-} from "./hooks";
+import { Hook, EffectHook, setCurrent } from "./hooks";
 
 export interface ComponentClass {
   new (...args: any[]): Component;
@@ -16,8 +10,6 @@ export class Component extends HTMLElement {
   public rootElement = this.attachShadow({ mode: "open" });
   public hooks: Hook[] = [];
   public effects: EffectHook[] = [];
-
-  protected static initialize() {}
 
   protected render() {}
 
@@ -35,16 +27,6 @@ export class Component extends HTMLElement {
       }
     });
     this.effects = [];
-  }
-
-  protected static get observedAttributes() {
-    setCurrent(createInitElement(), 0);
-    this.initialize();
-    return getProperties();
-  }
-
-  protected attributeChangedCallback() {
-    this.update();
   }
 
   protected connectedCallback() {
@@ -66,9 +48,6 @@ export function defineElement(
   func: FunctionalComponent
 ): ComponentClass {
   let C = class extends Component {
-    protected static initialize() {
-      func();
-    }
     protected render() {
       render(func(), this.rootElement);
     }
