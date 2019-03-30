@@ -10,6 +10,8 @@ export { Context, createContext } from "./context";
 export {
   useAttribute,
   useProperty,
+  useQuery,
+  useQueryAll,
   useState,
   useReducer,
   useContext,

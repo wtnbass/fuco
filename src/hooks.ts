@@ -8,6 +8,7 @@ type Callback<Arg = void, Return = void> = (arg: Arg) => Return;
 export type Hook =
   | AttributeHook
   | PropertyHook<any>
+  | QueryHook<Element | Element[] | null>
   | StateHook<any>
   | ReducerHook<any, any>
   | ContextHook
@@ -21,6 +22,12 @@ interface AttributeHook {
 
 interface PropertyHook<T> {
   value?: T;
+}
+
+interface QueryHook<T> {
+  value?: {
+    readonly current: T;
+  };
 }
 
 type SetState<T> = (value: T | FunctionArg<T>) => void;
@@ -102,6 +109,25 @@ export const useProperty = <T>(name: string) => {
   return hook.value;
 };
 
+const query = <T = Element | Element[] | null>(fn: Callback<Component, T>) => {
+  const hook = getHook() as QueryHook<T>;
+  const el = currentElement;
+  if (hook.value == null) {
+    hook.value = {
+      get current() {
+        return fn(el);
+      }
+    };
+  }
+  return hook.value;
+};
+
+export const useQuery = (selector: string) =>
+  query(el => el.querySelector(selector));
+
+export const useQueryAll = (selector: string) =>
+  query(el => el.querySelectorAll(selector));
+
 export const useState = <T>(initValue: T): [T, SetState<T>] => {
   const hook = getHook() as StateHook<T>;
   const el = currentElement;
@@ -123,7 +149,7 @@ const initAction = { type: "__@@init__" };
 export const useReducer = <S, A>(
   reducer: (state: Option<S>, action: A | typeof initAction) => S,
   initialState: S
-):[S, (action: A) => void] => {
+): [S, (action: A) => void] => {
   const hook = getHook() as ReducerHook<S, A>;
   const el = currentElement;
   if (hook.state == null || hook.dispatch == null) {
