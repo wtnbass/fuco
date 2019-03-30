@@ -1,22 +1,26 @@
-import { render, TemplateResult } from "lit-html";
-import { Hook, EffectHook, setCurrent } from "./hooks";
+import { Hook, setCurrent, AttributeHook, EffectHook } from "./hooks";
 
-export interface ComponentClass {
-  new (...args: any[]): Component;
-  prototype: Component;
-}
-
-export class Component extends HTMLElement {
+export abstract class Component extends HTMLElement {
   public rootElement = this.attachShadow({ mode: "open" });
   public hooks: Hook[] = [];
   public effects: EffectHook[] = [];
 
-  protected render() {}
+  protected connectedCallback() {
+    this.update();
+  }
+
+  protected disconnectedCallback() {
+    this.cleanup();
+  }
+  protected abstract render(): void;
 
   public update() {
     setCurrent(this, 0);
     this.render();
+    this.runEffects();
+  }
 
+  private runEffects() {
     this.effects.forEach(hook => {
       if (hook.cleanup) hook.cleanup();
       if (hook.handler) {
@@ -29,29 +33,10 @@ export class Component extends HTMLElement {
     this.effects = [];
   }
 
-  protected connectedCallback() {
-    this.update();
-  }
-
-  protected disconnectedCallback() {
+  private cleanup() {
     this.hooks.forEach(hook => {
-      const h = hook as EffectHook;
+      const h = hook as AttributeHook | EffectHook;
       if (h.cleanup) h.cleanup();
     });
   }
-}
-
-export type FunctionalComponent = () => TemplateResult;
-
-export function defineElement(
-  name: string,
-  func: FunctionalComponent
-): ComponentClass {
-  let C = class extends Component {
-    protected render() {
-      render(func(), this.rootElement);
-    }
-  };
-  window.customElements.define(name, C);
-  return C;
 }

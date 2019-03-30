@@ -15,35 +15,34 @@ export type Hook =
   | EffectHook
   | MemoHook<any>;
 
-interface AttributeHook {
+export interface AttributeHook {
   value?: string;
   cleanup?: () => void;
 }
 
-interface PropertyHook<T> {
+export interface PropertyHook<T> {
   value?: T;
 }
 
-interface QueryHook<T> {
+export interface QueryHook<T> {
   value?: {
     readonly current: T;
   };
 }
 
-type SetState<T> = (value: T | FunctionArg<T>) => void;
-type FunctionArg<T> = (value: T) => T;
+type SetState<T> = (value: T | Callback<T, T>) => void;
 
-interface StateHook<T> {
+export interface StateHook<T> {
   value?: T;
   setter?: SetState<T>;
 }
 
-interface ReducerHook<S, A> {
+export interface ReducerHook<S, A> {
   state?: S;
   dispatch?: (action: A) => void;
 }
 
-interface ContextHook {
+export interface ContextHook {
   called?: boolean;
 }
 
@@ -53,7 +52,7 @@ export interface EffectHook {
   cleanup?: Callback;
 }
 
-interface MemoHook<T> {
+export interface MemoHook<T> {
   value?: T;
   fields?: any[];
 }
@@ -91,6 +90,7 @@ export const useAttribute = (name: string) => {
   }
   return hook.value;
 };
+
 export const useProperty = <T>(name: string) => {
   const hook = getHook() as PropertyHook<T>;
   const el = currentElement;

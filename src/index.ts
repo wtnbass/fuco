@@ -1,11 +1,7 @@
-import {
-  defineElement,
-  ComponentClass,
-  FunctionalComponent
-} from "./component";
+import { render, TemplateResult } from "lit-html";
+import { Component } from "./component";
 
 export { html } from "lit-html";
-export { defineElement, FunctionalComponent } from "./component";
 export { Context, createContext } from "./context";
 export {
   useAttribute,
@@ -20,6 +16,15 @@ export {
   useCallback
 } from "./hooks";
 
-export const component = (name: string) => (
-  func: FunctionalComponent
-): ComponentClass => defineElement(name, func);
+export type FunctionalComponent = () => TemplateResult;
+
+export function defineElement(name: string, func: FunctionalComponent) {
+  window.customElements.define(
+    name,
+    class extends Component {
+      protected render() {
+        render(func(), this.rootElement);
+      }
+    }
+  );
+}
