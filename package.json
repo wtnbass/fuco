@@ -11,10 +11,10 @@
   "scripts": {
     "build": "tsc && rollup -c",
     "clean": "rm -fr dist .cache",
-    "distclean": "rm -fr dist node_modules package-lock.json",
+    "distclean": "npm run clearn && rm -fr node_modules package-lock.json",
     "lint": "eslint {src,demo}/**/*.ts",
     "fmt": "npm run lint -- --fix",
-    "demo:start": "parcel demo/index.html"
+    "demo": "parcel demo/index.html"
   },
   "keywords": [],
   "author": "Keisuke Watanabe",

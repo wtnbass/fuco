@@ -1,4 +1,4 @@
-import { createContext, defineElement } from "./lib";
+import { createContext, defineElement } from "../lib";
 
 export type Theme = "light" | "dark";
 

@@ -1,4 +1,4 @@
-import { html, defineElement, useState } from "./lib";
+import { html, defineElement, useState } from "../lib";
 
 function Counter() {
   const [count, setCount] = useState(0);

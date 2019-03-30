@@ -1,27 +1,11 @@
-import { html, defineElement, useState, useCallback } from "./lib";
+import { html, defineElement, useState, useCallback } from "../lib";
 import { Theme } from "./theme-context";
 import { Theme2 } from "./theme2-context";
 
-import "./counter-app";
-import "./todo-app";
 import "./theme-context";
 import "./theme-consumer";
 import "./theme2-context";
 import "./theme2-consumer";
-
-function State() {
-  return html`
-    <h2>State</h2>
-    <counter-app></counter-app>
-  `;
-}
-
-function Reducer() {
-  return html`
-    <h2>Reducer</h2>
-    <todo-app></todo-app>
-  `;
-}
 
 function Context() {
   const [theme, setTheme] = useState<Theme>("dark");
@@ -46,10 +30,4 @@ function Context() {
   `;
 }
 
-function Main() {
-  return html`
-    ${[State(), Reducer(), Context()]}
-  `;
-}
-
-defineElement("main-element", Main);
+defineElement("context-demo", Context);

@@ -1,6 +1,7 @@
-import { html, defineElement, useReducer, useCallback } from "./lib";
+import { html, defineElement, useReducer, useCallback } from "../lib";
 
 type ID = number;
+
 interface Todo {
   id: ID;
   text: string;
@@ -22,6 +23,7 @@ function toggleComplete(id: ID) {
     id
   };
 }
+
 type State = Todo[];
 type Action = ReturnType<typeof addTodo | typeof toggleComplete>;
 

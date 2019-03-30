@@ -1,4 +1,4 @@
-import { html, defineElement, useContext } from "./lib";
+import { html, defineElement, useContext } from "../lib";
 import { ThemeContext } from "./theme-context";
 
 function Consumer() {
