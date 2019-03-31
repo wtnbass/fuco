@@ -16,7 +16,7 @@ function Property() {
     <h2>Property</h2>
     <div>
       <label>Name</label>
-      <input type="text" .value=${name} @input=${input(setName)} />
+      <input type="text" .value=${name} @keyup=${input(setName)} />
     </div>
     <div>
       <label>Age</label>

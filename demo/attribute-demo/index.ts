@@ -10,7 +10,7 @@ function Attribute() {
 
   return html`
     <h2>Attribute</h2>
-    <input type="text" @input=${input} />
+    <input type="text" @keyup=${input} />
     <hello-world name=${name}></hello-world>
   `;
 }
