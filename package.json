@@ -1,6 +1,6 @@
 {
   "name": "functional-web-component",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "WebComponents with lit-html and Hooks",
   "main": "dist/functional-web-component.js",
   "module": "dist/functional-web-component.mjs",

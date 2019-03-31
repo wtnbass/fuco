@@ -1,5 +1,7 @@
 # functional-web-component
 
+[![npm](https://img.shields.io/npm/v/functional-web-component.svg)](https://www.npmjs.com/package/functional-web-component)
+
 WebComponents with lit-html and Hooks
 
 ## Short Example
