@@ -1,6 +1,7 @@
 import { html } from "lit-html";
 import { useProperty, useCallback, useEffect } from "./hooks";
-import { Component, FunctionalComponent } from "./component";
+import { FunctionalComponent } from ".";
+import { Component } from "./component";
 
 let contextId = 0;
 

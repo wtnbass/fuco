@@ -8,42 +8,41 @@ type Callback<Arg = void, Return = void> = (arg: Arg) => Return;
 export type Hook =
   | AttributeHook
   | PropertyHook<any>
-  | QueryHook<Element | Element[] | null>
+  | QueryHook<Element | NodeListOf<Element>>
   | StateHook<any>
   | ReducerHook<any, any>
   | ContextHook
   | EffectHook
   | MemoHook<any>;
 
-interface AttributeHook {
+export interface AttributeHook {
   value?: string;
   cleanup?: () => void;
 }
 
-interface PropertyHook<T> {
+export interface PropertyHook<T> {
   value?: T;
 }
 
-interface QueryHook<T> {
+export interface QueryHook<T extends Element | NodeListOf<Element>> {
   value?: {
-    readonly current: T;
+    readonly current: T | null;
   };
 }
 
-type SetState<T> = (value: T | FunctionArg<T>) => void;
-type FunctionArg<T> = (value: T) => T;
+type SetState<T> = (value: T | Callback<T, T>) => void;
 
-interface StateHook<T> {
+export interface StateHook<T> {
   value?: T;
   setter?: SetState<T>;
 }
 
-interface ReducerHook<S, A> {
+export interface ReducerHook<S, A> {
   state?: S;
   dispatch?: (action: A) => void;
 }
 
-interface ContextHook {
+export interface ContextHook {
   called?: boolean;
 }
 
@@ -53,7 +52,7 @@ export interface EffectHook {
   cleanup?: Callback;
 }
 
-interface MemoHook<T> {
+export interface MemoHook<T> {
   value?: T;
   fields?: any[];
 }
@@ -91,6 +90,7 @@ export const useAttribute = (name: string) => {
   }
   return hook.value;
 };
+
 export const useProperty = <T>(name: string) => {
   const hook = getHook() as PropertyHook<T>;
   const el = currentElement;
@@ -109,24 +109,31 @@ export const useProperty = <T>(name: string) => {
   return hook.value;
 };
 
-const query = <T = Element | Element[] | null>(fn: Callback<Component, T>) => {
+export const useQuery = <T extends Element>(selector: string) => {
   const hook = getHook() as QueryHook<T>;
   const el = currentElement;
   if (hook.value == null) {
     hook.value = {
       get current() {
-        return fn(el);
+        return el.rootElement.querySelector<T>(selector);
       }
     };
   }
   return hook.value;
 };
 
-export const useQuery = (selector: string) =>
-  query(el => el.querySelector(selector));
-
-export const useQueryAll = (selector: string) =>
-  query(el => el.querySelectorAll(selector));
+export const useQueryAll = <T extends Element>(selector: string) => {
+  const hook = getHook() as QueryHook<NodeListOf<T>>;
+  const el = currentElement;
+  if (hook.value == null) {
+    hook.value = {
+      get current() {
+        return el.rootElement.querySelectorAll<T>(selector);
+      }
+    };
+  }
+  return hook.value;
+};
 
 export const useState = <T>(initValue: T): [T, SetState<T>] => {
   const hook = getHook() as StateHook<T>;
