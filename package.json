@@ -11,7 +11,7 @@
   "scripts": {
     "build": "tsc && rollup -c",
     "clean": "rm -fr dist .cache",
-    "distclean": "npm run clearn && rm -fr node_modules package-lock.json",
+    "distclean": "npm run clean && rm -fr node_modules package-lock.json",
     "lint": "eslint {src,demo}/**/*.ts",
     "fmt": "npm run lint -- --fix",
     "demo": "parcel demo/index.html"
@@ -32,7 +32,6 @@
     "parcel-bundler": "1.12.3",
     "prettier": "1.16.4",
     "rollup": "1.7.4",
-    "rollup-plugin-node-resolve": "4.0.1",
     "rollup-plugin-terser": "4.0.4",
     "typescript": "3.4.1"
   }
