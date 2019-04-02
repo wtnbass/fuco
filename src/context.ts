@@ -12,9 +12,9 @@ export interface Context<T> {
 }
 
 export function createContext<T>(defaultValue?: T): Context<T> {
-  const components: Component[] = [];
   const id = contextId++;
 
+  let components: Component[] = [];
   let _value = defaultValue;
 
   function Provider() {
@@ -33,8 +33,19 @@ export function createContext<T>(defaultValue?: T): Context<T> {
       }
     });
 
+    const unloadConsumer = useCallback((event: Event) => {
+      const e = event as ConsumerLoadedEvent<T>;
+      const { type, component } = e.detail;
+      if (type.id === id) {
+        components = components.filter(c => c !== component);
+      }
+    });
+
     return html`
-      <slot @context-consumer-loaded=${loadConsumer}></slot>
+      <slot
+        @context-consumer-loaded=${loadConsumer}
+        @context-consumer-unloaded=${unloadConsumer}
+      ></slot>
     `;
   }
 
@@ -52,11 +63,12 @@ type ConsumerLoadedEvent<T> = CustomEvent<{
   component: Component;
 }>;
 
-export function createConsumerLoadedEvent<T>(
+export function createConsumerEvent<T>(
+  name: "context-consumer-loaded" | "context-consumer-unloaded",
   type: Context<T>,
   component: Component
 ) {
-  return new CustomEvent("context-consumer-loaded", {
+  return new CustomEvent(name, {
     bubbles: true,
     composed: true,
     detail: {

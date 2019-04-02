@@ -1,4 +1,4 @@
-import { Hook, setCurrent, AttributeHook, EffectHook } from "./hooks";
+import { Hook, setCurrent, HasCleanupHook, EffectHook } from "./hooks";
 
 export abstract class Component extends HTMLElement {
   public rootElement = this.attachShadow({ mode: "open" });
@@ -35,7 +35,7 @@ export abstract class Component extends HTMLElement {
 
   private cleanup() {
     this.hooks.forEach(hook => {
-      const h = hook as AttributeHook | EffectHook;
+      const h = hook as HasCleanupHook;
       if (h.cleanup) h.cleanup();
     });
   }
