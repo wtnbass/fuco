@@ -7,6 +7,14 @@ import "./theme-consumer";
 import "./theme2-context";
 import "./theme2-consumer";
 
+function Condition(t1: Theme, t2: Theme2) {
+  return t1 === "light" && t2 === "red"
+    ? html`
+        <theme-consumer></theme-consumer>
+      `
+    : html``;
+}
+
 function Context() {
   const [theme, setTheme] = useState<Theme>("dark");
   const [theme2, setTheme2] = useState<Theme2>("red");
@@ -22,8 +30,9 @@ function Context() {
     <button @click=${toggle}>change theme</button>
     <button @click=${toggle2}>change theme2</button>
     <theme-context .value=${theme}>
-    <theme2-context .value=${theme2}>
-          <theme-consumer></theme-consumer>
+      <theme2-context .value=${theme2}>
+        ${Condition(theme, theme2)}
+        <theme-consumer></theme-consumer>
         <theme2-consumer></theme-consumer>
       </theme2-context>
     </theme-context>

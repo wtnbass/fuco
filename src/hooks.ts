@@ -1,11 +1,13 @@
 import { Component } from "./component";
-import { Context, createConsumerEvent } from "./context";
+import { Context, subscribeSymbol } from "./context";
 
 type Option<T> = T | undefined;
 
 type Callback<Arg = void, Return = void> = (arg: Arg) => Return;
 
-export interface Hook {}
+export interface Hook {
+  value?: any;
+}
 
 export type HasCleanupHook = AttributeHook | EffectHook | ContextHook;
 
@@ -33,12 +35,11 @@ export interface StateHook<T> extends Hook {
 }
 
 export interface ReducerHook<S, A> extends Hook {
-  state?: S;
+  value?: S;
   dispatch?: (action: A) => void;
 }
 
 export interface ContextHook extends Hook {
-  called?: boolean;
   cleanup: () => void;
 }
 
@@ -155,28 +156,21 @@ export const useReducer = <S, A>(
 ): [S, (action: A) => void] => {
   const hook = getHook() as ReducerHook<S, A>;
   const el = currentElement;
-  if (hook.state == null || hook.dispatch == null) {
-    hook.state = reducer(initialState, initAction);
+  if (hook.value == null || hook.dispatch == null) {
+    hook.value = reducer(initialState, initAction);
     hook.dispatch = (action: A) => {
-      hook.state = reducer(hook.state, action);
+      hook.value = reducer(hook.value, action);
       el.update();
     };
   }
-  return [hook.state, hook.dispatch];
+  return [hook.value, hook.dispatch];
 };
 
 export const useContext = <T>(context: Context<T>) => {
   const hook = getHook() as ContextHook;
   const el = currentElement;
-  if (!hook.called) {
-    hook.called = true;
-    el.dispatchEvent(
-      createConsumerEvent("context-consumer-loaded", context, el)
-    );
-    hook.cleanup = () =>
-      el.dispatchEvent(
-        createConsumerEvent("context-consumer-unloaded", context, el)
-      );
+  if (!hook.cleanup) {
+    hook.cleanup = context[subscribeSymbol](el);
   }
   return context.value;
 };
