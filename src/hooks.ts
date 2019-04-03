@@ -1,30 +1,27 @@
 import { Component } from "./component";
-import { Context, createConsumerLoadedEvent } from "./context";
+import { Context, subscribeSymbol } from "./context";
 
 type Option<T> = T | undefined;
 
 type Callback<Arg = void, Return = void> = (arg: Arg) => Return;
 
-export type Hook =
-  | AttributeHook
-  | PropertyHook<any>
-  | QueryHook<Element | NodeListOf<Element>>
-  | StateHook<any>
-  | ReducerHook<any, any>
-  | ContextHook
-  | EffectHook
-  | MemoHook<any>;
+export interface Hook {
+  value?: any;
+}
 
-export interface AttributeHook {
+export type HasCleanupHook = AttributeHook | EffectHook | ContextHook;
+
+export interface AttributeHook extends Hook {
   value?: string;
   cleanup?: () => void;
 }
 
-export interface PropertyHook<T> {
+export interface PropertyHook<T> extends Hook {
   value?: T;
 }
 
-export interface QueryHook<T extends Element | NodeListOf<Element>> {
+export interface QueryHook<T extends Element | NodeListOf<Element>>
+  extends Hook {
   value?: {
     readonly current: T | null;
   };
@@ -32,27 +29,27 @@ export interface QueryHook<T extends Element | NodeListOf<Element>> {
 
 type SetState<T> = (value: T | Callback<T, T>) => void;
 
-export interface StateHook<T> {
+export interface StateHook<T> extends Hook {
   value?: T;
   setter?: SetState<T>;
 }
 
-export interface ReducerHook<S, A> {
-  state?: S;
+export interface ReducerHook<S, A> extends Hook {
+  value?: S;
   dispatch?: (action: A) => void;
 }
 
-export interface ContextHook {
-  called?: boolean;
+export interface ContextHook extends Hook {
+  cleanup: () => void;
 }
 
-export interface EffectHook {
+export interface EffectHook extends Hook {
   handler?: () => Callback | void;
   fields?: any[];
   cleanup?: Callback;
 }
 
-export interface MemoHook<T> {
+export interface MemoHook<T> extends Hook {
   value?: T;
   fields?: any[];
 }
@@ -159,22 +156,21 @@ export const useReducer = <S, A>(
 ): [S, (action: A) => void] => {
   const hook = getHook() as ReducerHook<S, A>;
   const el = currentElement;
-  if (hook.state == null || hook.dispatch == null) {
-    hook.state = reducer(initialState, initAction);
+  if (hook.value == null || hook.dispatch == null) {
+    hook.value = reducer(initialState, initAction);
     hook.dispatch = (action: A) => {
-      hook.state = reducer(hook.state, action);
+      hook.value = reducer(hook.value, action);
       el.update();
     };
   }
-  return [hook.state, hook.dispatch];
+  return [hook.value, hook.dispatch];
 };
 
 export const useContext = <T>(context: Context<T>) => {
   const hook = getHook() as ContextHook;
   const el = currentElement;
-  if (!hook.called) {
-    hook.called = true;
-    el.dispatchEvent(createConsumerLoadedEvent(context, el));
+  if (!hook.cleanup) {
+    hook.cleanup = context[subscribeSymbol](el);
   }
   return context.value;
 };
