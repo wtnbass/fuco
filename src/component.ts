@@ -1,9 +1,17 @@
-import { Hook, setCurrent, HasCleanupHook, EffectHook } from "./hooks";
+import {
+  Hook,
+  setCurrent,
+  HasCleanupHook,
+  EffectHook,
+  ContextHook
+} from "./hooks";
+import { Context } from "./context";
 
 export abstract class Component extends HTMLElement {
   public rootElement = this.attachShadow({ mode: "open" });
   public hooks: Hook[] = [];
   public effects: EffectHook[] = [];
+  public contexts = new WeakMap<Context, ContextHook>();
 
   protected connectedCallback() {
     this.update();

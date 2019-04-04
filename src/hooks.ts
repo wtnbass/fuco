@@ -77,8 +77,7 @@ export const useAttribute = (name: string) => {
   const el = currentElement;
   if (hook.value == null) {
     hook.value = el.getAttribute(name) || "";
-    const m = new MutationObserver(m => {
-      console.log(m);
+    const m = new MutationObserver(() => {
       hook.value = el.getAttribute(name) || "";
       el.update();
     });
@@ -167,8 +166,9 @@ export const useReducer = <S, A>(
 };
 
 export const useContext = <T>(context: Context<T>) => {
-  const hook = getHook() as ContextHook;
   const el = currentElement;
+  let hook = el.contexts.get(context);
+  if (!hook) el.contexts.set(context, (hook = getHook() as ContextHook));
   if (!hook.cleanup) {
     hook.cleanup = context[subscribeSymbol](el);
   }
