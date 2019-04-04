@@ -5,14 +5,14 @@ import { Component } from "./component";
 
 export const subscribeSymbol = Symbol("subscribe");
 
-export interface Context<T> {
+export interface Context<T = any> {
   readonly [subscribeSymbol]: (c: Component) => () => void;
   readonly value: T | undefined;
   readonly Provider: FunctionalComponent;
 }
 
 export function createContext<T>(defaultValue?: T): Context<T> {
-  let components: Component[] = [];
+  let components = new Set<Component>();
   let _value = defaultValue;
 
   function Provider() {
@@ -29,9 +29,9 @@ export function createContext<T>(defaultValue?: T): Context<T> {
   }
 
   function subscribe(component: Component) {
-    components.push(component);
+    components.add(component);
     return function unsubscribe() {
-      components = components.filter(c => c !== component);
+      components.delete(component);
     };
   }
 
