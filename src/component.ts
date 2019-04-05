@@ -7,6 +7,8 @@ import {
 } from "./hooks";
 import { Context } from "./context";
 
+type ComponentErrorEvent = CustomEvent<{ error: Error }>;
+
 export abstract class Component extends HTMLElement {
   public rootElement = this.attachShadow({ mode: "open" });
   public hooks: Hook[] = [];
@@ -23,9 +25,13 @@ export abstract class Component extends HTMLElement {
   protected abstract render(): void;
 
   public update() {
-    setCurrent(this, 0);
-    this.render();
-    this.runEffects();
+    try {
+      setCurrent(this, 0);
+      this.render();
+      this.runEffects();
+    } catch (e) {
+      this.dispatchEvent(this.errorEvent(e));
+    }
   }
 
   private runEffects() {
@@ -46,5 +52,22 @@ export abstract class Component extends HTMLElement {
       const h = hook as HasCleanupHook;
       if (h.cleanup) h.cleanup();
     });
+  }
+
+  private errorEvent(error: Error): ComponentErrorEvent {
+    return new CustomEvent("functional-web-component:error-boundary", {
+      bubbles: true,
+      composed: true,
+      detail: { error }
+    });
+  }
+
+  public subscribeErrorEvent(callback: (e: ComponentErrorEvent) => void) {
+    this.addEventListener(
+      "functional-web-component:error-boundary",
+      (e: Event) => {
+        callback(e as ComponentErrorEvent);
+      }
+    );
   }
 }
