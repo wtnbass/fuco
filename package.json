@@ -1,6 +1,6 @@
 {
   "name": "functional-web-component",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "WebComponents with lit-html and Hooks",
   "main": "dist/functional-web-component.js",
   "module": "dist/functional-web-component.mjs",
@@ -25,13 +25,13 @@
     "lit-html": "1.0.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "1.5.0",
+    "@typescript-eslint/eslint-plugin": "1.6.0",
     "eslint": "5.16.0",
     "eslint-config-prettier": "4.1.0",
     "eslint-plugin-prettier": "3.0.1",
     "parcel-bundler": "1.12.3",
     "prettier": "1.16.4",
-    "rollup": "1.7.4",
+    "rollup": "1.9.0",
     "rollup-plugin-terser": "4.0.4",
     "typescript": "3.4.1"
   }

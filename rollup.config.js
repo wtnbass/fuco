@@ -1,24 +1,25 @@
 import pkg from "./package.json";
 import { terser } from "rollup-plugin-terser";
 
-const source = "dist/index.js";
+const input = "dist/index.js";
+const external = Object.keys(pkg.dependencies);
 
 export default [
   {
-    input: source,
+    input,
+    external,
     output: {
       file: pkg.main,
       format: "cjs"
-    },
-    external: [...Object.keys(pkg.dependencies)]
+    }
   },
   {
-    input: source,
+    input,
+    external,
     output: {
       file: pkg.module,
       format: "esm"
     },
-    plugins: [terser()],
-    external: [...Object.keys(pkg.dependencies)]
+    plugins: [terser()]
   }
 ];
