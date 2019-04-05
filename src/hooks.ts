@@ -54,6 +54,11 @@ export interface MemoHook<T> extends Hook {
   fields?: any[];
 }
 
+export interface ErrorHook extends Hook {
+  value?: Error;
+  called?: boolean;
+}
+
 let currentCursor: number;
 let currentElement: Component;
 
@@ -201,3 +206,17 @@ export const useCallback = <A, R>(
   callback: Callback<A, R>,
   fields: any[] = []
 ) => useMemo(() => callback, fields);
+
+export const useErrorBoundary = () => {
+  const hook = getHook() as ErrorHook;
+  const el = currentElement;
+  if (!hook.called) {
+    hook.called = true;
+    el.subscribeErrorEvent(e => {
+      e.stopPropagation();
+      hook.value = e.detail.error;
+      el.update();
+    });
+  }
+  return hook.value;
+};

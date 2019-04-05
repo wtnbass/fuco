@@ -4,7 +4,7 @@ import "./show-inputs";
 
 function Query() {
   return html`
-    <h2>Query</h2>
+    <h2>Query All</h2>
     <show-inputs></show-inputs>
   `;
 }

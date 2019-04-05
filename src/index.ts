@@ -13,7 +13,8 @@ export {
   useContext,
   useEffect,
   useMemo,
-  useCallback
+  useCallback,
+  useErrorBoundary
 } from "./hooks";
 
 export type FunctionalComponent = () => TemplateResult;

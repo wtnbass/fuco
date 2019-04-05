@@ -10,6 +10,7 @@ import "./context-demo";
 import "./effect-demo";
 import "./memo-demo";
 import "./callback-demo";
+import "./error-boundary-demo";
 
 function Demo() {
   return html`
@@ -24,6 +25,7 @@ function Demo() {
     <effect-demo></effect-demo>
     <memo-demo></memo-demo>
     <callback-demo></callback-demo>
+    <error-boundary-demo></error-boundary-demo>
   `;
 }
 
