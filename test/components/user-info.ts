@@ -1,9 +1,6 @@
-import { html, defineElement, useProperty } from "../lib";
+import { html, defineElement, useProperty } from "../../src";
+import { User } from "./input-user";
 
-export interface User {
-  name: string;
-  age: number;
-}
 function UserInfo() {
   const user: User = useProperty("user");
   return html`
