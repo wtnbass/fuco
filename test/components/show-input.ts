@@ -1,4 +1,4 @@
-import { html, defineElement, useQuery, useState } from "../lib";
+import { html, defineElement, useQuery, useState } from "../../src";
 
 function Show() {
   const [value, set] = useState("");
