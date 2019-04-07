@@ -2,7 +2,7 @@ import { render, TemplateResult } from "lit-html";
 import { Component } from "./component";
 
 export { html } from "lit-html";
-export { Context, createContext } from "./context";
+export { createContext } from "./context";
 export {
   useAttribute,
   useProperty,

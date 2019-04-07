@@ -1,43 +1,52 @@
 import { html } from "lit-html";
-import { useProperty, useEffect } from "./hooks";
+import { useProperty, useState, useEffect, useCallback } from "./hooks";
 import { FunctionalComponent } from ".";
 import { Component } from "./component";
 
-export const subscribeSymbol = Symbol("subscribe");
-
 export interface Context<T = any> {
-  readonly [subscribeSymbol]: (c: Component) => () => void;
+  readonly id: number;
   readonly value: T | undefined;
   readonly Provider: FunctionalComponent;
 }
 
+let contextId = 0;
+
 export function createContext<T>(defaultValue?: T): Context<T> {
-  let components = new Set<Component>();
   let _value = defaultValue;
+  const id = contextId++;
 
   function Provider() {
     const value = useProperty<T>("value");
+    const [components] = useState<Set<Component>>(new Set());
 
     useEffect(() => {
       _value = value;
       components.forEach(c => c.update());
     }, [value]);
 
+    const request = useCallback((e: Event) => {
+      const { detail } = e as CustomEvent<{
+        context: Context;
+        consumer: Component;
+      }>;
+      const { context, consumer } = detail;
+
+      if (id === context.id) {
+        consumer.recieveContextUnsubscribe(context, () => {
+          components.delete(consumer);
+        });
+        components.add(consumer);
+      }
+    });
+
     return html`
-      <slot></slot>
+      <slot @functional-web-component:request-consume=${request}></slot>
     `;
   }
 
-  function subscribe(component: Component) {
-    components.add(component);
-    return function unsubscribe() {
-      components.delete(component);
-    };
-  }
-
   return {
+    id,
     Provider,
-    [subscribeSymbol]: subscribe,
     get value() {
       return _value;
     }
