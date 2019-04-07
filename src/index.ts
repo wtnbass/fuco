@@ -17,9 +17,7 @@ export {
   useErrorBoundary
 } from "./hooks";
 
-export type FunctionalComponent = () => TemplateResult;
-
-export function defineElement(name: string, func: FunctionalComponent) {
+export function defineElement(name: string, func: () => TemplateResult) {
   window.customElements.define(
     name,
     class extends Component {

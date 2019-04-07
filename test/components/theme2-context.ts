@@ -1,7 +1,7 @@
-import { createContext, defineElement } from "../../src";
+import { createContext } from "../../src";
 
 export type Theme2 = "green" | "red";
 
 export const Theme2Context = createContext<Theme2>();
 
-defineElement("theme2-context", Theme2Context.Provider);
+Theme2Context.defineProvider("theme2-context");
