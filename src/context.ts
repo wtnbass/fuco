@@ -1,43 +1,61 @@
-import { html } from "lit-html";
-import { useProperty, useEffect } from "./hooks";
-import { FunctionalComponent } from ".";
 import { Component } from "./component";
 
-export const subscribeSymbol = Symbol("subscribe");
-
 export interface Context<T = any> {
-  readonly [subscribeSymbol]: (c: Component) => () => void;
+  readonly id: number;
   readonly value: T | undefined;
-  readonly Provider: FunctionalComponent;
+  readonly defineProvider: (name: string) => void;
 }
 
+let contextId = 0;
+
 export function createContext<T>(defaultValue?: T): Context<T> {
-  let components = new Set<Component>();
   let _value = defaultValue;
+  const id = contextId++;
 
-  function Provider() {
-    const value = useProperty<T>("value");
+  class Provider extends HTMLElement {
+    private consumers: Set<Component>;
 
-    useEffect(() => {
-      _value = value;
-      components.forEach(c => c.update());
-    }, [value]);
+    public constructor() {
+      super();
+      this.consumers = new Set<Component>();
 
-    return html`
-      <slot></slot>
-    `;
-  }
+      this.attachShadow({ mode: "open" }).appendChild(
+        document.createElement("slot")
+      );
+      this.addEventListener(
+        "functional-web-component:request-consume",
+        (e: Event) => {
+          const { detail } = e as CustomEvent<{
+            context: Context;
+            consumer: Component;
+          }>;
+          const { context, consumer } = detail;
 
-  function subscribe(component: Component) {
-    components.add(component);
-    return function unsubscribe() {
-      components.delete(component);
-    };
+          if (id === context.id) {
+            consumer.recieveContextUnsubscribe(context, () => {
+              this.consumers.delete(consumer);
+            });
+            this.consumers.add(consumer);
+          }
+        }
+      );
+    }
+
+    public get value() {
+      return _value;
+    }
+
+    public set value(newValue) {
+      _value = newValue;
+      this.consumers.forEach(c => c.update());
+    }
   }
 
   return {
-    Provider,
-    [subscribeSymbol]: subscribe,
+    id,
+    defineProvider(name: string) {
+      window.customElements.define(name, Provider);
+    },
     get value() {
       return _value;
     }

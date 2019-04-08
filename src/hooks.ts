@@ -1,5 +1,5 @@
 import { Component } from "./component";
-import { Context, subscribeSymbol } from "./context";
+import { Context } from "./context";
 
 type Option<T> = T | undefined;
 
@@ -174,8 +174,9 @@ export const useContext = <T>(context: Context<T>) => {
   const el = currentElement;
   let hook = el.contexts.get(context);
   if (!hook) el.contexts.set(context, (hook = getHook() as ContextHook));
+
   if (!hook.cleanup) {
-    hook.cleanup = context[subscribeSymbol](el);
+    el.dispatchRequestComsume(context);
   }
   return context.value;
 };
@@ -193,13 +194,13 @@ export const useEffect = (
   }
 };
 
-export const useMemo = <T>(fn: Callback<void, T>, fields: any[] = []) => {
+export const useMemo = <T>(fn: Callback<void, T>, fields: any[] = []): T => {
   const hook = getHook() as MemoHook<T>;
   if (fieldsChanged(hook.fields, fields)) {
     hook.fields = fields;
     hook.value = fn();
   }
-  return hook.value;
+  return hook.value!;
 };
 
 export const useCallback = <A, R>(

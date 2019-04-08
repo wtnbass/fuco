@@ -7,8 +7,6 @@ import {
 } from "./hooks";
 import { Context } from "./context";
 
-type ComponentErrorEvent = CustomEvent<{ error: Error }>;
-
 export abstract class Component extends HTMLElement {
   public rootElement = this.attachShadow({ mode: "open" });
   public hooks: Hook[] = [];
@@ -22,6 +20,7 @@ export abstract class Component extends HTMLElement {
   protected disconnectedCallback() {
     this.cleanup();
   }
+
   protected abstract render(): void;
 
   public update() {
@@ -30,7 +29,7 @@ export abstract class Component extends HTMLElement {
       this.render();
       this.runEffects();
     } catch (e) {
-      this.dispatchEvent(this.errorEvent(e));
+      this.dispatchError(e);
     }
   }
 
@@ -54,19 +53,43 @@ export abstract class Component extends HTMLElement {
     });
   }
 
-  private errorEvent(error: Error): ComponentErrorEvent {
-    return new CustomEvent("functional-web-component:error-boundary", {
+  private createCustomEvent<T>(name: string, detail: T): CustomEvent<T> {
+    return new CustomEvent(name, {
       bubbles: true,
       composed: true,
-      detail: { error }
+      detail
     });
   }
 
-  public subscribeErrorEvent(callback: (e: ComponentErrorEvent) => void) {
+  public dispatchRequestComsume(context: Context) {
+    this.dispatchEvent(
+      this.createCustomEvent("functional-web-component:request-consume", {
+        context,
+        consumer: this
+      })
+    );
+  }
+
+  public recieveContextUnsubscribe(context: Context, unsubscribe: () => void) {
+    const hook = this.contexts.get(context);
+    if (hook) hook.cleanup = unsubscribe;
+  }
+
+  private dispatchError(error: Error) {
+    this.dispatchEvent(
+      this.createCustomEvent("functional-web-component:error-boundary", {
+        error
+      })
+    );
+  }
+
+  public subscribeErrorEvent(
+    callback: (e: CustomEvent<{ error: Error }>) => void
+  ) {
     this.addEventListener(
       "functional-web-component:error-boundary",
       (e: Event) => {
-        callback(e as ComponentErrorEvent);
+        callback(e as CustomEvent<{ error: Error }>);
       }
     );
   }
