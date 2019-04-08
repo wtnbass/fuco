@@ -3,7 +3,7 @@ module.exports = function(config) {
     frameworks: ["jasmine"],
     files: ["test/**/*_test.ts"],
     preprocessors: {
-      "**/*.ts": ["webpack"]
+      "**/*.ts": ["webpack", "sourcemap"]
     },
     reporters: ["progress"],
     port: 9876,

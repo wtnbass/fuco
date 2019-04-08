@@ -7,7 +7,7 @@ export function mountFixture(html: string) {
 
 export function unmountFixture() {
   const fixture = document.getElementById("fixture");
-  document.body.removeChild(fixture);
+  fixture && document.body.removeChild(fixture);
 }
 
 export function selectFixture(selector: string) {
