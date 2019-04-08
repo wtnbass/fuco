@@ -1,5 +1,6 @@
 import { Component } from "./component";
 import { Context } from "./context";
+import { Provider } from "./provider";
 
 type Option<T> = T | undefined;
 
@@ -7,9 +8,8 @@ type Callback<Arg = void, Return = void> = (arg: Arg) => Return;
 
 export interface Hook {
   value?: any;
+  cleanup?: any;
 }
-
-export type HasCleanupHook = AttributeHook | EffectHook | ContextHook;
 
 export interface AttributeHook extends Hook {
   value?: string;
@@ -39,7 +39,8 @@ export interface ReducerHook<S, A> extends Hook {
   dispatch?: (action: A) => void;
 }
 
-export interface ContextHook extends Hook {
+export interface ContextHook<T> extends Hook {
+  provider: Provider<T>;
   cleanup: () => void;
 }
 
@@ -170,15 +171,15 @@ export const useReducer = <S, A>(
   return [hook.value, hook.dispatch];
 };
 
-export const useContext = <T>(context: Context<T>) => {
+export const useContext = <T>(context: Context): T => {
   const el = currentElement;
   let hook = el.contexts.get(context);
-  if (!hook) el.contexts.set(context, (hook = getHook() as ContextHook));
+  if (!hook) el.contexts.set(context, (hook = getHook() as ContextHook<T>));
 
-  if (!hook.cleanup) {
+  if (!hook.provider) {
     el.dispatchRequestComsume(context);
   }
-  return context.value;
+  return hook.provider.value;
 };
 
 export const useEffect = (

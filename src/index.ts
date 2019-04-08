@@ -21,7 +21,7 @@ export function defineElement(name: string, func: () => TemplateResult) {
   window.customElements.define(
     name,
     class extends Component {
-      protected render() {
+      protected callFunction() {
         render(func(), this.rootElement);
       }
     }
