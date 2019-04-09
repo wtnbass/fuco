@@ -15,7 +15,7 @@
     "lint": "eslint {src,test}/**/*.ts",
     "fmt": "npm run lint -- --fix",
     "test": "karma start",
-    "prepublishOnly": "npm run build"
+    "prepare": "npm run build"
   },
   "keywords": [],
   "author": "Keisuke Watanabe",
@@ -41,6 +41,7 @@
     "karma-webpack": "3.0.5",
     "prettier": "1.16.4",
     "rollup": "1.9.0",
+    "rollup-plugin-filesize": "6.0.1",
     "rollup-plugin-terser": "4.0.4",
     "ts-loader": "5.3.3",
     "typescript": "3.4.2",

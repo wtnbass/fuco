@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "esnext",
+    "target": "es2017",
     "module": "es2015",
-    "lib": ["esnext", "dom"],
+    "lib": ["es2017", "dom"],
     "declaration": true,
     "sourceMap": true,
     "outDir": "./dist",

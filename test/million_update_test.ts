@@ -10,7 +10,6 @@ describe("million update", () => {
   let target: Element;
   let button: HTMLButtonElement;
   let div: HTMLDivElement;
-  let timeout: number;
 
   const setup = async () => {
     await waitFor();
@@ -35,15 +34,12 @@ describe("million update", () => {
   });
 
   beforeEach(() => {
-    timeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000;
     mountFixture(`
       <million-count></million-count>
     `);
   });
 
   afterEach(() => {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = timeout;
     unmountFixture();
   });
 

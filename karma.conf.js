@@ -13,6 +13,11 @@ module.exports = function(config) {
     autoWatch: true,
     browsers: ["Firefox"],
     singleRun: true,
+    client: {
+      jasmine: {
+        timeoutInterval: 1000
+      }
+    },
     webpack: {
       mode: "development",
       devtool: "inline-source-map",
