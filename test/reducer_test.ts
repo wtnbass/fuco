@@ -11,7 +11,8 @@ describe("use-reducer", () => {
   let input: HTMLInputElement;
   let list: NodeListOf<Element>;
 
-  const setup = () => {
+  const setup = async () => {
+    await waitFor();
     const target = selectFixture("todo-app");
     input = target.shadowRoot.querySelector("input");
     list = target.shadowRoot.querySelectorAll("ul > li");
@@ -28,35 +29,33 @@ describe("use-reducer", () => {
   });
 
   it("mount", async () => {
-    setup();
+    await setup();
     expect(input.value).toEqual("");
     expect(list.length).toEqual(0);
   });
 
   it("add todo", async () => {
-    setup();
+    await setup();
     input.value = "Do test";
     const e = Object.assign(new CustomEvent("keyup"), { keyCode: 13 });
     input.dispatchEvent(e);
 
-    await waitFor();
+    await setup();
     setup();
     expect(input.value).toEqual("");
     expect(list.length).toEqual(1);
   });
 
   it("toggle complete", async () => {
-    setup();
+    await setup();
     input.value = "Do test";
     const e = Object.assign(new Event("keyup"), { keyCode: 13 });
     input.dispatchEvent(e);
-    await waitFor();
 
-    setup();
+    await setup();
     list[0].dispatchEvent(new Event("click"));
-    await waitFor();
 
-    setup();
+    await setup();
     expect(list[0].getAttribute("class")).toEqual("completed");
   });
 });

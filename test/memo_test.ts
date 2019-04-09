@@ -14,7 +14,8 @@ describe("use-memo", () => {
   let div: HTMLDivElement;
   let updateCount = 0;
 
-  const setup = () => {
+  const setup = async () => {
+    await waitFor();
     target = selectFixture("full-name");
     [firstName, lastName, age] = target.shadowRoot.querySelectorAll("input");
     div = target.shadowRoot.querySelector("div");
@@ -57,7 +58,7 @@ describe("use-memo", () => {
   });
 
   it("mount", async () => {
-    setup();
+    await setup();
     expect(firstName.value).toEqual("Keisuke");
     expect(lastName.value).toEqual("Watanabe");
     expect(age.value).toEqual("27");
@@ -66,13 +67,13 @@ describe("use-memo", () => {
   });
 
   it("update watched fields", async () => {
-    setup();
+    await setup();
     expect(updateCount).toEqual(1);
 
     firstName.value = "Taro";
     firstName.dispatchEvent(Object.assign(new Event("keyup"), { keyCode: 13 }));
-    await waitFor();
 
+    await setup();
     expect(firstName.value).toEqual("Taro");
     expect(lastName.value).toEqual("Watanabe");
     expect(age.value).toEqual("27");
@@ -81,8 +82,8 @@ describe("use-memo", () => {
 
     lastName.value = "Tanaka";
     lastName.dispatchEvent(Object.assign(new Event("keyup"), { keyCode: 13 }));
-    await waitFor();
 
+    await setup();
     expect(firstName.value).toEqual("Taro");
     expect(lastName.value).toEqual("Tanaka");
     expect(div.textContent.trim()).toEqual("Taro Tanaka (27)");
@@ -91,12 +92,12 @@ describe("use-memo", () => {
   });
 
   it("update unwatched fields", async () => {
-    setup();
+    await setup();
 
     age.value = "100";
     age.dispatchEvent(Object.assign(new Event("keyup"), { keyCode: 13 }));
-    await waitFor();
 
+    await setup();
     expect(firstName.value).toEqual("Keisuke");
     expect(lastName.value).toEqual("Watanabe");
     expect(age.value).toEqual("100");

@@ -13,7 +13,8 @@ describe("use-error-boundary", () => {
   let slot: HTMLSlotElement;
   let div: HTMLDivElement;
 
-  const setup = () => {
+  const setup = async () => {
+    await waitFor();
     target = selectFixture("error-boundary");
     slot = target.shadowRoot.querySelector("slot");
     div = target.shadowRoot.querySelector("div");
@@ -32,16 +33,16 @@ describe("use-error-boundary", () => {
   });
 
   it("occuered error", async () => {
-    setup();
+    await setup();
     expect(slot).not.toBeNull();
     expect(div).toBeNull();
 
     const nodes = slot.assignedNodes().filter(n => n.nodeType === 1);
     const button = (nodes[0] as Element).shadowRoot.querySelector("button");
     button.click();
-    await waitFor();
 
-    setup();
+    await setup();
+
     expect(slot).toBeNull();
     expect(div.textContent.trim()).toEqual("oops!");
   });

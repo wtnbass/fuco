@@ -12,7 +12,8 @@ describe("use-query", () => {
   let input: HTMLInputElement;
   let div: HTMLDivElement;
 
-  const setup = () => {
+  const setup = async () => {
+    await waitFor();
     target = selectFixture("show-input");
     input = target.shadowRoot.querySelector("input");
     div = target.shadowRoot.querySelector("div");
@@ -29,15 +30,14 @@ describe("use-query", () => {
   });
 
   it("mount", async () => {
-    setup();
+    await setup();
     expect(input.value).toEqual("");
     expect(div.textContent.trim()).toEqual("");
 
     input.value = "Input";
     input.dispatchEvent(Object.assign(new Event("keyup"), { keyCode: 13 }));
-    await waitFor();
 
-    setup();
+    await setup();
     expect(input.value).toEqual("Input");
     expect(div.textContent.trim()).toEqual("Input");
   });

@@ -13,7 +13,8 @@ describe("use-cllback", () => {
   let div: HTMLDivElement;
   let updateCounts = [0, 0];
 
-  const setup = () => {
+  const setup = async () => {
+    await waitFor();
     target = selectFixture("callback-test");
     [add, minus] = target.shadowRoot.querySelectorAll("button");
     div = target.shadowRoot.querySelector("div");
@@ -50,35 +51,35 @@ describe("use-cllback", () => {
   });
 
   it("mount", async () => {
-    setup();
+    await setup();
     expect(div.textContent.trim()).toEqual("0");
     expect(updateCounts).toEqual([0, 0]);
 
     add.click();
-    await waitFor();
 
+    await setup();
     expect(div.textContent.trim()).toEqual("1");
     expect(updateCounts).toEqual([1, 0]);
   });
 
   it("callback has watched fields", async () => {
-    setup();
+    await setup();
     expect(updateCounts).toEqual([0, 0]);
 
     add.click();
-    await waitFor();
 
+    await setup();
     expect(div.textContent.trim()).toEqual("1");
     expect(updateCounts).toEqual([1, 0]);
   });
 
   it("callback doesn't have watched fields", async () => {
-    setup();
+    await setup();
     expect(updateCounts).toEqual([0, 0]);
 
     minus.click();
-    await waitFor();
 
+    await setup();
     expect(div.textContent.trim()).toEqual("-1");
     expect(updateCounts).toEqual([0, 1]);
   });

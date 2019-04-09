@@ -7,6 +7,7 @@ export abstract class Component extends HTMLElement {
   public hooks: Hook[] = [];
   public effects: EffectHook[] = [];
   public contexts = new WeakMap<Context, ContextHook<any>>();
+  private updating = false;
 
   protected connectedCallback() {
     this.update();
@@ -19,12 +20,20 @@ export abstract class Component extends HTMLElement {
   protected abstract callFunction(): void;
 
   public update() {
+    this.updating || this.enqueue();
+  }
+
+  private async enqueue() {
+    this.updating = true;
+    await Promise.resolve();
     try {
       setCurrent(this, 0);
       this.callFunction();
       this.runEffects();
     } catch (e) {
       this.dispatchError(e);
+    } finally {
+      this.updating = false;
     }
   }
 
