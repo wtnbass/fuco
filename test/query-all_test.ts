@@ -13,7 +13,8 @@ describe("use-query-all", () => {
   let input2: HTMLInputElement;
   let div: HTMLDivElement;
 
-  const setup = () => {
+  const setup = async () => {
+    await waitFor();
     target = selectFixture("input-join");
     [input1, input2] = target.shadowRoot.querySelectorAll("input");
     div = target.shadowRoot.querySelector("div");
@@ -30,24 +31,22 @@ describe("use-query-all", () => {
   });
 
   it("mount", async () => {
-    setup();
+    await setup();
     expect(input1.value).toEqual("");
     expect(input2.value).toEqual("");
     expect(div.textContent.trim()).toEqual("");
 
     input1.value = "input";
     input1.dispatchEvent(Object.assign(new Event("keyup"), { keyCode: 13 }));
-    await waitFor();
 
-    setup();
+    await setup();
     expect(input1.value).toEqual("input");
     expect(div.textContent.trim()).toEqual("Input");
 
     input2.value = "value";
     input2.dispatchEvent(Object.assign(new Event("keyup"), { keyCode: 13 }));
-    await waitFor();
 
-    setup();
+    await setup();
     expect(input2.value).toEqual("value");
     expect(div.textContent.trim()).toEqual("InputValue");
   });

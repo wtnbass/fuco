@@ -1,17 +1,13 @@
-import {
-  Hook,
-  setCurrent,
-  HasCleanupHook,
-  EffectHook,
-  ContextHook
-} from "./hooks";
+import { Hook, setCurrent, EffectHook, ContextHook } from "./hooks";
 import { Context } from "./context";
+import { Provider } from "./provider";
 
 export abstract class Component extends HTMLElement {
   public rootElement = this.attachShadow({ mode: "open" });
   public hooks: Hook[] = [];
   public effects: EffectHook[] = [];
-  public contexts = new WeakMap<Context, ContextHook>();
+  public contexts = new WeakMap<Context, ContextHook<any>>();
+  private updating = false;
 
   protected connectedCallback() {
     this.update();
@@ -21,15 +17,23 @@ export abstract class Component extends HTMLElement {
     this.cleanup();
   }
 
-  protected abstract render(): void;
+  protected abstract callFunction(): void;
 
   public update() {
+    this.updating || this.enqueue();
+  }
+
+  private async enqueue() {
+    this.updating = true;
+    await Promise.resolve();
     try {
       setCurrent(this, 0);
-      this.render();
+      this.callFunction();
       this.runEffects();
     } catch (e) {
       this.dispatchError(e);
+    } finally {
+      this.updating = false;
     }
   }
 
@@ -47,8 +51,7 @@ export abstract class Component extends HTMLElement {
   }
 
   private cleanup() {
-    this.hooks.forEach(hook => {
-      const h = hook as HasCleanupHook;
+    this.hooks.forEach(h => {
       if (h.cleanup) h.cleanup();
     });
   }
@@ -70,9 +73,16 @@ export abstract class Component extends HTMLElement {
     );
   }
 
-  public recieveContextUnsubscribe(context: Context, unsubscribe: () => void) {
+  public recieveContextUnsubscribe(
+    context: Context,
+    provider: Provider<any>,
+    unsubscribe: () => void
+  ) {
     const hook = this.contexts.get(context);
-    if (hook) hook.cleanup = unsubscribe;
+    if (hook) {
+      hook.provider = provider;
+      hook.cleanup = unsubscribe;
+    }
   }
 
   private dispatchError(error: Error) {

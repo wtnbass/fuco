@@ -38,21 +38,24 @@ describe("use-effect", () => {
   });
 
   it("mount", async () => {
+    await waitFor();
     expect(updateCount).toEqual(1);
   });
 
   it("unmount", async () => {
+    await waitFor();
     unmountFixture();
     expect(cleanupCount).toEqual(1);
   });
 
   it("update", async () => {
+    await waitFor();
     const target = selectFixture("effect-test");
     expect(updateCount).toEqual(1);
 
     target.setAttribute("value", "change");
-    await waitFor();
 
+    await waitFor();
     expect(cleanupCount).toEqual(1);
     expect(updateCount).toEqual(2);
   });

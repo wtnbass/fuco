@@ -12,7 +12,8 @@ describe("use-property", () => {
   let name: HTMLInputElement;
   let age: HTMLInputElement;
 
-  const setup = () => {
+  const setup = async () => {
+    await waitFor();
     const parent = selectFixture("input-user");
     target = parent.shadowRoot.querySelector("user-info");
     [name, age] = parent.shadowRoot.querySelectorAll("input");
@@ -29,28 +30,26 @@ describe("use-property", () => {
   });
 
   it("mount", async () => {
-    setup();
+    await setup();
     expect(name.value).toEqual("Alice");
     expect(age.value).toEqual("18");
     expect(target.shadowRoot.textContent.trim()).toEqual("Alice (18)");
   });
 
   it("propeties changed", async () => {
-    setup();
+    await setup();
     name.value = "Bob";
     name.dispatchEvent(Object.assign(new Event("keyup"), { keyCode: 13 }));
-    await waitFor();
 
-    setup();
+    await setup();
     expect(name.value).toEqual("Bob");
     expect(age.value).toEqual("18");
     expect(target.shadowRoot.textContent.trim()).toEqual("Bob (18)");
 
     age.value = "34";
     age.dispatchEvent(Object.assign(new Event("keyup"), { keyCode: 13 }));
-    await waitFor();
 
-    setup();
+    await setup();
     expect(name.value).toEqual("Bob");
     expect(age.value).toEqual("34");
     expect(target.shadowRoot.textContent.trim()).toEqual("Bob (34)");

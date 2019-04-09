@@ -12,7 +12,8 @@ describe("use-state", () => {
   let increment: HTMLButtonElement;
   let decrement: HTMLButtonElement;
 
-  const setup = () => {
+  const setup = async () => {
+    await waitFor();
     const target = selectFixture("counter-app");
     const inner = target.shadowRoot;
     count = inner.querySelector("div");
@@ -30,25 +31,23 @@ describe("use-state", () => {
   });
 
   it("mount", async () => {
-    setup();
+    await setup();
     expect(count.textContent).toEqual("0");
   });
 
   it("push increment", async () => {
-    setup();
+    await setup();
     increment.click();
 
-    await waitFor();
-    setup();
+    await setup();
     expect(count.textContent).toEqual("1");
   });
 
   it("push decrement", async () => {
-    setup();
+    await setup();
     decrement.click();
 
-    await waitFor();
-    setup();
+    await setup();
     expect(count.textContent).toEqual("-1");
   });
 });

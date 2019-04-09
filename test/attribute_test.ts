@@ -11,7 +11,8 @@ describe("use-attribute", () => {
   let target: Element;
   let div: HTMLDivElement;
 
-  const setup = () => {
+  const setup = async () => {
+    await waitFor();
     target = selectFixture("hello-world");
     div = target.shadowRoot.querySelector("div");
   };
@@ -27,17 +28,16 @@ describe("use-attribute", () => {
   });
 
   it("mount", async () => {
-    setup();
+    await setup();
     expect(target.getAttribute("name")).toEqual("World");
     expect(div.textContent).toEqual("Hello, World");
   });
 
   it("attribute changed", async () => {
-    setup();
+    await setup();
     target.setAttribute("name", "useAttribute");
 
-    await waitFor();
-    setup();
+    await setup();
     expect(target.getAttribute("name")).toEqual("useAttribute");
     expect(div.textContent).toEqual("Hello, useAttribute");
   });
