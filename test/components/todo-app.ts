@@ -11,9 +11,10 @@ interface Todo {
 const genId = (): ID => Date.now() + Math.random();
 
 function addTodo(text: string) {
+  const todo: Todo = { id: genId(), text, completed: false };
   return {
     type: "ADD_TODO" as "ADD_TODO",
-    todo: { id: genId(), text, completed: false } as Todo
+    todo
   };
 }
 

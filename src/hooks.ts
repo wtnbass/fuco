@@ -217,13 +217,13 @@ export const useEffect = (
   }
 };
 
-export const useMemo = <T>(fn: Callback<void, T>, fields: any[] = []): T => {
+export const useMemo = <T>(fn: Callback<void, T>, fields: any[] = []) => {
   const hook = getHook() as MemoHook<T>;
   if (fieldsChanged(hook.fields, fields)) {
     hook.fields = fields;
     hook.value = fn();
   }
-  return hook.value!;
+  return hook.value;
 };
 
 export const useCallback = <A, R>(

@@ -12,7 +12,7 @@
     "build": "tsc && rollup -c",
     "clean": "rm -fr dist coverage",
     "distclean": "npm run clean && rm -fr node_modules package-lock.json",
-    "lint": "eslint {src,test}/**/*.ts",
+    "lint": "tsc --noEmit && eslint {src,test}/**/*.ts",
     "fmt": "npm run lint -- --fix",
     "test": "karma start",
     "prepare": "npm run build"
