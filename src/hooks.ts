@@ -20,6 +20,10 @@ export interface PropertyHook<T> extends Hook {
   value?: T;
 }
 
+export interface DispatchHook<T> extends Hook {
+  dispatch(detail: T): void;
+}
+
 export interface QueryHook<T extends Element | NodeListOf<Element>>
   extends Hook {
   value?: {
@@ -109,6 +113,24 @@ export const useProperty = <T>(name: string) => {
     });
   }
   return hook.value;
+};
+
+export const useDispatchEvent = <T>(
+  name: string,
+  init: CustomEventInit = {}
+) => {
+  const hook = getHook() as DispatchHook<T>;
+  const el = currentElement;
+  if (!hook.dispatch) {
+    hook.dispatch = (detail: T) =>
+      el.dispatchEvent(
+        new CustomEvent(name, {
+          ...init,
+          detail
+        })
+      );
+  }
+  return hook.dispatch;
 };
 
 export const useQuery = <T extends Element>(selector: string) => {

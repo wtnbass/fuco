@@ -6,6 +6,7 @@ export { createContext } from "./context";
 export {
   useAttribute,
   useProperty,
+  useDispatchEvent,
   useQuery,
   useQueryAll,
   useState,
