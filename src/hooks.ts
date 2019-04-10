@@ -199,7 +199,7 @@ export const useContext = <T>(context: Context): T => {
   if (!hook) el.contexts.set(context, (hook = getHook() as ContextHook<T>));
 
   if (!hook.provider) {
-    el.dispatchRequestComsume(context);
+    el.dispatchRequestConsume(context);
   }
   return hook.provider.value;
 };

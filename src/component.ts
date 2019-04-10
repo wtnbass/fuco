@@ -2,6 +2,14 @@ import { Hook, setCurrent, EffectHook, ContextHook } from "./hooks";
 import { Context } from "./context";
 import { Provider } from "./provider";
 
+function createCustomEvent<T>(name: string, detail: T): CustomEvent<T> {
+  return new CustomEvent(name, {
+    bubbles: true,
+    composed: true,
+    detail
+  });
+}
+
 export abstract class Component extends HTMLElement {
   public rootElement = this.attachShadow({ mode: "open" });
   public hooks: Hook[] = [];
@@ -14,7 +22,7 @@ export abstract class Component extends HTMLElement {
   }
 
   protected disconnectedCallback() {
-    this.cleanup();
+    this.hooks.forEach(h => h.cleanup && h.cleanup());
   }
 
   protected abstract callFunction(): void;
@@ -23,6 +31,7 @@ export abstract class Component extends HTMLElement {
     this.updating || this.enqueue();
   }
 
+  // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/EventLoop
   private async enqueue() {
     this.updating = true;
     await Promise.resolve();
@@ -50,23 +59,9 @@ export abstract class Component extends HTMLElement {
     this.effects = [];
   }
 
-  private cleanup() {
-    this.hooks.forEach(h => {
-      if (h.cleanup) h.cleanup();
-    });
-  }
-
-  private createCustomEvent<T>(name: string, detail: T): CustomEvent<T> {
-    return new CustomEvent(name, {
-      bubbles: true,
-      composed: true,
-      detail
-    });
-  }
-
-  public dispatchRequestComsume(context: Context) {
+  public dispatchRequestConsume(context: Context) {
     this.dispatchEvent(
-      this.createCustomEvent("functional-web-component:request-consume", {
+      createCustomEvent("functional-web-component:request-consume", {
         context,
         consumer: this
       })
@@ -87,7 +82,7 @@ export abstract class Component extends HTMLElement {
 
   private dispatchError(error: Error) {
     this.dispatchEvent(
-      this.createCustomEvent("functional-web-component:error-boundary", {
+      createCustomEvent("functional-web-component:error-boundary", {
         error
       })
     );
@@ -96,6 +91,7 @@ export abstract class Component extends HTMLElement {
   public subscribeErrorEvent(
     callback: (e: CustomEvent<{ error: Error }>) => void
   ) {
+    // It is unnecessary to unsubscribe because the listener is related by `this`.
     this.addEventListener(
       "functional-web-component:error-boundary",
       (e: Event) => {
