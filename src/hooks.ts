@@ -1,6 +1,12 @@
 import { Component } from "./component";
 import { Context } from "./context";
 import { Provider } from "./provider";
+import {
+  REQUEST_CONSUME,
+  RAISE_ERROR,
+  dispatchCustomEvent,
+  listenCustomEvent
+} from "./event";
 
 type Option<T> = T | undefined;
 
@@ -199,7 +205,7 @@ export const useContext = <T>(context: Context): T => {
   if (!hook) el.contexts.set(context, (hook = getHook() as ContextHook<T>));
 
   if (!hook.provider) {
-    el.dispatchRequestConsume(context);
+    dispatchCustomEvent(el, REQUEST_CONSUME, { context, consumer: el });
   }
   return hook.provider.value;
 };
@@ -236,7 +242,7 @@ export const useErrorBoundary = () => {
   const el = currentElement;
   if (!hook.called) {
     hook.called = true;
-    el.subscribeErrorEvent(e => {
+    listenCustomEvent(el, RAISE_ERROR, e => {
       e.stopPropagation();
       hook.value = e.detail.error;
       el.update();

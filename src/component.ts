@@ -1,14 +1,7 @@
 import { Hook, setCurrent, EffectHook, ContextHook } from "./hooks";
 import { Context } from "./context";
 import { Provider } from "./provider";
-
-function createCustomEvent<T>(name: string, detail: T): CustomEvent<T> {
-  return new CustomEvent(name, {
-    bubbles: true,
-    composed: true,
-    detail
-  });
-}
+import { RAISE_ERROR, dispatchCustomEvent } from "./event";
 
 export abstract class Component extends HTMLElement {
   public rootElement = this.attachShadow({ mode: "open" });
@@ -31,7 +24,7 @@ export abstract class Component extends HTMLElement {
     this.updating || this.enqueue();
   }
 
-  // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/EventLoop
+  // See https://developer.mozilla.org/docs/Web/JavaScript/EventLoop
   private async enqueue() {
     this.updating = true;
     await Promise.resolve();
@@ -39,8 +32,8 @@ export abstract class Component extends HTMLElement {
       setCurrent(this, 0);
       this.callFunction();
       this.runEffects();
-    } catch (e) {
-      this.dispatchError(e);
+    } catch (error) {
+      dispatchCustomEvent(this, RAISE_ERROR, { error });
     } finally {
       this.updating = false;
     }
@@ -59,44 +52,11 @@ export abstract class Component extends HTMLElement {
     this.effects = [];
   }
 
-  public dispatchRequestConsume(context: Context) {
-    this.dispatchEvent(
-      createCustomEvent("functional-web-component:request-consume", {
-        context,
-        consumer: this
-      })
-    );
-  }
-
-  public recieveContextUnsubscribe(
-    context: Context,
-    provider: Provider<any>,
-    unsubscribe: () => void
-  ) {
+  public recieveProvider(context: Context, provider: Provider<any>) {
     const hook = this.contexts.get(context);
     if (hook) {
       hook.provider = provider;
-      hook.cleanup = unsubscribe;
+      hook.cleanup = () => provider.unsubscribe(this);
     }
-  }
-
-  private dispatchError(error: Error) {
-    this.dispatchEvent(
-      createCustomEvent("functional-web-component:error-boundary", {
-        error
-      })
-    );
-  }
-
-  public subscribeErrorEvent(
-    callback: (e: CustomEvent<{ error: Error }>) => void
-  ) {
-    // It is unnecessary to unsubscribe because the listener is related by `this`.
-    this.addEventListener(
-      "functional-web-component:error-boundary",
-      (e: Event) => {
-        callback(e as CustomEvent<{ error: Error }>);
-      }
-    );
   }
 }
