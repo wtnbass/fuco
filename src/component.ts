@@ -4,11 +4,12 @@ import { Provider } from "./provider";
 import { RAISE_ERROR, dispatchCustomEvent } from "./event";
 
 export abstract class Component extends HTMLElement {
-  public rootElement = this.attachShadow({ mode: "open" });
   public hooks: Hook[] = [];
   public effects: EffectHook[] = [];
   public contexts = new WeakMap<Context, ContextHook<any>>();
   private updating = false;
+
+  public abstract rootElement: Element | ShadowRoot;
 
   protected connectedCallback() {
     this.update();
@@ -24,7 +25,6 @@ export abstract class Component extends HTMLElement {
     this.updating || this.enqueue();
   }
 
-  // See https://developer.mozilla.org/docs/Web/JavaScript/EventLoop
   private async enqueue() {
     this.updating = true;
     await Promise.resolve();
