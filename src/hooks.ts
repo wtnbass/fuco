@@ -94,8 +94,11 @@ export const useAttribute = (name: string) => {
   if (hook.value == null) {
     hook.value = el.getAttribute(name) || "";
     const m = new MutationObserver(() => {
-      hook.value = el.getAttribute(name) || "";
-      el.update();
+      const newValue = el.getAttribute(name) || "";
+      if (hook.value !== newValue) {
+        hook.value = newValue;
+        el.update();
+      }
     });
     m.observe(el, { attributes: true, attributeFilter: [name] });
     hook.cleanup = () => m.disconnect();
@@ -113,8 +116,10 @@ export const useProperty = <T>(name: string) => {
         return hook.value;
       },
       set(newValue) {
-        hook.value = newValue;
-        el.update();
+        if (hook.value !== newValue) {
+          hook.value = newValue;
+          el.update();
+        }
       }
     });
   }
@@ -174,8 +179,10 @@ export const useState = <T>(initValue: T): [T, SetState<T>] => {
       if (typeof newValue === "function") {
         newValue = (newValue as Callback<Option<T>, T>)(hook.value);
       }
-      hook.value = newValue;
-      el.update();
+      if (hook.value !== newValue) {
+        hook.value = newValue;
+        el.update();
+      }
     };
   }
   return [hook.value, hook.setter];
@@ -192,8 +199,11 @@ export const useReducer = <S, A>(
   if (hook.value == null || hook.dispatch == null) {
     hook.value = reducer(initialState, initAction);
     hook.dispatch = (action: A) => {
-      hook.value = reducer(hook.value, action);
-      el.update();
+      const newValue = reducer(hook.value, action);
+      if (hook.value !== newValue) {
+        hook.value = newValue;
+        el.update();
+      }
     };
   }
   return [hook.value, hook.dispatch];

@@ -18,10 +18,26 @@ export {
   useErrorBoundary
 } from "./hooks";
 
-export function defineElement(name: string, func: () => TemplateResult) {
+export interface DefineElementOptions {
+  lightDOM: boolean;
+}
+
+const defaultOptions: DefineElementOptions = {
+  lightDOM: false
+};
+
+export function defineElement(
+  name: string,
+  func: () => TemplateResult,
+  options: DefineElementOptions = defaultOptions
+) {
   window.customElements.define(
     name,
     class extends Component {
+      public rootElement = options.lightDOM
+        ? this
+        : this.attachShadow({ mode: "open" });
+
       protected callFunction() {
         render(func(), this.rootElement);
       }
