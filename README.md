@@ -45,7 +45,7 @@ yarn add functional-web-component
 
 ### useAttribute
 
-As same as `getAttribute`, but `useAttribute` updates the component when the value of the specified attribute changes.
+Same as `getAttribute`, but `useAttribute` updates the component when the value of the specified attribute changes.
 
 ```js
 defineElement("greet-element", () => {
@@ -101,3 +101,53 @@ html`
   <send-message @some-message=${e => console.log(e.detail)}></send-message>
 `;
 ```
+
+### useQuery
+
+```js
+function App() {
+  const inputRef = useQuery("#todo");
+  // inputRef.current === <input id="todo" />
+
+  return html`
+    <input id="todo" />
+  `;
+}
+```
+
+### useQueryAll
+
+### useState
+
+`useState` returns a pair of values, state and the function update it.
+
+```js
+function Counter() {
+  const [count, setCount] = useState(0);
+  return html`
+    <div>${count}</div>
+    <button @click=${setCount(count + 1)}>+</button>
+    <button @click=${setCount(count - 1)}>-</button>
+  `;
+}
+```
+
+### useReducer
+
+This is the same as React Hooks API.
+
+### useContext
+
+### useEffect
+
+This is the same as React Hooks API.
+
+### useMemo
+
+This is the same as React Hooks API.
+
+### useCallback
+
+This is the same as React Hooks API.
+
+### useErrorBoundary
