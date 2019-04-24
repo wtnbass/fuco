@@ -4,8 +4,7 @@ import {
   selectFixture,
   waitFor
 } from "./helpers/fixture";
-
-import "./components/hello-world";
+import { html, defineElement, useProperty } from "../src";
 
 describe("use-attribute", () => {
   let target: Element;
@@ -17,9 +16,18 @@ describe("use-attribute", () => {
     div = target.shadowRoot.querySelector("div");
   };
 
+  beforeAll(() => {
+    defineElement("hello-world", () => {
+      const name = useProperty("greetName");
+      return html`
+        <div>Hello, ${name}</div>
+      `;
+    });
+  });
+
   beforeEach(() => {
     mountFixture(`
-      <hello-world name="World"></hello-world>
+      <hello-world greet-name="World"></hello-world>
     `);
   });
 
@@ -29,16 +37,16 @@ describe("use-attribute", () => {
 
   it("mount", async () => {
     await setup();
-    expect(target.getAttribute("name")).toEqual("World");
+    expect(target.getAttribute("greet-name")).toEqual("World");
     expect(div.textContent).toEqual("Hello, World");
   });
 
   it("attribute changed", async () => {
     await setup();
-    target.setAttribute("name", "useAttribute");
+    target.setAttribute("greet-name", "property");
 
     await setup();
-    expect(target.getAttribute("name")).toEqual("useAttribute");
-    expect(div.textContent).toEqual("Hello, useAttribute");
+    expect(target.getAttribute("greet-name")).toEqual("property");
+    expect(div.textContent).toEqual("Hello, property");
   });
 });

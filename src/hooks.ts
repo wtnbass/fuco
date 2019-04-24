@@ -88,30 +88,19 @@ function getHook() {
 const fieldsChanged = (prev: any[] | undefined, next: any[]) =>
   prev == null || next.some((f, i) => f !== prev[i]);
 
-export const useAttribute = (name: string) => {
-  const hook = getHook() as AttributeHook;
-  const el = currentElement;
-  if (hook.value == null) {
-    hook.value = el.getAttribute(name) || "";
-    const m = new MutationObserver(() => {
-      const newValue = el.getAttribute(name) || "";
-      if (hook.value !== newValue) {
-        hook.value = newValue;
-        el.update();
-      }
-    });
-    m.observe(el, { attributes: true, attributeFilter: [name] });
-    hook.cleanup = () => m.disconnect();
-  }
-  return hook.value;
-};
-
-export const useProperty = <T>(name: string) => {
+export const useProperty = <T>(propName: string) => {
   const hook = getHook() as PropertyHook<T>;
   const el = currentElement;
-  if (hook.value == null) {
-    hook.value = (el as any)[name];
-    Object.defineProperty(el, name, {
+  if (hook.cleanup == null) {
+    const attrName = propName.replace(/[A-Z]/g, c => "-" + c.toLowerCase());
+    const m = new MutationObserver(() => {
+      (el as any)[propName] =
+        el.getAttribute(attrName) || (el as any)[propName];
+    });
+    m.observe(el, { attributes: true, attributeFilter: [attrName] });
+    hook.cleanup = () => m.disconnect();
+    hook.value = el.getAttribute(attrName) || (el as any)[propName];
+    Object.defineProperty(el, propName, {
       get() {
         return hook.value;
       },

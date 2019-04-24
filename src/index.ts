@@ -4,7 +4,6 @@ import { Component } from "./component";
 export { html } from "lit-html";
 export { createContext } from "./context";
 export {
-  useAttribute,
   useProperty,
   useDispatchEvent,
   useQuery,
