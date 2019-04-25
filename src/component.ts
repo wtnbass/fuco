@@ -1,12 +1,9 @@
-import { Hook, setCurrent, EffectHook, ContextHook } from "./hooks";
-import { Context } from "./context";
-import { Provider } from "./provider";
+import { Hook, setCurrent, EffectHook } from "./hooks";
 import { RAISE_ERROR, dispatchCustomEvent } from "./event";
 
 export abstract class Component extends HTMLElement {
   public hooks: Hook[] = [];
   public effects: EffectHook[] = [];
-  public contexts = new WeakMap<Context, ContextHook<any>>();
   private updating = false;
 
   public abstract rootElement: Element | ShadowRoot;
@@ -50,13 +47,5 @@ export abstract class Component extends HTMLElement {
       }
     });
     this.effects = [];
-  }
-
-  public recieveProvider(context: Context, provider: Provider<any>) {
-    const hook = this.contexts.get(context);
-    if (hook) {
-      hook.provider = provider;
-      hook.cleanup = () => provider.unsubscribe(this);
-    }
   }
 }

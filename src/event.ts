@@ -1,5 +1,6 @@
 import { Component } from "./component";
 import { Context } from "./context";
+import { Provider } from "./provider";
 
 export const REQUEST_CONSUME = "functional-web-component:request-consume";
 
@@ -9,6 +10,7 @@ interface Details {
   [REQUEST_CONSUME]: {
     context: Context;
     consumer: Component;
+    register(provider: Provider<unknown>): void;
   };
   [RAISE_ERROR]: {
     error: Error;

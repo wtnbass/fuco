@@ -188,13 +188,21 @@ export const useReducer = <S, A>(
   return [hook.value, hook.dispatch];
 };
 
-export const useContext = <T>(context: Context): T => {
+export const useContext = <T>(context: Context): T | undefined => {
+  const hook = getHook() as ContextHook<T>;
   const el = currentElement;
-  let hook = el.contexts.get(context);
-  if (!hook) el.contexts.set(context, (hook = getHook() as ContextHook<T>));
 
   if (!hook.provider) {
-    dispatchCustomEvent(el, REQUEST_CONSUME, { context, consumer: el });
+    dispatchCustomEvent(el, REQUEST_CONSUME, {
+      context,
+      consumer: el,
+      register(provider: Provider<T>) {
+        if (hook) {
+          hook.provider = provider;
+          hook.cleanup = () => provider.unsubscribe(el);
+        }
+      }
+    });
   }
   return hook.provider.value;
 };

@@ -16,11 +16,11 @@ export abstract class Provider<T> extends HTMLElement {
 
   protected connectedCallback() {
     listenCustomEvent(this, REQUEST_CONSUME, e => {
-      const { context, consumer } = e.detail;
+      const { context, consumer, register } = e.detail;
       if (this.contextId === context.id) {
         e.stopPropagation();
         this.consumers.add(consumer);
-        consumer.recieveProvider(context, this);
+        register(this);
       }
     });
   }
