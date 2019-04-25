@@ -5,9 +5,8 @@ export { html } from "lit-html";
 export { createContext } from "./context";
 export {
   useProperty,
+  useSelector,
   useDispatchEvent,
-  useQuery,
-  useQueryAll,
   useState,
   useReducer,
   useContext,

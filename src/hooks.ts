@@ -30,10 +30,10 @@ export interface DispatchHook<T> extends Hook {
   dispatch(detail: T): void;
 }
 
-export interface QueryHook<T extends Element | NodeListOf<Element>>
-  extends Hook {
+export interface SelectorHook<T extends Element> extends Hook {
   value?: {
     readonly current: T | null;
+    readonly all: NodeListOf<T> | null;
   };
 }
 
@@ -115,6 +115,22 @@ export const useProperty = <T>(propName: string) => {
   return hook.value;
 };
 
+export const useSelector = <T extends Element>(selector: string) => {
+  const hook = getHook() as SelectorHook<T>;
+  const el = currentElement;
+  if (hook.value == null) {
+    hook.value = {
+      get current() {
+        return el.rootElement.querySelector<T>(selector);
+      },
+      get all() {
+        return el.rootElement.querySelectorAll<T>(selector);
+      }
+    };
+  }
+  return hook.value;
+};
+
 export const useDispatchEvent = <T>(
   name: string,
   init: CustomEventInit = {}
@@ -131,32 +147,6 @@ export const useDispatchEvent = <T>(
       );
   }
   return hook.dispatch;
-};
-
-export const useQuery = <T extends Element>(selector: string) => {
-  const hook = getHook() as QueryHook<T>;
-  const el = currentElement;
-  if (hook.value == null) {
-    hook.value = {
-      get current() {
-        return el.rootElement.querySelector<T>(selector);
-      }
-    };
-  }
-  return hook.value;
-};
-
-export const useQueryAll = <T extends Element>(selector: string) => {
-  const hook = getHook() as QueryHook<NodeListOf<T>>;
-  const el = currentElement;
-  if (hook.value == null) {
-    hook.value = {
-      get current() {
-        return el.rootElement.querySelectorAll<T>(selector);
-      }
-    };
-  }
-  return hook.value;
 };
 
 export const useState = <T>(initValue: T): [T, SetState<T>] => {

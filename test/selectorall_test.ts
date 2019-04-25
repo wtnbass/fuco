@@ -4,10 +4,9 @@ import {
   selectFixture,
   waitFor
 } from "./helpers/fixture";
+import { html, defineElement, useSelector, useState } from "../src";
 
-import "./components/input-join";
-
-describe("use-query-all", () => {
+describe("use-selector/all", () => {
   let target: Element;
   let input1: HTMLInputElement;
   let input2: HTMLInputElement;
@@ -19,6 +18,25 @@ describe("use-query-all", () => {
     [input1, input2] = target.shadowRoot.querySelectorAll("input");
     div = target.shadowRoot.querySelector("div");
   };
+
+  beforeAll(() => {
+    function InputJoin() {
+      const [value, setValue] = useState("");
+      const ref = useSelector<HTMLInputElement>(".input");
+      const change = () => {
+        const [first, second] = ref.all;
+        setValue(first.value + " " + second.value);
+      };
+
+      return html`
+        <input type="text" class="input" @keyup=${change} />
+        <input type="text" class="input" @keyup=${change} />
+        <div>${value}</div>
+      `;
+    }
+
+    defineElement("input-join", InputJoin);
+  });
 
   beforeEach(() => {
     mountFixture(`
@@ -41,13 +59,13 @@ describe("use-query-all", () => {
 
     await setup();
     expect(input1.value).toEqual("input");
-    expect(div.textContent.trim()).toEqual("Input");
+    expect(div.textContent.trim()).toEqual("input");
 
     input2.value = "value";
     input2.dispatchEvent(Object.assign(new Event("keyup"), { keyCode: 13 }));
 
     await setup();
     expect(input2.value).toEqual("value");
-    expect(div.textContent.trim()).toEqual("InputValue");
+    expect(div.textContent.trim()).toEqual("input value");
   });
 });

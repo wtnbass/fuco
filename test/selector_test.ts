@@ -4,10 +4,9 @@ import {
   selectFixture,
   waitFor
 } from "./helpers/fixture";
+import { html, defineElement, useSelector, useState } from "../src";
 
-import "./components/show-input";
-
-describe("use-query", () => {
+describe("use-selector/current", () => {
   let target: Element;
   let input: HTMLInputElement;
   let div: HTMLDivElement;
@@ -18,6 +17,24 @@ describe("use-query", () => {
     input = target.shadowRoot.querySelector("input");
     div = target.shadowRoot.querySelector("div");
   };
+
+  beforeAll(() => {
+    function Show() {
+      const [value, set] = useState("");
+      const input = useSelector<HTMLInputElement>("#input");
+
+      return html`
+        <input
+          type="text"
+          id="input"
+          @keyup=${() => set(input.current.value)}
+        />
+        <div>${value}</div>
+      `;
+    }
+
+    defineElement("show-input", Show);
+  });
 
   beforeEach(() => {
     mountFixture(`
