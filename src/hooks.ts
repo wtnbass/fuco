@@ -1,12 +1,7 @@
 import { hooks } from "./component";
 import { Context } from "./context";
 import { Provider } from "./provider";
-import {
-  REQUEST_CONSUME,
-  RAISE_ERROR,
-  dispatchCustomEvent,
-  listenCustomEvent
-} from "./event";
+import { REQUEST_CONSUME, dispatchCustomEvent } from "./event";
 
 const fieldsChanged = (prev: any[] | undefined, next: any[]) =>
   prev == null || next.some((f, i) => f !== prev[i]);
@@ -128,13 +123,3 @@ export const useMemo = <T>(fn: () => T, deps: any[] = []) =>
 
 export const useCallback = <A, R>(callback: (a: A) => R, deps: any[] = []) =>
   useMemo(() => callback, deps);
-
-export const useErrorBoundary = () =>
-  hooks((h, c, i) => {
-    listenCustomEvent(c, RAISE_ERROR, e => {
-      e.stopPropagation();
-      h.values[i] = e.detail.error;
-      c.update();
-    });
-    return h.values[i];
-  });

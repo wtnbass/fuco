@@ -11,8 +11,7 @@ export {
   useContext,
   useEffect,
   useMemo,
-  useCallback,
-  useErrorBoundary
+  useCallback
 } from "./hooks";
 
 export function defineElement(name: string, fn: FunctionalComponent) {

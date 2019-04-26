@@ -1,5 +1,4 @@
 import { render, TemplateResult } from "lit-html";
-import { RAISE_ERROR, dispatchCustomEvent } from "./event";
 
 let currentCursor: number;
 let currentComponent: Component;
@@ -52,29 +51,27 @@ export abstract class Component extends HTMLElement {
   private async enqueue() {
     this.updating = true;
     await Promise.resolve();
-    try {
-      currentCursor = 0;
-      currentComponent = this;
 
-      render(
-        (this.constructor as typeof Component).functionalComponent(),
-        this.rootElement
-      );
+    currentCursor = 0;
+    currentComponent = this;
 
-      const h = this.hooks;
-      for (let i = 0; i < h.effects.length; i++) {
-        if (h.effects[i]) {
-          h.cleanup[i] && h.cleanup[i]();
-          const cleanup = h.effects[i]();
-          if (cleanup) {
-            h.cleanup[i] = cleanup;
-          }
-          delete h.effects[i];
+    render(
+      (this.constructor as typeof Component).functionalComponent(),
+      this.rootElement
+    );
+
+    const h = this.hooks;
+    for (let i = 0; i < h.effects.length; i++) {
+      if (h.effects[i]) {
+        h.cleanup[i] && h.cleanup[i]();
+        const cleanup = h.effects[i]();
+        if (cleanup) {
+          h.cleanup[i] = cleanup;
         }
+        delete h.effects[i];
       }
-    } catch (error) {
-      dispatchCustomEvent(this, RAISE_ERROR, { error });
     }
+
     this.updating = false;
   }
 }

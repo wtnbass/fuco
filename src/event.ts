@@ -4,16 +4,11 @@ import { Provider } from "./provider";
 
 export const REQUEST_CONSUME = "functional-web-component:request-consume";
 
-export const RAISE_ERROR = "functional-web-component:raise-error";
-
 interface Details {
   [REQUEST_CONSUME]: {
     context: Context;
     consumer: Component;
     register(provider: Provider<unknown>): void;
-  };
-  [RAISE_ERROR]: {
-    error: Error;
   };
 }
 
