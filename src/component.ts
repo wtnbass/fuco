@@ -1,22 +1,49 @@
-import { Hook, setCurrent, EffectHook } from "./hooks";
+import { render, TemplateResult } from "lit-html";
 import { RAISE_ERROR, dispatchCustomEvent } from "./event";
 
-export abstract class Component extends HTMLElement {
-  public hooks: Hook[] = [];
-  public effects: EffectHook[] = [];
-  private updating = false;
+let currentCursor: number;
+let currentComponent: Component;
 
-  public abstract rootElement: Element | ShadowRoot;
+export type FunctionalComponent = () => TemplateResult;
+
+export interface Hooks<T = any> {
+  values: T[];
+  deps: any[][];
+  effects: (() => void | (() => void))[];
+  cleanup: (() => void)[];
+}
+
+export function hooks<T>(
+  first: (h: Hooks<T>, c: Component, i: number) => T,
+  always = false
+): T {
+  const h = currentComponent.hooks as Hooks<T>;
+  const index = currentCursor++;
+  if (always || h.values.length <= index) {
+    h.values[index] = first(h, currentComponent, index);
+  }
+  return h.values[index];
+}
+
+export abstract class Component extends HTMLElement {
+  private updating = false;
+  public rootElement = this.attachShadow({ mode: "open" });
+  public hooks: Hooks = {
+    values: [],
+    deps: [],
+    effects: [],
+    cleanup: []
+  };
+
+  protected static functionalComponent: FunctionalComponent;
 
   protected connectedCallback() {
     this.update();
   }
 
   protected disconnectedCallback() {
-    this.hooks.forEach(h => h.cleanup && h.cleanup());
+    this.hooks.cleanup.forEach(f => f());
   }
-
-  protected abstract callFunction(): void;
 
   public update() {
     this.updating || this.enqueue();
@@ -26,26 +53,28 @@ export abstract class Component extends HTMLElement {
     this.updating = true;
     await Promise.resolve();
     try {
-      setCurrent(this, 0);
-      this.callFunction();
-      this.runEffects();
-    } catch (error) {
-      dispatchCustomEvent(this, RAISE_ERROR, { error });
-    } finally {
-      this.updating = false;
-    }
-  }
+      currentCursor = 0;
+      currentComponent = this;
 
-  private runEffects() {
-    this.effects.forEach(hook => {
-      if (hook.cleanup) hook.cleanup();
-      if (hook.handler) {
-        const cleanup = hook.handler();
-        if (typeof cleanup === "function") {
-          hook.cleanup = cleanup;
+      render(
+        (this.constructor as typeof Component).functionalComponent(),
+        this.rootElement
+      );
+
+      const h = this.hooks;
+      for (let i = 0; i < h.effects.length; i++) {
+        if (h.effects[i]) {
+          h.cleanup[i] && h.cleanup[i]();
+          const cleanup = h.effects[i]();
+          if (cleanup) {
+            h.cleanup[i] = cleanup;
+          }
+          delete h.effects[i];
         }
       }
-    });
-    this.effects = [];
+    } catch (error) {
+      dispatchCustomEvent(this, RAISE_ERROR, { error });
+    }
+    this.updating = false;
   }
 }

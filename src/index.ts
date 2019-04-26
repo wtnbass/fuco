@@ -1,5 +1,4 @@
-import { render, TemplateResult } from "lit-html";
-import { Component } from "./component";
+import { Component, FunctionalComponent } from "./component";
 
 export { html } from "lit-html";
 export { createContext } from "./context";
@@ -16,29 +15,11 @@ export {
   useErrorBoundary
 } from "./hooks";
 
-export interface DefineElementOptions {
-  lightDOM: boolean;
-}
-
-const defaultOptions: DefineElementOptions = {
-  lightDOM: false
-};
-
-export function defineElement(
-  name: string,
-  func: () => TemplateResult,
-  options: DefineElementOptions = defaultOptions
-) {
+export function defineElement(name: string, fn: FunctionalComponent) {
   window.customElements.define(
     name,
     class extends Component {
-      public rootElement = options.lightDOM
-        ? this
-        : this.attachShadow({ mode: "open" });
-
-      protected callFunction() {
-        render(func(), this.rootElement);
-      }
+      protected static functionalComponent = fn;
     }
   );
 }
