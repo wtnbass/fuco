@@ -16,11 +16,11 @@ export abstract class Provider<T> extends HTMLElement {
 
   protected connectedCallback() {
     listenCustomEvent(this, REQUEST_CONSUME, e => {
-      const { context, consumer } = e.detail;
+      const { context, consumer, register } = e.detail;
       if (this.contextId === context.id) {
         e.stopPropagation();
         this.consumers.add(consumer);
-        consumer.recieveProvider(context, this);
+        register(this);
       }
     });
   }
@@ -34,7 +34,9 @@ export abstract class Provider<T> extends HTMLElement {
   }
 
   public set value(newValue) {
-    this._value = newValue;
-    this.consumers.forEach(c => c.update());
+    if (this._value !== newValue) {
+      this._value = newValue;
+      this.consumers.forEach(c => c.update());
+    }
   }
 }

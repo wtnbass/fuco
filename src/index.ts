@@ -1,30 +1,26 @@
-import { render, TemplateResult } from "lit-html";
-import { Component } from "./component";
+import { Component, FunctionalComponent } from "./component";
 
 export { html } from "lit-html";
+export { css } from "./css";
 export { createContext } from "./context";
 export {
-  useAttribute,
   useProperty,
+  useSelector,
   useDispatchEvent,
-  useQuery,
-  useQueryAll,
+  useStyle,
   useState,
   useReducer,
   useContext,
   useEffect,
   useMemo,
-  useCallback,
-  useErrorBoundary
+  useCallback
 } from "./hooks";
 
-export function defineElement(name: string, func: () => TemplateResult) {
+export function defineElement(name: string, fn: FunctionalComponent) {
   window.customElements.define(
     name,
     class extends Component {
-      protected callFunction() {
-        render(func(), this.rootElement);
-      }
+      protected static functionalComponent = fn;
     }
   );
 }

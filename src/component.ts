@@ -1,62 +1,77 @@
-import { Hook, setCurrent, EffectHook, ContextHook } from "./hooks";
-import { Context } from "./context";
-import { Provider } from "./provider";
-import { RAISE_ERROR, dispatchCustomEvent } from "./event";
+import { render, TemplateResult } from "lit-html";
+
+let currentCursor: number;
+let currentComponent: Component;
+
+export type FunctionalComponent = () => TemplateResult;
+
+export interface Hooks<T = any> {
+  values: T[];
+  deps: any[][];
+  effects: (() => void | (() => void))[];
+  cleanup: (() => void)[];
+}
+
+export function hooks<T>(
+  first: (h: Hooks<T>, c: Component, i: number) => T,
+  always = false
+): T {
+  const h = currentComponent.hooks as Hooks<T>;
+  const index = currentCursor++;
+  if (always || h.values.length <= index) {
+    h.values[index] = first(h, currentComponent, index);
+  }
+  return h.values[index];
+}
 
 export abstract class Component extends HTMLElement {
-  public rootElement = this.attachShadow({ mode: "open" });
-  public hooks: Hook[] = [];
-  public effects: EffectHook[] = [];
-  public contexts = new WeakMap<Context, ContextHook<any>>();
   private updating = false;
+  public rootElement = this.attachShadow({ mode: "open" });
+  public hooks: Hooks = {
+    values: [],
+    deps: [],
+    effects: [],
+    cleanup: []
+  };
+
+  protected static functionalComponent: FunctionalComponent;
 
   protected connectedCallback() {
     this.update();
   }
 
   protected disconnectedCallback() {
-    this.hooks.forEach(h => h.cleanup && h.cleanup());
+    this.hooks.cleanup.forEach(f => f());
   }
-
-  protected abstract callFunction(): void;
 
   public update() {
     this.updating || this.enqueue();
   }
 
-  // See https://developer.mozilla.org/docs/Web/JavaScript/EventLoop
   private async enqueue() {
     this.updating = true;
     await Promise.resolve();
-    try {
-      setCurrent(this, 0);
-      this.callFunction();
-      this.runEffects();
-    } catch (error) {
-      dispatchCustomEvent(this, RAISE_ERROR, { error });
-    } finally {
-      this.updating = false;
-    }
-  }
 
-  private runEffects() {
-    this.effects.forEach(hook => {
-      if (hook.cleanup) hook.cleanup();
-      if (hook.handler) {
-        const cleanup = hook.handler();
-        if (typeof cleanup === "function") {
-          hook.cleanup = cleanup;
+    currentCursor = 0;
+    currentComponent = this;
+
+    render(
+      (this.constructor as typeof Component).functionalComponent(),
+      this.rootElement
+    );
+
+    const h = this.hooks;
+    for (let i = 0; i < h.effects.length; i++) {
+      if (h.effects[i]) {
+        h.cleanup[i] && h.cleanup[i]();
+        const cleanup = h.effects[i]();
+        if (cleanup) {
+          h.cleanup[i] = cleanup;
         }
+        delete h.effects[i];
       }
-    });
-    this.effects = [];
-  }
-
-  public recieveProvider(context: Context, provider: Provider<any>) {
-    const hook = this.contexts.get(context);
-    if (hook) {
-      hook.provider = provider;
-      hook.cleanup = () => provider.unsubscribe(this);
     }
+
+    this.updating = false;
   }
 }
