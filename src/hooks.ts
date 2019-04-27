@@ -1,10 +1,8 @@
 import { hooks } from "./component";
 import { Context } from "./context";
 import { Provider } from "./provider";
+import { cssSymbol } from "./css";
 import { REQUEST_CONSUME, dispatchCustomEvent } from "./event";
-
-const fieldsChanged = (prev: any[] | undefined, next: any[]) =>
-  prev == null || next.some((f, i) => f !== prev[i]);
 
 export const useProperty = <T>(propName: string) =>
   hooks<T>((h, c, i) => {
@@ -54,6 +52,33 @@ export const useDispatchEvent = <T>(name: string, init: CustomEventInit = {}) =>
     )
   );
 
+const enabledAdoptedStyleSheets =
+  "adoptedStyleSheets" in Document.prototype &&
+  "replace" in CSSStyleSheet.prototype;
+
+export const useStyle = (...styles: { [cssSymbol]: string }[]) =>
+  hooks((h, c, i) => {
+    if (enabledAdoptedStyleSheets) {
+      const styleSheets = styles.map(css => {
+        const styleSheet = new CSSStyleSheet();
+        styleSheet.replaceSync(css[cssSymbol]);
+        return styleSheet;
+      });
+      c.rootElement.adoptedStyleSheets = [...styleSheets];
+    } else {
+      h.effects[i] = () => {
+        styles
+          .map(css => {
+            const style = document.createElement("style");
+            style.textContent = css[cssSymbol];
+            return style;
+          })
+          .forEach(style => c.rootElement.appendChild(style));
+      };
+    }
+    return 0;
+  });
+
 export const useState = <T>(initialState: T) =>
   hooks<[T, ((t: T | ((s: T) => T)) => void)]>((h, c, i) => [
     initialState,
@@ -98,6 +123,9 @@ export const useContext = <T>(context: Context) =>
     }
     return (h.deps[i][0] as Provider<T>).value;
   }, true);
+
+const fieldsChanged = (prev: any[] | undefined, next: any[]) =>
+  prev == null || next.some((f, i) => f !== prev[i]);
 
 export const useEffect = (
   handler: () => void | (() => void),
