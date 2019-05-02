@@ -50,6 +50,7 @@ export abstract class Component extends HTMLElement {
 
   private async enqueue() {
     this.updating = true;
+
     await Promise.resolve();
 
     currentCursor = 0;
@@ -57,7 +58,8 @@ export abstract class Component extends HTMLElement {
 
     render(
       (this.constructor as typeof Component).functionalComponent(),
-      this.rootElement
+      this.rootElement,
+      { eventContext: this }
     );
 
     const h = this.hooks;
