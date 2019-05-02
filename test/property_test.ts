@@ -5,23 +5,40 @@ import {
   waitFor
 } from "./helpers/fixture";
 
-import "./components/input-user";
+import { html, defineElement, useProperty } from "../src";
+
+interface User {
+  name: string;
+  age: string;
+}
 
 describe("use-property", () => {
   let target: Element;
-  let name: HTMLInputElement;
-  let age: HTMLInputElement;
 
   const setup = async () => {
     await waitFor();
-    const parent = selectFixture("input-user");
-    target = parent.shadowRoot.querySelector("user-info");
-    [name, age] = parent.shadowRoot.querySelectorAll("input");
+    target = selectFixture("user-info");
   };
+
+  beforeAll(() => {
+    function UserInfo() {
+      const user: User = useProperty("user");
+      if (!user) {
+        return html`
+          No user
+        `;
+      }
+      return html`
+        ${user.name} (${user.age})
+      `;
+    }
+
+    defineElement("user-info", UserInfo);
+  });
 
   beforeEach(() => {
     mountFixture(`
-      <input-user></input-user>
+      <user-info></user-info>
     `);
   });
 
@@ -31,27 +48,14 @@ describe("use-property", () => {
 
   it("mount", async () => {
     await setup();
-    expect(name.value).toEqual("Alice");
-    expect(age.value).toEqual("18");
-    expect(target.shadowRoot.textContent.trim()).toEqual("Alice (18)");
+    expect(target.shadowRoot.textContent.trim()).toEqual("No user");
   });
 
   it("propeties changed", async () => {
     await setup();
-    name.value = "Bob";
-    name.dispatchEvent(Object.assign(new Event("keyup"), { keyCode: 13 }));
+    (target as any).user = { name: "Bob", age: "18" } as User;
 
     await setup();
-    expect(name.value).toEqual("Bob");
-    expect(age.value).toEqual("18");
     expect(target.shadowRoot.textContent.trim()).toEqual("Bob (18)");
-
-    age.value = "34";
-    age.dispatchEvent(Object.assign(new Event("keyup"), { keyCode: 13 }));
-
-    await setup();
-    expect(name.value).toEqual("Bob");
-    expect(age.value).toEqual("34");
-    expect(target.shadowRoot.textContent.trim()).toEqual("Bob (34)");
   });
 });

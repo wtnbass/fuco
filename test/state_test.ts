@@ -5,7 +5,7 @@ import {
   waitFor
 } from "./helpers/fixture";
 
-import "./components/counter-app";
+import { html, defineElement, useState } from "../src";
 
 describe("use-state", () => {
   let count: Element;
@@ -19,6 +19,17 @@ describe("use-state", () => {
     count = inner.querySelector("div");
     [increment, decrement] = inner.querySelectorAll("button");
   };
+
+  beforeAll(() => {
+    defineElement("counter-app", () => {
+      const [count, setCount] = useState(0);
+      return html`
+        <div>${count}</div>
+        <button @click=${() => setCount(count + 1)}>+</button>
+        <button @click=${() => setCount(count - 1)}>-</button>
+      `;
+    });
+  });
 
   beforeEach(() => {
     mountFixture(`
