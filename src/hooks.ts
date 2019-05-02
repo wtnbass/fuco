@@ -4,15 +4,32 @@ import { Provider } from "./provider";
 import { cssSymbol } from "./css";
 import { REQUEST_CONSUME, dispatchCustomEvent } from "./event";
 
-export const useProperty = <T>(propName: string) =>
+const kebabToCamel = (name: string) => {
+  let hyphen = false;
+  let camel = "";
+  for (let i = 0, len = name.length; i < len; i++) {
+    const char = name[i];
+    if (char === "-") {
+      hyphen = true;
+    } else if (hyphen) {
+      camel += char.toUpperCase();
+      hyphen = false;
+    } else {
+      camel += char;
+    }
+  }
+  return camel;
+};
+
+export const useProperty = <T>(name: string) =>
   hooks<T>((h, c, i) => {
-    const attrName = propName.replace(/[A-Z]/g, c => "-" + c.toLowerCase());
-    const initialValue = c.getAttribute(attrName) || (c as any)[propName];
+    const propName = kebabToCamel(name);
+    const initialValue = c.getAttribute(name) || (c as any)[propName];
 
     const m = new MutationObserver(() => {
-      (c as any)[propName] = c.getAttribute(attrName) || (c as any)[propName];
+      (c as any)[propName] = c.getAttribute(name) || (c as any)[propName];
     });
-    m.observe(c, { attributes: true, attributeFilter: [attrName] });
+    m.observe(c, { attributes: true, attributeFilter: [name] });
     h.cleanup[i] = () => m.disconnect();
 
     Object.defineProperty(c, propName, {
@@ -124,7 +141,7 @@ export const useContext = <T>(context: Context) =>
     return (h.deps[i][0] as Provider<T>).value;
   }, true);
 
-const fieldsChanged = (prev: any[] | undefined, next: any[]) =>
+const depsChanged = (prev: any[] | undefined, next: any[]) =>
   prev == null || next.some((f, i) => f !== prev[i]);
 
 export const useEffect = (
@@ -132,7 +149,7 @@ export const useEffect = (
   deps: any[] = []
 ) =>
   hooks((h, _, i) => {
-    if (fieldsChanged(h.deps[i], deps)) {
+    if (depsChanged(h.deps[i], deps)) {
       h.deps[i] = deps;
       h.effects[i] = handler;
     }
@@ -142,7 +159,7 @@ export const useEffect = (
 export const useMemo = <T>(fn: () => T, deps: any[] = []) =>
   hooks((h, _, i) => {
     let value = h.values[i];
-    if (fieldsChanged(h.deps[i], deps)) {
+    if (depsChanged(h.deps[i], deps)) {
       h.deps[i] = deps;
       value = fn();
     }

@@ -13,6 +13,7 @@ describe("use-effect", () => {
   beforeAll(() => {
     defineElement("effect-test", () => {
       const value = useProperty("value");
+      const otherValue = useProperty("other-value");
       useEffect(() => {
         updateCount++;
         return () => {
@@ -20,7 +21,7 @@ describe("use-effect", () => {
         };
       }, [value]);
       return html`
-        ${value}
+        ${value} ${otherValue}
       `;
     });
   });
@@ -58,5 +59,17 @@ describe("use-effect", () => {
     await waitFor();
     expect(cleanupCount).toEqual(1);
     expect(updateCount).toEqual(2);
+  });
+
+  it("no update", async () => {
+    await waitFor();
+    const target = selectFixture("effect-test");
+    expect(updateCount).toEqual(1);
+
+    target.setAttribute("other-value", "change");
+
+    await waitFor();
+    expect(cleanupCount).toEqual(0);
+    expect(updateCount).toEqual(1);
   });
 });

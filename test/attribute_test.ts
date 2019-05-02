@@ -18,7 +18,7 @@ describe("use-attribute", () => {
 
   beforeAll(() => {
     defineElement("hello-world", () => {
-      const name = useProperty("greetName");
+      const name = useProperty("greet-name");
       return html`
         <div>Hello, ${name}</div>
       `;
