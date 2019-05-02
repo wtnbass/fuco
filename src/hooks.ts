@@ -25,9 +25,11 @@ export const useProperty = <T>(name: string) =>
   hooks<T>((h, c, i) => {
     const cmp = c as Component & { [name: string]: T };
     const propName = kebabToCamel(name);
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     const initialValue = (c.getAttribute(name) as any) || cmp[propName];
 
     const m = new MutationObserver(() => {
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       cmp[propName] = (c.getAttribute(name) as any) || cmp[propName];
     });
     m.observe(c, { attributes: true, attributeFilter: [name] });

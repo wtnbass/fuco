@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import {
   mountFixture,
   unmountFixture,
   selectFixture,
+  selector,
+  selectorAll,
   waitFor
 } from "./helpers/fixture";
 
@@ -15,9 +15,9 @@ describe("use-reducer", () => {
 
   const setup = async () => {
     await waitFor();
-    const target = selectFixture("todo-app")!;
-    input = target.shadowRoot!.querySelector("input")!;
-    list = target.shadowRoot!.querySelectorAll("ul > li");
+    const target = selectFixture("todo-app");
+    input = selector("input", target);
+    list = selectorAll("ul > li", target);
   };
 
   beforeEach(() => {

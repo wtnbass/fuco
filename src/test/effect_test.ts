@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import {
   mountFixture,
   unmountFixture,
@@ -53,7 +51,7 @@ describe("use-effect", () => {
 
   it("update", async () => {
     await waitFor();
-    const target = selectFixture("effect-test")!;
+    const target = selectFixture("effect-test");
     expect(updateCount).toEqual(1);
 
     target.setAttribute("value", "change");
@@ -65,7 +63,7 @@ describe("use-effect", () => {
 
   it("no update", async () => {
     await waitFor();
-    const target = selectFixture("effect-test")!;
+    const target = selectFixture("effect-test");
     expect(updateCount).toEqual(1);
 
     target.setAttribute("other-value", "change");

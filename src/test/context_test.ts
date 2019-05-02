@@ -1,9 +1,10 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import {
   mountFixture,
   unmountFixture,
   selectFixture,
+  selector,
+  selectorAll,
+  text,
   waitFor
 } from "./helpers/fixture";
 
@@ -23,41 +24,37 @@ describe("use-context", () => {
 
   const setup1 = async () => {
     await waitFor();
-    target = selectFixture("theme-app")!;
-    button1 = target.shadowRoot!.querySelector("button")!;
-    consumer1 = target.shadowRoot!.querySelector("theme-consumer")!;
-    inner1 = consumer1.shadowRoot!.querySelector("div")!;
+    target = selectFixture("theme-app");
+    button1 = selector("button", target);
+    consumer1 = selector("theme-consumer", target);
+    inner1 = selector("div", consumer1);
   };
 
   const setup2 = async () => {
     await waitFor();
-    target = selectFixture("theme-double")!;
-    [button1, button2] = target.shadowRoot!.querySelectorAll("button");
-    consumer1 = target.shadowRoot!.querySelector("theme-consumer")!;
-    consumer2 = target.shadowRoot!.querySelector("theme2-consumer")!;
-    inner1 = consumer1.shadowRoot!.querySelector("div")!;
-    inner2 = consumer2.shadowRoot!.querySelector("div")!;
+    target = selectFixture("theme-double");
+    [button1, button2] = selectorAll<HTMLButtonElement>("button", target);
+    consumer1 = selector("theme-consumer", target);
+    consumer2 = selector("theme2-consumer", target);
+    inner1 = selector("div", consumer1);
+    inner2 = selector("div", consumer2);
   };
 
   const setup3 = async () => {
     await waitFor();
-    target = selectFixture("theme-same")!;
-    [button1, button2] = target.shadowRoot!.querySelectorAll("button");
-    [consumer1, consumer2] = target.shadowRoot!.querySelectorAll(
-      "theme2-consumer"
-    );
-    inner1 = consumer1.shadowRoot!.querySelector("div")!;
-    inner2 = consumer2.shadowRoot!.querySelector("div")!;
+    target = selectFixture("theme-same");
+    [button1, button2] = selectorAll<HTMLButtonElement>("button", target);
+    [consumer1, consumer2] = selectorAll("theme2-consumer", target);
+    inner1 = selector("div", consumer1);
+    inner2 = selector("div", consumer2);
   };
   const setup4 = async () => {
     await waitFor();
-    target = selectFixture("theme-duplicate")!;
-    [button1, button2] = target.shadowRoot!.querySelectorAll("button");
-    [consumer1, consumer2] = target.shadowRoot!.querySelectorAll(
-      "theme-consumer"
-    );
-    inner1 = consumer1.shadowRoot!.querySelector("div")!;
-    inner2 = consumer2.shadowRoot!.querySelector("div")!;
+    target = selectFixture("theme-duplicate");
+    [button1, button2] = selectorAll<HTMLButtonElement>("button", target);
+    [consumer1, consumer2] = selectorAll("theme-consumer", target);
+    inner1 = selector("div", consumer1);
+    inner2 = selector("div", consumer2);
   };
 
   beforeEach(() => {
@@ -75,65 +72,65 @@ describe("use-context", () => {
 
   it("single context", async () => {
     await setup1();
-    expect(inner1.textContent!.trim()).toEqual("Theme is dark.");
+    expect(text(inner1)).toEqual("Theme is dark.");
 
     button1.click();
 
     await setup1();
-    expect(inner1.textContent!.trim()).toEqual("Theme is light.");
+    expect(text(inner1)).toEqual("Theme is light.");
   });
 
   it("double contexts", async () => {
     await setup2();
-    expect(inner1.textContent!.trim()).toEqual("Theme is dark.");
-    expect(inner2.textContent!.trim()).toEqual("Theme2 is redred.");
+    expect(text(inner1)).toEqual("Theme is dark.");
+    expect(text(inner2)).toEqual("Theme2 is redred.");
 
     button1.click();
 
     await setup2();
-    expect(inner1.textContent!.trim()).toEqual("Theme is light.");
-    expect(inner2.textContent!.trim()).toEqual("Theme2 is redred.");
+    expect(text(inner1)).toEqual("Theme is light.");
+    expect(text(inner2)).toEqual("Theme2 is redred.");
 
     button2.click();
 
     await setup2();
-    expect(inner1.textContent!.trim()).toEqual("Theme is light.");
-    expect(inner2.textContent!.trim()).toEqual("Theme2 is greengreen.");
+    expect(text(inner1)).toEqual("Theme is light.");
+    expect(text(inner2)).toEqual("Theme2 is greengreen.");
   });
 
   it("same contexts", async () => {
     await setup3();
-    expect(inner1.textContent!.trim()).toEqual("Theme2 is redred.");
-    expect(inner2.textContent!.trim()).toEqual("Theme2 is redred.");
+    expect(text(inner1)).toEqual("Theme2 is redred.");
+    expect(text(inner2)).toEqual("Theme2 is redred.");
 
     button1.click();
 
     await setup3();
-    expect(inner1.textContent!.trim()).toEqual("Theme2 is greengreen.");
-    expect(inner2.textContent!.trim()).toEqual("Theme2 is redred.");
+    expect(text(inner1)).toEqual("Theme2 is greengreen.");
+    expect(text(inner2)).toEqual("Theme2 is redred.");
 
     button2.click();
 
     await setup3();
-    expect(inner1.textContent!.trim()).toEqual("Theme2 is greengreen.");
-    expect(inner2.textContent!.trim()).toEqual("Theme2 is greengreen.");
+    expect(text(inner1)).toEqual("Theme2 is greengreen.");
+    expect(text(inner2)).toEqual("Theme2 is greengreen.");
   });
 
   it("duplicate contexts", async () => {
     await setup4();
-    expect(inner1.textContent!.trim()).toEqual("Theme is dark.");
-    expect(inner2.textContent!.trim()).toEqual("Theme is dark.");
+    expect(text(inner1)).toEqual("Theme is dark.");
+    expect(text(inner2)).toEqual("Theme is dark.");
 
     button1.click();
 
     await setup4();
-    expect(inner1.textContent!.trim()).toEqual("Theme is light.");
-    expect(inner2.textContent!.trim()).toEqual("Theme is dark.");
+    expect(text(inner1)).toEqual("Theme is light.");
+    expect(text(inner2)).toEqual("Theme is dark.");
 
     button2.click();
 
     await setup4();
-    expect(inner1.textContent!.trim()).toEqual("Theme is light.");
-    expect(inner2.textContent!.trim()).toEqual("Theme is light.");
+    expect(text(inner1)).toEqual("Theme is light.");
+    expect(text(inner2)).toEqual("Theme is light.");
   });
 });

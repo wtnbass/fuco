@@ -1,9 +1,10 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import {
   mountFixture,
   unmountFixture,
   selectFixture,
+  selector,
+  selectorAll,
+  text,
   waitFor
 } from "./helpers/fixture";
 
@@ -16,10 +17,9 @@ describe("use-state", () => {
 
   const setup = async () => {
     await waitFor();
-    const target = selectFixture("counter-app")!;
-    const inner = target.shadowRoot!;
-    count = inner.querySelector("div")!;
-    [increment, decrement] = inner.querySelectorAll("button");
+    const target = selectFixture("counter-app");
+    count = selector("div", target);
+    [increment, decrement] = selectorAll<HTMLButtonElement>("button", target);
   };
 
   beforeAll(() => {
@@ -45,7 +45,7 @@ describe("use-state", () => {
 
   it("mount", async () => {
     await setup();
-    expect(count.textContent).toEqual("0");
+    expect(text(count)).toEqual("0");
   });
 
   it("push increment", async () => {
@@ -53,7 +53,7 @@ describe("use-state", () => {
     increment.click();
 
     await setup();
-    expect(count.textContent).toEqual("1");
+    expect(text(count)).toEqual("1");
   });
 
   it("push decrement", async () => {
@@ -61,6 +61,6 @@ describe("use-state", () => {
     decrement.click();
 
     await setup();
-    expect(count.textContent).toEqual("-1");
+    expect(text(count)).toEqual("-1");
   });
 });

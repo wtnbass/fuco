@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import {
   mountFixture,
   unmountFixture,
   selectFixture,
+  selector,
   waitFor
 } from "./helpers/fixture";
 import { html, defineElement, useProperty } from "..";
@@ -14,8 +13,8 @@ describe("use-attribute", () => {
 
   const setup = async () => {
     await waitFor();
-    target = selectFixture("hello-world")!;
-    div = target.shadowRoot!.querySelector("div")!;
+    target = selectFixture("hello-world");
+    div = selector("div", target);
   };
 
   beforeAll(() => {

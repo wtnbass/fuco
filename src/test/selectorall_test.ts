@@ -1,9 +1,10 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import {
   mountFixture,
   unmountFixture,
   selectFixture,
+  selector,
+  selectorAll,
+  text,
   waitFor
 } from "./helpers/fixture";
 import { html, defineElement, useSelector, useState } from "..";
@@ -16,9 +17,9 @@ describe("use-selector/all", () => {
 
   const setup = async () => {
     await waitFor();
-    target = selectFixture("input-join")!;
-    [input1, input2] = target.shadowRoot!.querySelectorAll("input");
-    div = target.shadowRoot!.querySelector("div")!;
+    target = selectFixture("input-join");
+    [input1, input2] = selectorAll<HTMLInputElement>("input", target);
+    div = selector("div", target);
   };
 
   beforeAll(() => {
@@ -26,7 +27,8 @@ describe("use-selector/all", () => {
       const [value, setValue] = useState("");
       const ref = useSelector<HTMLInputElement>(".input");
       const change = () => {
-        const [first, second] = ref.all!;
+        if (!ref.all) return;
+        const [first, second] = ref.all;
         setValue(first.value + " " + second.value);
       };
 
@@ -54,20 +56,20 @@ describe("use-selector/all", () => {
     await setup();
     expect(input1.value).toEqual("");
     expect(input2.value).toEqual("");
-    expect(div.textContent!.trim()).toEqual("");
+    expect(text(div)).toEqual("");
 
     input1.value = "input";
     input1.dispatchEvent(Object.assign(new Event("keyup"), { keyCode: 13 }));
 
     await setup();
     expect(input1.value).toEqual("input");
-    expect(div.textContent!.trim()).toEqual("input");
+    expect(text(div)).toEqual("input");
 
     input2.value = "value";
     input2.dispatchEvent(Object.assign(new Event("keyup"), { keyCode: 13 }));
 
     await setup();
     expect(input2.value).toEqual("value");
-    expect(div.textContent!.trim()).toEqual("input value");
+    expect(text(div)).toEqual("input value");
   });
 });
