@@ -2,9 +2,11 @@ import {
   mountFixture,
   unmountFixture,
   selectFixture,
+  selector,
+  text,
   waitFor
 } from "./helpers/fixture";
-import { html, defineElement, useState, useCallback } from "../src";
+import { html, defineElement, useState, useCallback } from "..";
 
 describe("million update", () => {
   let target: Element;
@@ -14,8 +16,8 @@ describe("million update", () => {
   const setup = async () => {
     await waitFor();
     target = selectFixture("million-count");
-    div = target.shadowRoot.querySelector("div");
-    button = target.shadowRoot.querySelector("button");
+    div = selector("div", target);
+    button = selector("button", target);
   };
 
   beforeAll(() => {
@@ -45,11 +47,11 @@ describe("million update", () => {
 
   it("million update", async () => {
     await setup();
-    expect(div.textContent.trim()).toEqual("0");
+    expect(text(div)).toEqual("0");
 
     button.click();
 
     await setup();
-    expect(div.textContent.trim()).toEqual("1000000");
+    expect(text(div)).toEqual("1000000");
   });
 });

@@ -1,8 +1,16 @@
 export const cssSymbol = Symbol("css");
 
-const replace = (value: any): string => {
+export interface HasCSSSymbol {
+  [cssSymbol]: string;
+}
+
+const hasCSSSymbol = (value: unknown): value is HasCSSSymbol => {
+  return typeof value === "object" && value != null && cssSymbol in value;
+};
+
+const replace = (value: unknown): string => {
   if (typeof value === "number") return String(value);
-  if (cssSymbol in value) return value[cssSymbol];
+  if (hasCSSSymbol(value)) return value[cssSymbol];
   throw new TypeError();
 };
 

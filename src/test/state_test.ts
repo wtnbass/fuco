@@ -2,10 +2,13 @@ import {
   mountFixture,
   unmountFixture,
   selectFixture,
+  selector,
+  selectorAll,
+  text,
   waitFor
 } from "./helpers/fixture";
 
-import "./components/counter-app";
+import { html, defineElement, useState } from "..";
 
 describe("use-state", () => {
   let count: Element;
@@ -15,10 +18,20 @@ describe("use-state", () => {
   const setup = async () => {
     await waitFor();
     const target = selectFixture("counter-app");
-    const inner = target.shadowRoot;
-    count = inner.querySelector("div");
-    [increment, decrement] = inner.querySelectorAll("button");
+    count = selector("div", target);
+    [increment, decrement] = selectorAll<HTMLButtonElement>("button", target);
   };
+
+  beforeAll(() => {
+    defineElement("counter-app", () => {
+      const [count, setCount] = useState(0);
+      return html`
+        <div>${count}</div>
+        <button @click=${() => setCount(count + 1)}>+</button>
+        <button @click=${() => setCount(count - 1)}>-</button>
+      `;
+    });
+  });
 
   beforeEach(() => {
     mountFixture(`
@@ -32,7 +45,7 @@ describe("use-state", () => {
 
   it("mount", async () => {
     await setup();
-    expect(count.textContent).toEqual("0");
+    expect(text(count)).toEqual("0");
   });
 
   it("push increment", async () => {
@@ -40,7 +53,7 @@ describe("use-state", () => {
     increment.click();
 
     await setup();
-    expect(count.textContent).toEqual("1");
+    expect(text(count)).toEqual("1");
   });
 
   it("push decrement", async () => {
@@ -48,6 +61,6 @@ describe("use-state", () => {
     decrement.click();
 
     await setup();
-    expect(count.textContent).toEqual("-1");
+    expect(text(count)).toEqual("-1");
   });
 });

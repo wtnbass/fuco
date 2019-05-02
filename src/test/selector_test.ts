@@ -2,9 +2,11 @@ import {
   mountFixture,
   unmountFixture,
   selectFixture,
+  selector,
+  text,
   waitFor
 } from "./helpers/fixture";
-import { html, defineElement, useSelector, useState } from "../src";
+import { html, defineElement, useSelector, useState } from "..";
 
 describe("use-selector/current", () => {
   let target: Element;
@@ -14,8 +16,8 @@ describe("use-selector/current", () => {
   const setup = async () => {
     await waitFor();
     target = selectFixture("show-input");
-    input = target.shadowRoot.querySelector("input");
-    div = target.shadowRoot.querySelector("div");
+    input = selector("input", target);
+    div = selector("div", target);
   };
 
   beforeAll(() => {
@@ -27,7 +29,7 @@ describe("use-selector/current", () => {
         <input
           type="text"
           id="input"
-          @keyup=${() => set(input.current.value)}
+          @keyup=${() => set(input.current ? input.current.value : "")}
         />
         <div>${value}</div>
       `;
@@ -49,13 +51,13 @@ describe("use-selector/current", () => {
   it("mount", async () => {
     await setup();
     expect(input.value).toEqual("");
-    expect(div.textContent.trim()).toEqual("");
+    expect(text(div)).toEqual("");
 
     input.value = "Input";
     input.dispatchEvent(Object.assign(new Event("keyup"), { keyCode: 13 }));
 
     await setup();
     expect(input.value).toEqual("Input");
-    expect(div.textContent.trim()).toEqual("Input");
+    expect(text(div)).toEqual("Input");
   });
 });

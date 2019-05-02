@@ -10,12 +10,12 @@
   ],
   "scripts": {
     "build": "tsc && rollup -c",
-    "clean": "rm -fr dist coverage",
-    "distclean": "npm run clean && rm -fr node_modules package-lock.json",
-    "lint": "tsc --noEmit && eslint {src,test}/**/*.ts",
+    "test": "tsc && karma start",
+    "lint": "tsc --noEmit && eslint src/** --ext .ts",
     "fmt": "npm run lint -- --fix",
-    "test": "karma start",
-    "prepare": "npm run build"
+    "clean": "rm -fr dist .tsbuildinfo",
+    "distclean": "npm run clean && rm -fr node_modules package-lock.json",
+    "prepare": "npm run clean && npm run build"
   },
   "keywords": [],
   "author": "Keisuke Watanabe",
@@ -27,24 +27,20 @@
   },
   "devDependencies": {
     "@types/jasmine": "3.3.12",
-    "@typescript-eslint/eslint-plugin": "1.6.0",
+    "@typescript-eslint/eslint-plugin": "1.7.0",
     "eslint": "5.16.0",
-    "eslint-config-prettier": "4.1.0",
+    "eslint-config-prettier": "4.2.0",
     "eslint-plugin-prettier": "3.0.1",
-    "istanbul-instrumenter-loader": "3.0.1",
-    "karma": "4.0.1",
-    "karma-coverage": "1.1.2",
+    "karma": "4.1.0",
     "karma-firefox-launcher": "1.1.0",
     "karma-jasmine": "2.0.1",
     "karma-mocha-reporter": "2.2.5",
-    "karma-sourcemap-loader": "0.3.7",
-    "karma-webpack": "3.0.5",
-    "prettier": "1.16.4",
-    "rollup": "1.9.0",
+    "karma-rollup-preprocessor": "7.0.0",
+    "prettier": "1.17.0",
+    "rollup": "1.10.1",
     "rollup-plugin-filesize": "6.0.1",
+    "rollup-plugin-node-resolve": "4.2.3",
     "rollup-plugin-terser": "4.0.4",
-    "ts-loader": "5.3.3",
-    "typescript": "3.4.2",
-    "webpack": "4.29.6"
+    "typescript": "3.4.5"
   }
 }

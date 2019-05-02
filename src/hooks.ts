@@ -1,18 +1,38 @@
-import { hooks } from "./component";
+import { hooks, Component } from "./component";
 import { Context } from "./context";
 import { Provider } from "./provider";
-import { cssSymbol } from "./css";
+import { cssSymbol, HasCSSSymbol } from "./css";
 import { REQUEST_CONSUME, dispatchCustomEvent } from "./event";
 
-export const useProperty = <T>(propName: string) =>
+const kebabToCamel = (name: string) => {
+  let hyphen = false;
+  let camel = "";
+  for (let i = 0, len = name.length; i < len; i++) {
+    const char = name[i];
+    if (char === "-") {
+      hyphen = true;
+    } else if (hyphen) {
+      camel += char.toUpperCase();
+      hyphen = false;
+    } else {
+      camel += char;
+    }
+  }
+  return camel;
+};
+
+export const useProperty = <T>(name: string) =>
   hooks<T>((h, c, i) => {
-    const attrName = propName.replace(/[A-Z]/g, c => "-" + c.toLowerCase());
-    const initialValue = c.getAttribute(attrName) || (c as any)[propName];
+    const cmp = c as Component & { [name: string]: T };
+    const propName = kebabToCamel(name);
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    const initialValue = (c.getAttribute(name) as any) || cmp[propName];
 
     const m = new MutationObserver(() => {
-      (c as any)[propName] = c.getAttribute(attrName) || (c as any)[propName];
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+      cmp[propName] = (c.getAttribute(name) as any) || cmp[propName];
     });
-    m.observe(c, { attributes: true, attributeFilter: [attrName] });
+    m.observe(c, { attributes: true, attributeFilter: [name] });
     h.cleanup[i] = () => m.disconnect();
 
     Object.defineProperty(c, propName, {
@@ -31,8 +51,8 @@ export const useProperty = <T>(propName: string) =>
 
 export const useSelector = <T extends Element>(selector: string) =>
   hooks<{
-    readonly current: Element | null;
-    readonly all: NodeListOf<Element> | null;
+    readonly current: T | null;
+    readonly all: NodeListOf<T> | null;
   }>((_, c) => ({
     get current() {
       return c.rootElement.querySelector<T>(selector);
@@ -56,24 +76,21 @@ const enabledAdoptedStyleSheets =
   "adoptedStyleSheets" in Document.prototype &&
   "replace" in CSSStyleSheet.prototype;
 
-export const useStyle = (...styles: { [cssSymbol]: string }[]) =>
+export const useStyle = (...styles: HasCSSSymbol[]) =>
   hooks((h, c, i) => {
     if (enabledAdoptedStyleSheets) {
-      const styleSheets = styles.map(css => {
+      c.rootElement.adoptedStyleSheets = styles.map(css => {
         const styleSheet = new CSSStyleSheet();
         styleSheet.replaceSync(css[cssSymbol]);
         return styleSheet;
       });
-      c.rootElement.adoptedStyleSheets = [...styleSheets];
     } else {
       h.effects[i] = () => {
-        styles
-          .map(css => {
-            const style = document.createElement("style");
-            style.textContent = css[cssSymbol];
-            return style;
-          })
-          .forEach(style => c.rootElement.appendChild(style));
+        for (let i = 0, l = styles.length; i < l; i++) {
+          const style = document.createElement("style");
+          style.textContent = styles[i][cssSymbol];
+          c.rootElement.appendChild(style);
+        }
       };
     }
     return 0;
@@ -99,6 +116,7 @@ export const useReducer = <S, A>(
   initialState: S
 ) =>
   hooks<[S, (action: A) => void]>((h, c, i) => [
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     reducer(initialState, { type: Symbol() } as any),
     function dispatch(action: A) {
       const state = h.values[i][0];
@@ -110,7 +128,7 @@ export const useReducer = <S, A>(
     }
   ]);
 
-export const useContext = <T>(context: Context) =>
+export const useContext = <T>(context: Context<T>) =>
   hooks<T | undefined>((h, c, i) => {
     if (!h.deps[i] || h.deps[i].length <= 0) {
       dispatchCustomEvent(c, REQUEST_CONSUME, {
@@ -124,30 +142,32 @@ export const useContext = <T>(context: Context) =>
     return (h.deps[i][0] as Provider<T>).value;
   }, true);
 
-const fieldsChanged = (prev: any[] | undefined, next: any[]) =>
+const depsChanged = (prev: unknown[] | undefined, next: unknown[]) =>
   prev == null || next.some((f, i) => f !== prev[i]);
 
 export const useEffect = (
   handler: () => void | (() => void),
-  deps: any[] = []
+  deps: unknown[] = []
 ) =>
   hooks((h, _, i) => {
-    if (fieldsChanged(h.deps[i], deps)) {
+    if (depsChanged(h.deps[i], deps)) {
       h.deps[i] = deps;
       h.effects[i] = handler;
     }
     return 0;
   }, true);
 
-export const useMemo = <T>(fn: () => T, deps: any[] = []) =>
+export const useMemo = <T>(fn: () => T, deps: unknown[] = []) =>
   hooks((h, _, i) => {
     let value = h.values[i];
-    if (fieldsChanged(h.deps[i], deps)) {
+    if (depsChanged(h.deps[i], deps)) {
       h.deps[i] = deps;
       value = fn();
     }
     return value;
   }, true);
 
-export const useCallback = <A, R>(callback: (a: A) => R, deps: any[] = []) =>
-  useMemo(() => callback, deps);
+export const useCallback = <A, R>(
+  callback: (a: A) => R,
+  deps: unknown[] = []
+) => useMemo(() => callback, deps);

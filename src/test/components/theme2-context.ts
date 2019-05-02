@@ -1,4 +1,4 @@
-import { createContext } from "../../src";
+import { createContext } from "../..";
 
 export type Theme2 = "green" | "red";
 

@@ -1,4 +1,4 @@
-import { html, defineElement, useReducer, useCallback } from "../../src";
+import { html, defineElement, useReducer, useCallback } from "../..";
 
 type ID = number;
 

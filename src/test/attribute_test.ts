@@ -2,9 +2,10 @@ import {
   mountFixture,
   unmountFixture,
   selectFixture,
+  selector,
   waitFor
 } from "./helpers/fixture";
-import { html, defineElement, useProperty } from "../src";
+import { html, defineElement, useProperty } from "..";
 
 describe("use-attribute", () => {
   let target: Element;
@@ -13,12 +14,12 @@ describe("use-attribute", () => {
   const setup = async () => {
     await waitFor();
     target = selectFixture("hello-world");
-    div = target.shadowRoot.querySelector("div");
+    div = selector("div", target);
   };
 
   beforeAll(() => {
     defineElement("hello-world", () => {
-      const name = useProperty("greetName");
+      const name = useProperty("greet-name");
       return html`
         <div>Hello, ${name}</div>
       `;

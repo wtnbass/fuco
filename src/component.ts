@@ -5,9 +5,9 @@ let currentComponent: Component;
 
 export type FunctionalComponent = () => TemplateResult;
 
-export interface Hooks<T = any> {
+export interface Hooks<T> {
   values: T[];
-  deps: any[][];
+  deps: unknown[][];
   effects: (() => void | (() => void))[];
   cleanup: (() => void)[];
 }
@@ -27,7 +27,7 @@ export function hooks<T>(
 export abstract class Component extends HTMLElement {
   private updating = false;
   public rootElement = this.attachShadow({ mode: "open" });
-  public hooks: Hooks = {
+  public hooks: Hooks<unknown> = {
     values: [],
     deps: [],
     effects: [],
@@ -50,6 +50,7 @@ export abstract class Component extends HTMLElement {
 
   private async enqueue() {
     this.updating = true;
+
     await Promise.resolve();
 
     currentCursor = 0;
@@ -57,7 +58,8 @@ export abstract class Component extends HTMLElement {
 
     render(
       (this.constructor as typeof Component).functionalComponent(),
-      this.rootElement
+      this.rootElement,
+      { eventContext: this }
     );
 
     const h = this.hooks;
