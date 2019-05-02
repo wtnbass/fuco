@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo",
     "target": "es2017",
     "module": "es2015",
     "lib": ["es2017", "dom"],
