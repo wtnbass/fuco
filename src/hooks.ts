@@ -1,7 +1,7 @@
-import { hooks } from "./component";
+import { hooks, Component } from "./component";
 import { Context } from "./context";
 import { Provider } from "./provider";
-import { cssSymbol } from "./css";
+import { cssSymbol, HasCSSSymbol } from "./css";
 import { REQUEST_CONSUME, dispatchCustomEvent } from "./event";
 
 const kebabToCamel = (name: string) => {
@@ -22,12 +22,13 @@ const kebabToCamel = (name: string) => {
 };
 
 export const useProperty = <T>(name: string) =>
-  hooks<T>((h, c, i) => {
+  hooks<T | string>((h, c, i) => {
+    const cmp = c as Component & { [name: string]: T | string };
     const propName = kebabToCamel(name);
-    const initialValue = c.getAttribute(name) || (c as any)[propName];
+    const initialValue = c.getAttribute(name) || cmp[propName];
 
     const m = new MutationObserver(() => {
-      (c as any)[propName] = c.getAttribute(name) || (c as any)[propName];
+      cmp[propName] = c.getAttribute(name) || cmp[propName];
     });
     m.observe(c, { attributes: true, attributeFilter: [name] });
     h.cleanup[i] = () => m.disconnect();
@@ -73,24 +74,21 @@ const enabledAdoptedStyleSheets =
   "adoptedStyleSheets" in Document.prototype &&
   "replace" in CSSStyleSheet.prototype;
 
-export const useStyle = (...styles: { [cssSymbol]: string }[]) =>
+export const useStyle = (...styles: HasCSSSymbol[]) =>
   hooks((h, c, i) => {
     if (enabledAdoptedStyleSheets) {
-      const styleSheets = styles.map(css => {
+      c.rootElement.adoptedStyleSheets = styles.map(css => {
         const styleSheet = new CSSStyleSheet();
         styleSheet.replaceSync(css[cssSymbol]);
         return styleSheet;
       });
-      c.rootElement.adoptedStyleSheets = [...styleSheets];
     } else {
       h.effects[i] = () => {
-        styles
-          .map(css => {
-            const style = document.createElement("style");
-            style.textContent = css[cssSymbol];
-            return style;
-          })
-          .forEach(style => c.rootElement.appendChild(style));
+        for (let i = 0, l = styles.length; i < l; i++) {
+          const style = document.createElement("style");
+          style.textContent = styles[i][cssSymbol];
+          c.rootElement.appendChild(style);
+        }
       };
     }
     return 0;
@@ -116,6 +114,7 @@ export const useReducer = <S, A>(
   initialState: S
 ) =>
   hooks<[S, (action: A) => void]>((h, c, i) => [
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     reducer(initialState, { type: Symbol() } as any),
     function dispatch(action: A) {
       const state = h.values[i][0];
@@ -141,12 +140,12 @@ export const useContext = <T>(context: Context) =>
     return (h.deps[i][0] as Provider<T>).value;
   }, true);
 
-const depsChanged = (prev: any[] | undefined, next: any[]) =>
+const depsChanged = (prev: unknown[] | undefined, next: unknown[]) =>
   prev == null || next.some((f, i) => f !== prev[i]);
 
 export const useEffect = (
   handler: () => void | (() => void),
-  deps: any[] = []
+  deps: unknown[] = []
 ) =>
   hooks((h, _, i) => {
     if (depsChanged(h.deps[i], deps)) {
@@ -156,7 +155,7 @@ export const useEffect = (
     return 0;
   }, true);
 
-export const useMemo = <T>(fn: () => T, deps: any[] = []) =>
+export const useMemo = <T>(fn: () => T, deps: unknown[] = []) =>
   hooks((h, _, i) => {
     let value = h.values[i];
     if (depsChanged(h.deps[i], deps)) {
@@ -166,5 +165,7 @@ export const useMemo = <T>(fn: () => T, deps: any[] = []) =>
     return value;
   }, true);
 
-export const useCallback = <A, R>(callback: (a: A) => R, deps: any[] = []) =>
-  useMemo(() => callback, deps);
+export const useCallback = <A, R>(
+  callback: (a: A) => R,
+  deps: unknown[] = []
+) => useMemo(() => callback, deps);
