@@ -1,12 +1,11 @@
 module.exports = function(config) {
   config.set({
     frameworks: ["jasmine"],
-    files: ["test/**/*_test.ts"],
+    files: [{ pattern: "dist/test/**/*_test.js", watched: false }],
     preprocessors: {
-      "src/**/*.ts": ["webpack", "sourcemap", "coverage"],
-      "test/**/*.ts": ["webpack", "sourcemap"]
+      "dist/test/**/*_test.js": ["rollup"]
     },
-    reporters: ["mocha", "coverage"],
+    reporters: ["mocha"],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
@@ -18,36 +17,13 @@ module.exports = function(config) {
         timeoutInterval: 1000
       }
     },
-    webpack: {
-      mode: "development",
-      devtool: "inline-source-map",
-      module: {
-        rules: [
-          {
-            test: /\.ts$/,
-            use: [
-              {
-                loader: "ts-loader",
-                options: { transpileOnly: true }
-              }
-            ]
-          },
-          {
-            test: /\.ts$/,
-            enforce: "post",
-            loader: "istanbul-instrumenter-loader",
-            exclude: /(test|node_modules)/,
-            options: { esModules: true }
-          }
-        ]
+    rollupPreprocessor: {
+      output: {
+        format: "iife",
+        name: "FWC",
+        sourcemap: "inline"
       },
-      resolve: {
-        extensions: [".ts", ".js"]
-      }
-    },
-    coverageReporter: {
-      dir: "coverage",
-      reporters: [{ type: "lcov", subdir: "." }]
+      plugins: [require("rollup-plugin-node-resolve")()]
     }
   });
 };

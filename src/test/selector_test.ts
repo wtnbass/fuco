@@ -1,10 +1,14 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import {
   mountFixture,
   unmountFixture,
   selectFixture,
   waitFor
 } from "./helpers/fixture";
-import { html, defineElement, useSelector, useState } from "../src";
+import { html, defineElement, useSelector, useState } from "..";
 
 describe("use-selector/current", () => {
   let target: Element;
@@ -13,9 +17,9 @@ describe("use-selector/current", () => {
 
   const setup = async () => {
     await waitFor();
-    target = selectFixture("show-input");
-    input = target.shadowRoot.querySelector("input");
-    div = target.shadowRoot.querySelector("div");
+    target = selectFixture("show-input")!;
+    input = target.shadowRoot!.querySelector("input")!;
+    div = target.shadowRoot!.querySelector("div")!;
   };
 
   beforeAll(() => {
@@ -27,7 +31,7 @@ describe("use-selector/current", () => {
         <input
           type="text"
           id="input"
-          @keyup=${() => set(input.current.value)}
+          @keyup=${() => set(input.current!.value)}
         />
         <div>${value}</div>
       `;
@@ -49,13 +53,13 @@ describe("use-selector/current", () => {
   it("mount", async () => {
     await setup();
     expect(input.value).toEqual("");
-    expect(div.textContent.trim()).toEqual("");
+    expect(div.textContent!.trim()).toEqual("");
 
     input.value = "Input";
     input.dispatchEvent(Object.assign(new Event("keyup"), { keyCode: 13 }));
 
     await setup();
     expect(input.value).toEqual("Input");
-    expect(div.textContent.trim()).toEqual("Input");
+    expect(div.textContent!.trim()).toEqual("Input");
   });
 });

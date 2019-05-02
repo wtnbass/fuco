@@ -10,11 +10,11 @@
   ],
   "scripts": {
     "build": "tsc && rollup -c",
-    "clean": "rm -fr dist coverage",
-    "distclean": "npm run clean && rm -fr node_modules package-lock.json",
-    "lint": "tsc --noEmit && eslint {src,test}/**/*.ts",
+    "test": "tsc && karma start",
+    "lint": "tsc --noEmit && eslint src/**/*.ts",
     "fmt": "npm run lint -- --fix",
-    "test": "karma start",
+    "clean": "rm -fr dist .tsbuildinfo",
+    "distclean": "npm run clean && rm -fr node_modules package-lock.json",
     "prepare": "npm run clean && npm run build"
   },
   "keywords": [],
@@ -31,21 +31,16 @@
     "eslint": "5.16.0",
     "eslint-config-prettier": "4.2.0",
     "eslint-plugin-prettier": "3.0.1",
-    "istanbul-instrumenter-loader": "3.0.1",
     "karma": "4.1.0",
-    "karma-chai": "0.1.0",
-    "karma-coverage": "1.1.2",
     "karma-firefox-launcher": "1.1.0",
     "karma-jasmine": "2.0.1",
     "karma-mocha-reporter": "2.2.5",
-    "karma-sourcemap-loader": "0.3.7",
-    "karma-webpack": "3.0.5",
+    "karma-rollup-preprocessor": "7.0.0",
     "prettier": "1.17.0",
     "rollup": "1.10.1",
     "rollup-plugin-filesize": "6.0.1",
+    "rollup-plugin-node-resolve": "4.2.3",
     "rollup-plugin-terser": "4.0.4",
-    "ts-loader": "5.4.4",
-    "typescript": "3.4.5",
-    "webpack": "4.30.0"
+    "typescript": "3.4.5"
   }
 }

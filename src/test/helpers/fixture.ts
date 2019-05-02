@@ -11,7 +11,7 @@ export function unmountFixture() {
 }
 
 export function selectFixture(selector: string) {
-  const fixture = document.getElementById("fixture");
+  const fixture = document.getElementById("fixture")!;
   return fixture.querySelector(selector);
 }
 

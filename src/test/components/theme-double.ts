@@ -1,4 +1,4 @@
-import { html, defineElement, useState, useCallback } from "../../src";
+import { html, defineElement, useState, useCallback } from "../..";
 import { Theme } from "./theme-context";
 import { Theme2 } from "./theme2-context";
 

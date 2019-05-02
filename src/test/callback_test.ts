@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import {
   mountFixture,
   unmountFixture,
   selectFixture,
   waitFor
 } from "./helpers/fixture";
-import { html, defineElement, useState, useCallback } from "../src";
+import { html, defineElement, useState, useCallback } from "..";
 
 describe("use-cllback", () => {
   let target: Element;
@@ -15,9 +17,9 @@ describe("use-cllback", () => {
 
   const setup = async () => {
     await waitFor();
-    target = selectFixture("callback-test");
-    [add, minus] = target.shadowRoot.querySelectorAll("button");
-    div = target.shadowRoot.querySelector("div");
+    target = selectFixture("callback-test")!;
+    [add, minus] = target.shadowRoot!.querySelectorAll("button");
+    div = target.shadowRoot!.querySelector("div")!;
   };
 
   beforeAll(() => {
@@ -52,13 +54,13 @@ describe("use-cllback", () => {
 
   it("mount", async () => {
     await setup();
-    expect(div.textContent.trim()).toEqual("0");
+    expect(div.textContent!.trim()).toEqual("0");
     expect(updateCounts).toEqual([0, 0]);
 
     add.click();
 
     await setup();
-    expect(div.textContent.trim()).toEqual("1");
+    expect(div.textContent!.trim()).toEqual("1");
     expect(updateCounts).toEqual([1, 0]);
   });
 
@@ -69,7 +71,7 @@ describe("use-cllback", () => {
     add.click();
 
     await setup();
-    expect(div.textContent.trim()).toEqual("1");
+    expect(div.textContent!.trim()).toEqual("1");
     expect(updateCounts).toEqual([1, 0]);
   });
 
@@ -80,7 +82,7 @@ describe("use-cllback", () => {
     minus.click();
 
     await setup();
-    expect(div.textContent.trim()).toEqual("-1");
+    expect(div.textContent!.trim()).toEqual("-1");
     expect(updateCounts).toEqual([0, 1]);
   });
 });

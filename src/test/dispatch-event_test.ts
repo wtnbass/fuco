@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import {
   mountFixture,
   unmountFixture,
   selectFixture,
   waitFor
 } from "./helpers/fixture";
-import { html, defineElement, useDispatchEvent, useCallback } from "../src";
+import { html, defineElement, useDispatchEvent, useCallback } from "..";
 
 describe("use-dispatch-event", () => {
   let target: Element;
@@ -14,9 +16,9 @@ describe("use-dispatch-event", () => {
 
   const setup = async () => {
     await waitFor();
-    target = selectFixture("event-reciever");
-    sender = target.shadowRoot.querySelector("event-sender");
-    button = sender.shadowRoot.querySelector("button");
+    target = selectFixture("event-reciever")!;
+    sender = target.shadowRoot!.querySelector("event-sender")!;
+    button = sender.shadowRoot!.querySelector("button")!;
   };
 
   beforeAll(() => {

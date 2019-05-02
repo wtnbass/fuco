@@ -22,13 +22,13 @@ const kebabToCamel = (name: string) => {
 };
 
 export const useProperty = <T>(name: string) =>
-  hooks<T | string>((h, c, i) => {
-    const cmp = c as Component & { [name: string]: T | string };
+  hooks<T>((h, c, i) => {
+    const cmp = c as Component & { [name: string]: T };
     const propName = kebabToCamel(name);
-    const initialValue = c.getAttribute(name) || cmp[propName];
+    const initialValue = (c.getAttribute(name) as any) || cmp[propName];
 
     const m = new MutationObserver(() => {
-      cmp[propName] = c.getAttribute(name) || cmp[propName];
+      cmp[propName] = (c.getAttribute(name) as any) || cmp[propName];
     });
     m.observe(c, { attributes: true, attributeFilter: [name] });
     h.cleanup[i] = () => m.disconnect();
@@ -49,8 +49,8 @@ export const useProperty = <T>(name: string) =>
 
 export const useSelector = <T extends Element>(selector: string) =>
   hooks<{
-    readonly current: Element | null;
-    readonly all: NodeListOf<Element> | null;
+    readonly current: T | null;
+    readonly all: NodeListOf<T> | null;
   }>((_, c) => ({
     get current() {
       return c.rootElement.querySelector<T>(selector);

@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import {
   mountFixture,
   unmountFixture,
   selectFixture,
   waitFor
 } from "./helpers/fixture";
-import { html, defineElement, useMemo, useState } from "../src";
+import { html, defineElement, useMemo, useState } from "..";
 
 describe("use-memo", () => {
   let target: Element;
@@ -16,9 +18,9 @@ describe("use-memo", () => {
 
   const setup = async () => {
     await waitFor();
-    target = selectFixture("full-name");
-    [firstName, lastName, age] = target.shadowRoot.querySelectorAll("input");
-    div = target.shadowRoot.querySelector("div");
+    target = selectFixture("full-name")!;
+    [firstName, lastName, age] = target.shadowRoot!.querySelectorAll("input");
+    div = target.shadowRoot!.querySelector("div")!;
   };
 
   beforeAll(() => {
@@ -62,7 +64,7 @@ describe("use-memo", () => {
     expect(firstName.value).toEqual("Keisuke");
     expect(lastName.value).toEqual("Watanabe");
     expect(age.value).toEqual("27");
-    expect(div.textContent.trim()).toEqual("Keisuke Watanabe (27)");
+    expect(div.textContent!.trim()).toEqual("Keisuke Watanabe (27)");
     expect(updateCount).toEqual(1);
   });
 
@@ -77,7 +79,7 @@ describe("use-memo", () => {
     expect(firstName.value).toEqual("Taro");
     expect(lastName.value).toEqual("Watanabe");
     expect(age.value).toEqual("27");
-    expect(div.textContent.trim()).toEqual("Taro Watanabe (27)");
+    expect(div.textContent!.trim()).toEqual("Taro Watanabe (27)");
     expect(updateCount).toEqual(2);
 
     lastName.value = "Tanaka";
@@ -86,7 +88,7 @@ describe("use-memo", () => {
     await setup();
     expect(firstName.value).toEqual("Taro");
     expect(lastName.value).toEqual("Tanaka");
-    expect(div.textContent.trim()).toEqual("Taro Tanaka (27)");
+    expect(div.textContent!.trim()).toEqual("Taro Tanaka (27)");
     expect(age.value).toEqual("27");
     expect(updateCount).toEqual(3);
   });
@@ -101,7 +103,7 @@ describe("use-memo", () => {
     expect(firstName.value).toEqual("Keisuke");
     expect(lastName.value).toEqual("Watanabe");
     expect(age.value).toEqual("100");
-    expect(div.textContent.trim()).toEqual("Keisuke Watanabe (100)");
+    expect(div.textContent!.trim()).toEqual("Keisuke Watanabe (100)");
     expect(updateCount).toEqual(1);
   });
 });

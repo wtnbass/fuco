@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import {
   mountFixture,
   unmountFixture,
@@ -5,7 +7,7 @@ import {
   waitFor
 } from "./helpers/fixture";
 
-import { html, defineElement, useState } from "../src";
+import { html, defineElement, useState } from "..";
 
 describe("use-state", () => {
   let count: Element;
@@ -14,9 +16,9 @@ describe("use-state", () => {
 
   const setup = async () => {
     await waitFor();
-    const target = selectFixture("counter-app");
-    const inner = target.shadowRoot;
-    count = inner.querySelector("div");
+    const target = selectFixture("counter-app")!;
+    const inner = target.shadowRoot!;
+    count = inner.querySelector("div")!;
     [increment, decrement] = inner.querySelectorAll("button");
   };
 

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import {
   mountFixture,
   unmountFixture,
@@ -5,7 +7,7 @@ import {
   waitFor
 } from "./helpers/fixture";
 
-import { html, defineElement, useProperty } from "../src";
+import { html, defineElement, useProperty } from "..";
 
 interface User {
   name: string;
@@ -17,7 +19,7 @@ describe("use-property", () => {
 
   const setup = async () => {
     await waitFor();
-    target = selectFixture("user-info");
+    target = selectFixture("user-info")!;
   };
 
   beforeAll(() => {
@@ -48,14 +50,17 @@ describe("use-property", () => {
 
   it("mount", async () => {
     await setup();
-    expect(target.shadowRoot.textContent.trim()).toEqual("No user");
+    expect(target.shadowRoot!.textContent!.trim()).toEqual("No user");
   });
 
   it("propeties changed", async () => {
     await setup();
-    (target as any).user = { name: "Bob", age: "18" } as User;
+    (target as Element & { user: User }).user = {
+      name: "Bob",
+      age: "18"
+    };
 
     await setup();
-    expect(target.shadowRoot.textContent.trim()).toEqual("Bob (18)");
+    expect(target.shadowRoot!.textContent!.trim()).toEqual("Bob (18)");
   });
 });
