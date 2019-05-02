@@ -126,7 +126,7 @@ export const useReducer = <S, A>(
     }
   ]);
 
-export const useContext = <T>(context: Context) =>
+export const useContext = <T>(context: Context<T>) =>
   hooks<T | undefined>((h, c, i) => {
     if (!h.deps[i] || h.deps[i].length <= 0) {
       dispatchCustomEvent(c, REQUEST_CONSUME, {

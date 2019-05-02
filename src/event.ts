@@ -6,7 +6,7 @@ export const REQUEST_CONSUME = "functional-web-component:request-consume";
 
 interface Details {
   [REQUEST_CONSUME]: {
-    context: Context;
+    context: Context<unknown>;
     consumer: Component;
     register(provider: Provider<unknown>): void;
   };
