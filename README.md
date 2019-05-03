@@ -1,6 +1,7 @@
 # functional-web-component
 
 [![npm](https://img.shields.io/npm/v/functional-web-component.svg)](https://www.npmjs.com/package/functional-web-component)
+[![Build Status](https://travis-ci.com/wtnbass/functional-web-component.svg?branch=master)](https://travis-ci.com/wtnbass/functional-web-component)
 
 Functional Component like React, but for Web Components.
 
@@ -178,6 +179,6 @@ defineElement("theme-consumer", () => {
 });
 ```
 
-# License
+## License
 
 MIT

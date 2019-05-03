@@ -1,6 +1,6 @@
 {
   "name": "functional-web-component",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "WebComponents with lit-html and Hooks",
   "main": "dist/functional-web-component.js",
   "module": "dist/functional-web-component.mjs",
@@ -17,7 +17,11 @@
     "distclean": "npm run clean && rm -fr node_modules package-lock.json",
     "prepare": "npm run clean && npm run build"
   },
-  "keywords": [],
+  "keywords": [
+    "webcomponents",
+    "lit-html",
+    "hooks"
+  ],
   "author": "Keisuke Watanabe",
   "license": "MIT",
   "homepage": "https://github.com/wtnbass/functional-web-component",
