@@ -1,53 +1,38 @@
-import {
-  mountFixture,
-  unmountFixture,
-  selectFixture,
-  selector,
-  waitFor
-} from "./helpers/fixture";
-import { html, defineElement, useAttribute } from "..";
+import { withFixture, selector, waitFor } from "./fixture";
+import { html, useAttribute } from "..";
 
-describe("use-attribute", () => {
-  let target: Element;
-  let div: HTMLDivElement;
+const fixture = () => {
+  const name = useAttribute("greet-name");
+  return html`
+    <div>Hello, ${name}</div>
+  `;
+};
 
-  const setup = async () => {
-    await waitFor();
-    target = selectFixture("hello-world");
-    div = selector("div", target);
-  };
+describe(
+  "use-attribute",
+  withFixture(fixture, name => {
+    let target: Element;
+    let div: HTMLDivElement;
 
-  beforeAll(() => {
-    defineElement("hello-world", () => {
-      const name = useAttribute("greet-name");
-      return html`
-        <div>Hello, ${name}</div>
-      `;
+    const setup = async () => {
+      await waitFor();
+      target = selector(name);
+      div = selector("div", target);
+    };
+
+    it("mount", async () => {
+      await setup();
+      expect(target.getAttribute("greet-name")).toBeNull();
+      expect(div.textContent).toEqual("Hello, ");
     });
-  });
 
-  beforeEach(() => {
-    mountFixture(`
-      <hello-world greet-name="World"></hello-world>
-    `);
-  });
+    it("attribute changed", async () => {
+      await setup();
+      target.setAttribute("greet-name", "property");
 
-  afterEach(() => {
-    unmountFixture();
-  });
-
-  it("mount", async () => {
-    await setup();
-    expect(target.getAttribute("greet-name")).toEqual("World");
-    expect(div.textContent).toEqual("Hello, World");
-  });
-
-  it("attribute changed", async () => {
-    await setup();
-    target.setAttribute("greet-name", "property");
-
-    await setup();
-    expect(target.getAttribute("greet-name")).toEqual("property");
-    expect(div.textContent).toEqual("Hello, property");
-  });
-});
+      await setup();
+      expect(target.getAttribute("greet-name")).toEqual("property");
+      expect(div.textContent).toEqual("Hello, property");
+    });
+  })
+);

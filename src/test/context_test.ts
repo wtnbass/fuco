@@ -1,12 +1,4 @@
-import {
-  mountFixture,
-  unmountFixture,
-  selectFixture,
-  selector,
-  selectorAll,
-  text,
-  waitFor
-} from "./helpers/fixture";
+import { withFixture, selector, selectorAll, text, waitFor } from "./fixture";
 import {
   html,
   defineElement,
@@ -20,6 +12,8 @@ type Theme = "light" | "dark";
 type Theme2 = "green" | "red";
 
 describe("use-context", () => {
+  let fixture;
+
   beforeAll(() => {
     const ThemeContext = createContext<Theme>();
     ThemeContext.defineProvider("theme-context");
@@ -45,268 +39,230 @@ describe("use-context", () => {
     });
   });
 
-  describe("single context", () => {
-    let target: Element;
-    let button: HTMLButtonElement;
-    let consumer: Element;
-    let inner: HTMLDivElement;
+  fixture = () => {
+    const [theme, setTheme] = useState<Theme>("dark");
+    const toggle = useCallback(() => {
+      setTheme(t => (t === "dark" ? "light" : "dark"));
+    });
 
-    const setup = async () => {
-      await waitFor();
-      target = selectFixture("theme-app");
-      button = selector("button", target);
-      consumer = selector("theme-consumer", target);
-      inner = selector("div", consumer);
-    };
+    return html`
+      <button @click=${toggle}>change theme</button>
+      <theme-context .value=${theme}>
+        <theme-consumer></theme-consumer>
+      </theme-context>
+    `;
+  };
 
-    beforeAll(() => {
-      defineElement("theme-app", () => {
-        const [theme, setTheme] = useState<Theme>("dark");
-        const toggle = useCallback(() => {
-          setTheme(t => (t === "dark" ? "light" : "dark"));
-        });
+  describe(
+    "single context",
+    withFixture(fixture, name => {
+      let target: Element;
+      let button: HTMLButtonElement;
+      let consumer: Element;
+      let inner: HTMLDivElement;
 
-        return html`
-          <button @click=${toggle}>change theme</button>
-          <theme-context .value=${theme}>
-            <theme-consumer></theme-consumer>
-          </theme-context>
-        `;
+      const setup = async () => {
+        await waitFor();
+        target = selector(name);
+        button = selector("button", target);
+        consumer = selector("theme-consumer", target);
+        inner = selector("div", consumer);
+      };
+
+      it("single context", async () => {
+        await setup();
+        expect(text(inner)).toEqual("Theme is dark.");
+
+        button.click();
+
+        await setup();
+        expect(text(inner)).toEqual("Theme is light.");
       });
+    })
+  );
+
+  fixture = () => {
+    const [theme, setTheme] = useState<Theme>("dark");
+    const [theme2, setTheme2] = useState<Theme2>("red");
+    const toggle = useCallback(() => {
+      setTheme(t => (t === "dark" ? "light" : "dark"));
+    });
+    const toggle2 = useCallback(() => {
+      setTheme2(t => (t === "red" ? "green" : "red"));
     });
 
-    beforeEach(() => {
-      mountFixture(`
-        <theme-app></theme-app>
-      `);
-    });
+    return html`
+      <button @click=${toggle}>change theme</button>
+      <button @click=${toggle2}>change theme2</button>
+      <theme-context .value=${theme}>
+        <theme2-context .value=${theme2}>
+          <theme-consumer></theme-consumer>
+          <theme2-consumer></theme-consumer>
+        </theme2-context>
+      </theme-context>
+    `;
+  };
 
-    afterEach(() => {
-      unmountFixture();
-    });
+  describe(
+    "double contexts",
+    withFixture(fixture, name => {
+      let target: Element;
+      let button1: HTMLButtonElement;
+      let button2: HTMLButtonElement;
+      let consumer1: Element;
+      let consumer2: Element;
+      let inner1: HTMLDivElement;
+      let inner2: HTMLDivElement;
 
-    it("single context", async () => {
-      await setup();
-      expect(text(inner)).toEqual("Theme is dark.");
+      const setup = async () => {
+        await waitFor();
+        target = selector(name);
+        [button1, button2] = selectorAll<HTMLButtonElement>("button", target);
+        consumer1 = selector("theme-consumer", target);
+        consumer2 = selector("theme2-consumer", target);
+        inner1 = selector("div", consumer1);
+        inner2 = selector("div", consumer2);
+      };
 
-      button.click();
+      it("double contexts", async () => {
+        await setup();
+        expect(text(inner1)).toEqual("Theme is dark.");
+        expect(text(inner2)).toEqual("Theme2 is redred.");
 
-      await setup();
-      expect(text(inner)).toEqual("Theme is light.");
-    });
-  });
+        button1.click();
 
-  describe("double contexts", () => {
-    let target: Element;
-    let button1: HTMLButtonElement;
-    let button2: HTMLButtonElement;
-    let consumer1: Element;
-    let consumer2: Element;
-    let inner1: HTMLDivElement;
-    let inner2: HTMLDivElement;
+        await setup();
+        expect(text(inner1)).toEqual("Theme is light.");
+        expect(text(inner2)).toEqual("Theme2 is redred.");
 
-    beforeAll(() => {
-      defineElement("theme-double", () => {
-        const [theme, setTheme] = useState<Theme>("dark");
-        const [theme2, setTheme2] = useState<Theme2>("red");
-        const toggle = useCallback(() => {
-          setTheme(t => (t === "dark" ? "light" : "dark"));
-        });
-        const toggle2 = useCallback(() => {
-          setTheme2(t => (t === "red" ? "green" : "red"));
-        });
+        button2.click();
 
-        return html`
-          <button @click=${toggle}>change theme</button>
-          <button @click=${toggle2}>change theme2</button>
-          <theme-context .value=${theme}>
-            <theme2-context .value=${theme2}>
-              <theme-consumer></theme-consumer>
-              <theme2-consumer></theme-consumer>
-            </theme2-context>
-          </theme-context>
-        `;
+        await setup();
+        expect(text(inner1)).toEqual("Theme is light.");
+        expect(text(inner2)).toEqual("Theme2 is greengreen.");
       });
+    })
+  );
+
+  fixture = () => {
+    const [theme, setTheme] = useState<Theme2>("red");
+    const toggle = useCallback(() => {
+      setTheme(t => (t === "red" ? "green" : "red"));
+    });
+    const [theme2, setTheme2] = useState<Theme2>("red");
+    const toggle2 = useCallback(() => {
+      setTheme2(t => (t === "red" ? "green" : "red"));
     });
 
-    const setup = async () => {
-      await waitFor();
-      target = selectFixture("theme-double");
-      [button1, button2] = selectorAll<HTMLButtonElement>("button", target);
-      consumer1 = selector("theme-consumer", target);
-      consumer2 = selector("theme2-consumer", target);
-      inner1 = selector("div", consumer1);
-      inner2 = selector("div", consumer2);
-    };
+    return html`
+      <button @click=${toggle}>change theme</button>
+      <button @click=${toggle2}>change theme</button>
+      <theme2-context .value=${theme}>
+        <theme2-consumer></theme2-consumer>
+      </theme2-context>
+      <theme2-context .value=${theme2}>
+        <theme2-consumer></theme2-consumer>
+      </theme2-context>
+    `;
+  };
+  describe(
+    "same contexts",
+    withFixture(fixture, name => {
+      let target: Element;
+      let button1: HTMLButtonElement;
+      let button2: HTMLButtonElement;
+      let consumer1: Element;
+      let consumer2: Element;
+      let inner1: HTMLDivElement;
+      let inner2: HTMLDivElement;
 
-    beforeEach(() => {
-      mountFixture(`
-      <theme-double></theme-double>
-     `);
-    });
+      const setup = async () => {
+        await waitFor();
+        target = selector(name);
+        [button1, button2] = selectorAll<HTMLButtonElement>("button", target);
+        [consumer1, consumer2] = selectorAll("theme2-consumer", target);
+        inner1 = selector("div", consumer1);
+        inner2 = selector("div", consumer2);
+      };
 
-    afterEach(() => {
-      unmountFixture();
-    });
+      it("same contexts", async () => {
+        await setup();
+        expect(text(inner1)).toEqual("Theme2 is redred.");
+        expect(text(inner2)).toEqual("Theme2 is redred.");
 
-    it("double contexts", async () => {
-      await setup();
-      expect(text(inner1)).toEqual("Theme is dark.");
-      expect(text(inner2)).toEqual("Theme2 is redred.");
+        button1.click();
 
-      button1.click();
+        await setup();
+        expect(text(inner1)).toEqual("Theme2 is greengreen.");
+        expect(text(inner2)).toEqual("Theme2 is redred.");
 
-      await setup();
-      expect(text(inner1)).toEqual("Theme is light.");
-      expect(text(inner2)).toEqual("Theme2 is redred.");
+        button2.click();
 
-      button2.click();
-
-      await setup();
-      expect(text(inner1)).toEqual("Theme is light.");
-      expect(text(inner2)).toEqual("Theme2 is greengreen.");
-    });
-  });
-
-  describe("same contexts", () => {
-    let target: Element;
-    let button1: HTMLButtonElement;
-    let button2: HTMLButtonElement;
-    let consumer1: Element;
-    let consumer2: Element;
-    let inner1: HTMLDivElement;
-    let inner2: HTMLDivElement;
-
-    const setup = async () => {
-      await waitFor();
-      target = selectFixture("theme-same");
-      [button1, button2] = selectorAll<HTMLButtonElement>("button", target);
-      [consumer1, consumer2] = selectorAll("theme2-consumer", target);
-      inner1 = selector("div", consumer1);
-      inner2 = selector("div", consumer2);
-    };
-
-    beforeAll(() => {
-      defineElement("theme-same", () => {
-        const [theme, setTheme] = useState<Theme2>("red");
-        const toggle = useCallback(() => {
-          setTheme(t => (t === "red" ? "green" : "red"));
-        });
-        const [theme2, setTheme2] = useState<Theme2>("red");
-        const toggle2 = useCallback(() => {
-          setTheme2(t => (t === "red" ? "green" : "red"));
-        });
-
-        return html`
-          <button @click=${toggle}>change theme</button>
-          <button @click=${toggle2}>change theme</button>
-          <theme2-context .value=${theme}>
-            <theme2-consumer></theme2-consumer>
-          </theme2-context>
-          <theme2-context .value=${theme2}>
-            <theme2-consumer></theme2-consumer>
-          </theme2-context>
-        `;
+        await setup();
+        expect(text(inner1)).toEqual("Theme2 is greengreen.");
+        expect(text(inner2)).toEqual("Theme2 is greengreen.");
       });
+    })
+  );
+
+  fixture = () => {
+    const [theme, setTheme] = useState<Theme>("dark");
+    const toggle = useCallback(() => {
+      setTheme(t => (t === "dark" ? "light" : "dark"));
+    });
+    const [theme2, setTheme2] = useState<Theme>("dark");
+    const toggle2 = useCallback(() => {
+      setTheme2(t => (t === "dark" ? "light" : "dark"));
     });
 
-    beforeEach(() => {
-      mountFixture(`
-      <theme-same></theme-same>
-     `);
-    });
+    return html`
+      <button @click=${toggle}>change theme</button>
+      <button @click=${toggle2}>change theme</button>
+      <theme-context .value=${theme}>
+        <theme-consumer></theme-consumer>
+        <theme-context .value=${theme2}>
+          <theme-consumer></theme-consumer>
+        </theme-context>
+      </theme-context>
+    `;
+  };
+  describe(
+    "duplicate contexts",
+    withFixture(fixture, name => {
+      let target: Element;
+      let button1: HTMLButtonElement;
+      let button2: HTMLButtonElement;
+      let consumer1: Element;
+      let consumer2: Element;
+      let inner1: HTMLDivElement;
+      let inner2: HTMLDivElement;
 
-    afterEach(() => {
-      unmountFixture();
-    });
+      const setup = async () => {
+        await waitFor();
+        target = selector(name);
+        [button1, button2] = selectorAll<HTMLButtonElement>("button", target);
+        [consumer1, consumer2] = selectorAll("theme-consumer", target);
+        inner1 = selector("div", consumer1);
+        inner2 = selector("div", consumer2);
+      };
 
-    it("same contexts", async () => {
-      await setup();
-      expect(text(inner1)).toEqual("Theme2 is redred.");
-      expect(text(inner2)).toEqual("Theme2 is redred.");
+      it("duplicate contexts", async () => {
+        await setup();
+        expect(text(inner1)).toEqual("Theme is dark.");
+        expect(text(inner2)).toEqual("Theme is dark.");
 
-      button1.click();
+        button1.click();
 
-      await setup();
-      expect(text(inner1)).toEqual("Theme2 is greengreen.");
-      expect(text(inner2)).toEqual("Theme2 is redred.");
+        await setup();
+        expect(text(inner1)).toEqual("Theme is light.");
+        expect(text(inner2)).toEqual("Theme is dark.");
 
-      button2.click();
+        button2.click();
 
-      await setup();
-      expect(text(inner1)).toEqual("Theme2 is greengreen.");
-      expect(text(inner2)).toEqual("Theme2 is greengreen.");
-    });
-  });
-
-  describe("duplicate contexts", () => {
-    let target: Element;
-    let button1: HTMLButtonElement;
-    let button2: HTMLButtonElement;
-    let consumer1: Element;
-    let consumer2: Element;
-    let inner1: HTMLDivElement;
-    let inner2: HTMLDivElement;
-
-    beforeAll(() => {
-      defineElement("theme-duplicate", () => {
-        const [theme, setTheme] = useState<Theme>("dark");
-        const toggle = useCallback(() => {
-          setTheme(t => (t === "dark" ? "light" : "dark"));
-        });
-        const [theme2, setTheme2] = useState<Theme>("dark");
-        const toggle2 = useCallback(() => {
-          setTheme2(t => (t === "dark" ? "light" : "dark"));
-        });
-
-        return html`
-          <button @click=${toggle}>change theme</button>
-          <button @click=${toggle2}>change theme</button>
-          <theme-context .value=${theme}>
-            <theme-consumer></theme-consumer>
-            <theme-context .value=${theme2}>
-              <theme-consumer></theme-consumer>
-            </theme-context>
-          </theme-context>
-        `;
+        await setup();
+        expect(text(inner1)).toEqual("Theme is light.");
+        expect(text(inner2)).toEqual("Theme is light.");
       });
-    });
-
-    const setup = async () => {
-      await waitFor();
-      target = selectFixture("theme-duplicate");
-      [button1, button2] = selectorAll<HTMLButtonElement>("button", target);
-      [consumer1, consumer2] = selectorAll("theme-consumer", target);
-      inner1 = selector("div", consumer1);
-      inner2 = selector("div", consumer2);
-    };
-
-    beforeEach(() => {
-      mountFixture(`
-        <theme-duplicate></theme-duplicate>
-      `);
-    });
-
-    afterEach(() => {
-      unmountFixture();
-    });
-
-    it("duplicate contexts", async () => {
-      await setup();
-      expect(text(inner1)).toEqual("Theme is dark.");
-      expect(text(inner2)).toEqual("Theme is dark.");
-
-      button1.click();
-
-      await setup();
-      expect(text(inner1)).toEqual("Theme is light.");
-      expect(text(inner2)).toEqual("Theme is dark.");
-
-      button2.click();
-
-      await setup();
-      expect(text(inner1)).toEqual("Theme is light.");
-      expect(text(inner2)).toEqual("Theme is light.");
-    });
-  });
+    })
+  );
 });
