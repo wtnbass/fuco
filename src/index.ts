@@ -4,6 +4,7 @@ export { html } from "lit-html";
 export { css } from "./css";
 export { createContext } from "./context";
 export {
+  useAttribute,
   useProperty,
   useSelector,
   useDispatchEvent,

@@ -4,7 +4,7 @@ import {
   selectFixture,
   waitFor
 } from "./helpers/fixture";
-import { html, defineElement, useProperty, useEffect } from "..";
+import { html, defineElement, useAttribute, useEffect } from "..";
 
 describe("use-effect", () => {
   let updateCount = 0;
@@ -12,8 +12,8 @@ describe("use-effect", () => {
 
   beforeAll(() => {
     defineElement("effect-test", () => {
-      const value = useProperty("value");
-      const otherValue = useProperty("other-value");
+      const value = useAttribute("value");
+      const otherValue = useAttribute("other-value");
       useEffect(() => {
         updateCount++;
         return () => {

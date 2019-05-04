@@ -5,11 +5,15 @@ let currentComponent: Component;
 
 export type FunctionalComponent = () => TemplateResult;
 
+type EffectFn = () => void | CleanupFn;
+
+type CleanupFn = () => void;
+
 export interface Hooks<T> {
   values: T[];
   deps: unknown[][];
-  effects: (() => void | (() => void))[];
-  cleanup: (() => void)[];
+  effects: EffectFn[];
+  cleanup: CleanupFn[];
 }
 
 export function hooks<T>(

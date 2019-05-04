@@ -14,7 +14,7 @@ module.exports = function(config) {
     singleRun: true,
     client: {
       jasmine: {
-        timeoutInterval: 1000
+        timeoutInterval: 3000
       }
     },
     rollupPreprocessor: {

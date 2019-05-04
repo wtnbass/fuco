@@ -4,38 +4,25 @@ import { Provider } from "./provider";
 import { cssSymbol, HasCSSSymbol } from "./css";
 import { REQUEST_CONSUME, dispatchCustomEvent } from "./event";
 
-const kebabToCamel = (name: string) => {
-  let hyphen = false;
-  let camel = "";
-  for (let i = 0, len = name.length; i < len; i++) {
-    const char = name[i];
-    if (char === "-") {
-      hyphen = true;
-    } else if (hyphen) {
-      camel += char.toUpperCase();
-      hyphen = false;
-    } else {
-      camel += char;
-    }
-  }
-  return camel;
-};
-
-export const useProperty = <T>(name: string) =>
-  hooks<T>((h, c, i) => {
-    const cmp = c as Component & { [name: string]: T };
-    const propName = kebabToCamel(name);
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    const initialValue = (c.getAttribute(name) as any) || cmp[propName];
-
+export const useAttribute = (name: string) =>
+  hooks<string>((h, c, i) => {
     const m = new MutationObserver(() => {
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      cmp[propName] = (c.getAttribute(name) as any) || cmp[propName];
+      const newValue = c.getAttribute(name) || "";
+      if (h.values[i] !== newValue) {
+        h.values[i] = newValue;
+        c.update();
+      }
     });
     m.observe(c, { attributes: true, attributeFilter: [name] });
     h.cleanup[i] = () => m.disconnect();
+    return c.getAttribute(name) || "";
+  });
 
-    Object.defineProperty(c, propName, {
+export const useProperty = <T>(name: string) =>
+  hooks<T>((h, c, i) => {
+    const initialValue = (c as Component & { [name: string]: T })[name];
+
+    Object.defineProperty(c, name, {
       get() {
         return h.values[i];
       },

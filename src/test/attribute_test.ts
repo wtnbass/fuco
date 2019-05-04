@@ -5,7 +5,7 @@ import {
   selector,
   waitFor
 } from "./helpers/fixture";
-import { html, defineElement, useProperty } from "..";
+import { html, defineElement, useAttribute } from "..";
 
 describe("use-attribute", () => {
   let target: Element;
@@ -19,7 +19,7 @@ describe("use-attribute", () => {
 
   beforeAll(() => {
     defineElement("hello-world", () => {
-      const name = useProperty("greet-name");
+      const name = useAttribute("greet-name");
       return html`
         <div>Hello, ${name}</div>
       `;
