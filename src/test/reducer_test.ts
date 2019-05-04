@@ -7,11 +7,85 @@ import {
   waitFor
 } from "./helpers/fixture";
 
-import "./components/todo-app";
+import { html, defineElement, useReducer, useCallback } from "..";
 
 describe("use-reducer", () => {
   let input: HTMLInputElement;
   let list: NodeListOf<Element>;
+
+  beforeAll(() => {
+    type ID = number;
+
+    interface Todo {
+      id: ID;
+      text: string;
+      completed: boolean;
+    }
+
+    const genId = (): ID => Date.now() + Math.random();
+    const addTodo = (text: string) => ({
+      type: "ADD_TODO" as "ADD_TODO",
+      text
+    });
+    const toggleComplete = (id: ID) => ({
+      type: "TOGGLE_COMPLETE" as "TOGGLE_COMPLETE",
+      id
+    });
+
+    type State = Todo[];
+    type Action = ReturnType<typeof addTodo | typeof toggleComplete>;
+
+    function reducer(state: State = [], action: Action): State {
+      switch (action.type) {
+        case "ADD_TODO":
+          return [
+            ...state,
+            { id: genId(), text: action.text, completed: false }
+          ];
+        case "TOGGLE_COMPLETE":
+          return state.map(todo =>
+            todo.id === action.id
+              ? { ...todo, completed: !todo.completed }
+              : todo
+          );
+        default:
+          return state;
+      }
+    }
+
+    defineElement("todo-app", function TodoApp() {
+      const [state, dispatch] = useReducer(reducer, []);
+
+      const handleKeyup = useCallback((e: KeyboardEvent) => {
+        if (e.keyCode === 13) {
+          const input = e.target as HTMLInputElement;
+          dispatch(addTodo(input.value));
+          input.value = "";
+        }
+      });
+
+      return html`
+        <style>
+          .completed {
+            text-decoration: line-through;
+          }
+        </style>
+        <input type="text" @keyup=${handleKeyup} />
+        <ul>
+          ${state.map(
+            ({ id, text, completed }) => html`
+              <li
+                class=${completed ? "completed" : ""}
+                @click=${() => dispatch(toggleComplete(id))}
+              >
+                ${text}
+              </li>
+            `
+          )}
+        </ul>
+      `;
+    });
+  });
 
   const setup = async () => {
     await waitFor();

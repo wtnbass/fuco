@@ -103,8 +103,7 @@ export const useReducer = <S, A>(
   initialState: S
 ) =>
   hooks<[S, (action: A) => void]>((h, c, i) => [
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    reducer(initialState, { type: Symbol() } as any),
+    initialState,
     function dispatch(action: A) {
       const state = h.values[i][0];
       const nextState = reducer(state, action);
