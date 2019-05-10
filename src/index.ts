@@ -1,7 +1,7 @@
 import { Component, FunctionalComponent } from "./component";
 
 export { html } from "lit-html";
-export { css } from "./css";
+export { css, unsafeCSS } from "./css";
 export { createContext } from "./context";
 export {
   useAttribute,
