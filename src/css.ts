@@ -11,11 +11,13 @@ const hasCSSSymbol = (value: unknown): value is HasCSSSymbol => {
 const replace = (value: unknown): string => {
   if (typeof value === "number") return String(value);
   if (hasCSSSymbol(value)) return value[cssSymbol];
-  throw new TypeError();
+  throw new TypeError(`${value} is not supported type.`);
 };
 
 export const css = (strings: ReadonlyArray<string>, ...values: unknown[]) => ({
   [cssSymbol]: strings
     .slice(1)
-    .reduce((acc, s, i) => acc + replace(values[i] + s), strings[0])
+    .reduce((acc, s, i) => acc + replace(values[i]) + s, strings[0])
 });
+
+export const unsafeCSS = (css: string) => ({ [cssSymbol]: css });

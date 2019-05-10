@@ -1,75 +1,64 @@
-import {
-  mountFixture,
-  unmountFixture,
-  selectFixture,
-  waitFor
-} from "./helpers/fixture";
-import { html, defineElement, useProperty, useEffect } from "..";
+import { withFixture, unmountFixture, selector, waitFor } from "./fixture";
+import { html, useAttribute, useEffect } from "..";
 
-describe("use-effect", () => {
-  let updateCount = 0;
-  let cleanupCount = 0;
+let updateCount = 0;
+let cleanupCount = 0;
 
-  beforeAll(() => {
-    defineElement("effect-test", () => {
-      const value = useProperty("value");
-      const otherValue = useProperty("other-value");
-      useEffect(() => {
-        updateCount++;
-        return () => {
-          cleanupCount++;
-        };
-      }, [value]);
-      return html`
-        ${value} ${otherValue}
-      `;
+const fixture = () => {
+  const value = useAttribute("value");
+  const otherValue = useAttribute("other-value");
+  useEffect(() => {
+    updateCount++;
+    return () => {
+      cleanupCount++;
+    };
+  }, [value]);
+  return html`
+    ${value} ${otherValue}
+  `;
+};
+
+describe(
+  "use-effect",
+  withFixture(fixture, elName => {
+    beforeEach(() => {
+      updateCount = 0;
+      cleanupCount = 0;
     });
-  });
 
-  beforeEach(() => {
-    updateCount = 0;
-    cleanupCount = 0;
-    mountFixture(`
-      <effect-test></effect-test>
-    `);
-  });
+    it("mount", async () => {
+      await waitFor();
+      expect(updateCount).toEqual(1);
+    });
 
-  afterEach(() => {
-    unmountFixture();
-  });
+    it("unmount", async () => {
+      await waitFor();
+      unmountFixture();
+      expect(cleanupCount).toEqual(1);
+    });
 
-  it("mount", async () => {
-    await waitFor();
-    expect(updateCount).toEqual(1);
-  });
+    it("update", async () => {
+      await waitFor();
+      const target = selector(elName);
+      expect(updateCount).toEqual(1);
 
-  it("unmount", async () => {
-    await waitFor();
-    unmountFixture();
-    expect(cleanupCount).toEqual(1);
-  });
+      target.setAttribute("value", "change");
 
-  it("update", async () => {
-    await waitFor();
-    const target = selectFixture("effect-test");
-    expect(updateCount).toEqual(1);
+      await waitFor();
+      expect(cleanupCount).toEqual(1);
+      expect(updateCount).toEqual(2);
+    });
 
-    target.setAttribute("value", "change");
+    it("no update", async () => {
+      await waitFor();
+      const target = selector(elName);
+      expect(updateCount).toEqual(1);
 
-    await waitFor();
-    expect(cleanupCount).toEqual(1);
-    expect(updateCount).toEqual(2);
-  });
+      target.setAttribute("other-value", "change");
 
-  it("no update", async () => {
-    await waitFor();
-    const target = selectFixture("effect-test");
-    expect(updateCount).toEqual(1);
-
-    target.setAttribute("other-value", "change");
-
-    await waitFor();
-    expect(cleanupCount).toEqual(0);
-    expect(updateCount).toEqual(1);
-  });
-});
+      await waitFor();
+      expect(cleanupCount).toEqual(0);
+      expect(updateCount).toEqual(1);
+    });
+  })
+);

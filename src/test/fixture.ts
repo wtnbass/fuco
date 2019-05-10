@@ -1,9 +1,20 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-export function mountFixture(html: string) {
+import { defineElement } from "..";
+import { FunctionalComponent } from "../component";
+
+const genElementName = () =>
+  ["test", Date.now(), String(Math.random()).slice(2)].join("-");
+
+function mountFixture(html: string | Element) {
   const fixture = document.createElement("div");
   fixture.id = "fixture";
-  fixture.innerHTML = html;
+  if (typeof html === "string") {
+    fixture.innerHTML = html;
+  } else {
+    fixture.appendChild(html);
+  }
+
   document.body.appendChild(fixture);
 }
 
@@ -12,9 +23,27 @@ export function unmountFixture() {
   fixture && document.body.removeChild(fixture);
 }
 
-export function selectFixture(selector: string) {
-  const fixture = document.getElementById("fixture")!;
-  return fixture.querySelector(selector)!;
+export function withFixture(
+  fixture: FunctionalComponent,
+  fn: (elName: string) => void
+) {
+  return () => {
+    const elName = genElementName();
+
+    beforeAll(() => {
+      defineElement(elName, fixture);
+    });
+
+    beforeEach(() => {
+      mountFixture(document.createElement(elName));
+    });
+
+    afterEach(() => {
+      unmountFixture();
+    });
+
+    fn(elName);
+  };
 }
 
 export const selector = <T extends Element>(s: string, hasShadow?: Element) =>

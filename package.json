@@ -6,12 +6,13 @@
   "module": "dist/functional-web-component.mjs",
   "typings": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "!dist/test"
   ],
   "scripts": {
     "build": "tsc && rollup -c",
     "test": "tsc && karma start",
-    "lint": "tsc --noEmit && eslint src/** --ext .ts",
+    "lint": "tsc --noEmit && eslint src --ext .ts",
     "fmt": "npm run lint -- --fix",
     "clean": "rm -fr dist .tsbuildinfo",
     "distclean": "npm run clean && rm -fr node_modules package-lock.json",

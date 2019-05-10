@@ -1,89 +1,76 @@
-import {
-  mountFixture,
-  unmountFixture,
-  selectFixture,
-  selector,
-  selectorAll,
-  text,
-  waitFor
-} from "./helpers/fixture";
-import { html, defineElement, useState, useCallback } from "..";
+import { withFixture, selector, selectorAll, text, waitFor } from "./fixture";
+import { html, useState, useCallback } from "..";
 
-describe("use-cllback", () => {
-  let target: Element;
-  let add: HTMLButtonElement;
-  let minus: HTMLButtonElement;
-  let div: HTMLDivElement;
-  let updateCounts = [0, 0];
+let updateCounts = [0, 0];
 
-  const setup = async () => {
-    await waitFor();
-    target = selectFixture("callback-test");
-    [add, minus] = selectorAll<HTMLButtonElement>("button", target);
-    div = selector("div", target);
-  };
+const fixture = () => {
+  const [count, setCount] = useState(0);
+  const add = useCallback(() => {
+    updateCounts[0]++;
+    setCount(c => c + 1);
+  }, [count]);
+  const minus = useCallback(() => {
+    updateCounts[1]++;
+    setCount(c => c - 1);
+  });
+  return html`
+    <div>${count}</div>
+    <button @click=${add}>Add</button>
+    <button @click=${minus}>Minus</button>
+  `;
+};
 
-  beforeAll(() => {
-    defineElement("callback-test", () => {
-      const [count, setCount] = useState(0);
-      const add = useCallback(() => {
-        updateCounts[0]++;
-        setCount(c => c + 1);
-      }, [count]);
-      const minus = useCallback(() => {
-        updateCounts[1]++;
-        setCount(c => c - 1);
-      });
-      return html`
-        <div>${count}</div>
-        <button @click=${add}>Add</button>
-        <button @click=${minus}>Minus</button>
-      `;
+describe(
+  "use-cllback",
+  withFixture(fixture, name => {
+    let target: Element;
+    let add: HTMLButtonElement;
+    let minus: HTMLButtonElement;
+    let div: HTMLDivElement;
+
+    const setup = async () => {
+      await waitFor();
+      target = selector(name);
+      [add, minus] = selectorAll<HTMLButtonElement>("button", target);
+      div = selector("div", target);
+    };
+
+    beforeEach(() => {
+      updateCounts = [0, 0];
     });
-  });
 
-  beforeEach(() => {
-    updateCounts = [0, 0];
-    mountFixture(`
-      <callback-test></callback-test>
-    `);
-  });
+    it("mount", async () => {
+      await setup();
+      expect(text(div)).toEqual("0");
+      expect(updateCounts).toEqual([0, 0]);
 
-  afterEach(() => {
-    unmountFixture();
-  });
+      add.click();
 
-  it("mount", async () => {
-    await setup();
-    expect(text(div)).toEqual("0");
-    expect(updateCounts).toEqual([0, 0]);
+      await setup();
+      expect(text(div)).toEqual("1");
+      expect(updateCounts).toEqual([1, 0]);
+    });
 
-    add.click();
+    it("callback has watched fields", async () => {
+      await setup();
+      expect(updateCounts).toEqual([0, 0]);
 
-    await setup();
-    expect(text(div)).toEqual("1");
-    expect(updateCounts).toEqual([1, 0]);
-  });
+      add.click();
 
-  it("callback has watched fields", async () => {
-    await setup();
-    expect(updateCounts).toEqual([0, 0]);
+      await setup();
+      expect(text(div)).toEqual("1");
+      expect(updateCounts).toEqual([1, 0]);
+    });
 
-    add.click();
+    it("callback doesn't have watched fields", async () => {
+      await setup();
+      expect(updateCounts).toEqual([0, 0]);
 
-    await setup();
-    expect(text(div)).toEqual("1");
-    expect(updateCounts).toEqual([1, 0]);
-  });
+      minus.click();
 
-  it("callback doesn't have watched fields", async () => {
-    await setup();
-    expect(updateCounts).toEqual([0, 0]);
-
-    minus.click();
-
-    await setup();
-    expect(text(div)).toEqual("-1");
-    expect(updateCounts).toEqual([0, 1]);
-  });
-});
+      await setup();
+      expect(text(div)).toEqual("-1");
+      expect(updateCounts).toEqual([0, 1]);
+    });
+  })
+);
