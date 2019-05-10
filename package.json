@@ -6,7 +6,8 @@
   "module": "dist/functional-web-component.mjs",
   "typings": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "!dist/test"
   ],
   "scripts": {
     "build": "tsc && rollup -c",

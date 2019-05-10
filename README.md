@@ -34,6 +34,7 @@ Functional Component like React, but for Web Components.
 
 - [Installation](#Installation)
 - [Hooks](#Hooks)
+  - [useAttribute](#useAttribute)
   - [useProperty](#useProperty)
   - [useSelector](#useSelector)
   - [useDispatchEvent](#useDispatchEvent)
@@ -52,6 +53,7 @@ yarn add functional-web-component
 
 - Hooks related with WebComponent
 
+  - [useAttribute](#useAttribute)
   - [useProperty](#useProperty)
   - [useSelector](#useSelector)
   - [useDispatchEvent](#useDispatchEvent)
@@ -64,9 +66,9 @@ yarn add functional-web-component
   - useMemo
   - useCallback
 
-### useProperty
+### useAttribute
 
-Using `useProperty` allow to recieve node's Javascript property value and update the component when the value of this property changes.
+As same as `getAttribute`, but `useAttribute` updates the component when the value of the specified attribute changes.
 
 ```js
 defineElement("greet-element", () => {
@@ -76,11 +78,17 @@ defineElement("greet-element", () => {
   `;
 });
 
-// Use it like:
 html`
   <greet-element name="World"></greet-element>
 `;
+```
 
+### useProperty
+
+If you use `useAttribute`, you can only receive string type values.
+Using `useProperty` allow to recieve node's Javascript property value and update the component when the value of this property changes.
+
+```js
 defineElement("card-element", () => {
   const card = useProperty("card");
   return html`
@@ -88,7 +96,6 @@ defineElement("card-element", () => {
   `;
 });
 
-// Use it like:
 const heartAce = { mark: "♥", value: 1 };
 html`
   <card-element .card=${heartAce}></card-element>
@@ -129,13 +136,13 @@ defineElement("send-message", () => {
   `;
 });
 
-// You can listen custom event using `@` prefix like:
+// You can listen custom event using `@` prefix.
 html`
   <send-message @some-message=${e => console.log(e.detail)}></send-message>
 `;
 ```
 
-### useStyle (experimental)
+### useStyle
 
 At first time rendering, `useStyle` adapt StyleSheet to the component.
 
