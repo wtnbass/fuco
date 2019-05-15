@@ -66,11 +66,14 @@ const enabledAdoptedStyleSheets =
 export const useStyle = (...styles: HasCSSSymbol[]) =>
   hooks((h, c, i) => {
     if (enabledAdoptedStyleSheets) {
-      c.rootElement.adoptedStyleSheets = styles.map(css => {
+      for (let i = 0, l = styles.length; i < l; i++) {
         const styleSheet = new CSSStyleSheet();
-        styleSheet.replaceSync(css[cssSymbol]);
-        return styleSheet;
-      });
+        styleSheet.replace(styles[i][cssSymbol]);
+        c.rootElement.adoptedStyleSheets = [
+          ...c.rootElement.adoptedStyleSheets,
+          styleSheet
+        ];
+      }
     } else {
       h.effects[i] = () => {
         for (let i = 0, l = styles.length; i < l; i++) {
