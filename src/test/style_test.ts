@@ -30,14 +30,25 @@ const fixtureUnsafeCss = () => {
   `;
 };
 
+const fixtureImports = () => {
+  useStyle(
+    css`
+      @import url(https://unpkg.com/normalize.css);
+    `
+  );
+  return html``;
+};
+
+const sanitizeCss = (css: string) => css.replace(/\s+/g, " ").trim();
+
 const getCssText = (element: Element) => {
   let css;
   if ("adoptedStyleSheets" in element.shadowRoot!) {
-    css = element.shadowRoot!.adoptedStyleSheets[0].cssText;
+    css = element.shadowRoot!.adoptedStyleSheets[0].cssRules[0].cssText;
   } else {
     css = element.shadowRoot!.querySelector("style")!.textContent;
   }
-  return css;
+  return sanitizeCss(css || "");
 };
 
 describe("use-style", () => {
@@ -52,11 +63,7 @@ describe("use-style", () => {
 
       it("size is 10", async () => {
         await setup();
-        expect(getCssText(target)).toEqual(`
-  div {
-    font-size: 10px;
-  }
-`);
+        expect(getCssText(target)).toEqual("div { font-size: 10px; }");
       });
     })
   );
@@ -72,11 +79,7 @@ describe("use-style", () => {
 
       it("size is 10", async () => {
         await setup();
-        expect(getCssText(target)).toEqual(`
-  div {
-    font-size: 10px;
-  }
-`);
+        expect(getCssText(target)).toEqual("div { font-size: 10px; }");
       });
     })
   );
@@ -91,12 +94,47 @@ describe("use-style", () => {
 
       it("size is 10", async () => {
         await setup();
-        expect(getCssText(target)).toEqual(`
-  div {
-    font-size: 10px;
-  }
-`);
+        expect(getCssText(target)).toEqual("div { font-size: 10px; }");
       });
     })
+  );
+  describe(
+    "import style",
+    withFixture(fixtureImports, name => {
+      let target: Element;
+      const setup = async () => {
+        await waitFor();
+        target = selector(name);
+      };
+
+      it("suceeded import css", async () => {
+        await setup();
+        expect(getCssText(target)).not.toEqual("");
+      });
+    })
+  );
+  describe(
+    "import using url value",
+    withFixture(
+      () => {
+        useStyle(
+          css`
+            @import url(${new URL("./normalize.css", "https://unpkg.com")});
+          `
+        );
+        return html``;
+      },
+      name => {
+        let target: Element;
+        const setup = async () => {
+          await waitFor();
+          target = selector(name);
+        };
+        it("suceeded import css", async () => {
+          await setup();
+          expect(getCssText(target)).not.toEqual("");
+        });
+      }
+    )
   );
 });
