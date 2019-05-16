@@ -31,7 +31,7 @@ const fixtureAll = () => {
   `;
 };
 
-describe("use-selector/current", () => {
+describe("use-selector", () => {
   describe(
     "current",
     withFixture(fixtureCurrent, elName => {

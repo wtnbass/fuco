@@ -113,4 +113,28 @@ describe("use-style", () => {
       });
     })
   );
+  describe(
+    "import using url value",
+    withFixture(
+      () => {
+        useStyle(
+          css`
+            @import url(${new URL("./normalize.css", "https://unpkg.com")});
+          `
+        );
+        return html``;
+      },
+      name => {
+        let target: Element;
+        const setup = async () => {
+          await waitFor();
+          target = selector(name);
+        };
+        it("suceeded import css", async () => {
+          await setup();
+          expect(getCssText(target)).not.toEqual("");
+        });
+      }
+    )
+  );
 });
