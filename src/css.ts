@@ -15,7 +15,7 @@ const resolve = (value: unknown): string => {
   throw new TypeError(`${value} is not supported type.`);
 };
 
-export const css = (strings: ReadonlyArray<string>, ...values: unknown[]) => ({
+export const css = (strings: readonly string[], ...values: unknown[]) => ({
   [cssSymbol]: strings
     .slice(1)
     .reduce((acc, s, i) => acc + resolve(values[i]) + s, strings[0])
