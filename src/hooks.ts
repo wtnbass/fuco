@@ -4,10 +4,24 @@ import { Provider } from "./provider";
 import { cssSymbol, HasCSSSymbol } from "./css";
 import { REQUEST_CONSUME, dispatchCustomEvent } from "./event";
 
-export const useAttribute = (name: string) =>
-  hooks<string | null>((h, c, i) => {
+type AttributeConverter<T> = (attr: string | null) => T;
+
+export function useAttribute(name: string): string | null;
+
+export function useAttribute<T>(
+  name: string,
+  converter: AttributeConverter<T>
+): T;
+
+export function useAttribute<T>(
+  name: string,
+  converter?: AttributeConverter<T>
+) {
+  return hooks<string | T | null>((h, c, i) => {
     const m = new MutationObserver(() => {
-      const newValue = c.getAttribute(name);
+      const newValue = converter
+        ? converter(c.getAttribute(name))
+        : c.getAttribute(name);
       if (h.values[i] !== newValue) {
         h.values[i] = newValue;
         c.update();
@@ -15,8 +29,9 @@ export const useAttribute = (name: string) =>
     });
     m.observe(c, { attributes: true, attributeFilter: [name] });
     h.cleanup[i] = () => m.disconnect();
-    return c.getAttribute(name);
+    return converter ? converter(c.getAttribute(name)) : c.getAttribute(name);
   });
+}
 
 export const useProperty = <T>(name: string) =>
   hooks<T>((h, c, i) => {
