@@ -1,7 +1,7 @@
 {
   "name": "functional-web-component",
-  "version": "0.3.3",
-  "description": "WebComponents with lit-html and Hooks",
+  "version": "0.4.0",
+  "description": "Functional Component like React, but for Web Components",
   "main": "dist/functional-web-component.js",
   "module": "dist/functional-web-component.mjs",
   "typings": "dist/index.d.ts",

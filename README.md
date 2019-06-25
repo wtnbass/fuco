@@ -1,6 +1,7 @@
 # functional-web-component
 
 [![npm](https://img.shields.io/npm/v/functional-web-component.svg)](https://www.npmjs.com/package/functional-web-component)
+[![install size](https://packagephobia.now.sh/badge?p=functional-web-component)](https://packagephobia.now.sh/result?p=functional-web-component)
 [![Build Status](https://travis-ci.com/wtnbass/functional-web-component.svg?branch=master)](https://travis-ci.com/wtnbass/functional-web-component)
 
 Functional Component like React, but for Web Components.
@@ -15,7 +16,7 @@ Functional Component like React, but for Web Components.
         html,
         defineElement,
         useState
-      } from "https://unpkg.com/functional-web-component?module";
+      } from "//unpkg.com/functional-web-component?module";
 
       function Counter() {
         const [count, setCount] = useState(0);
@@ -39,7 +40,8 @@ Functional Component like React, but for Web Components.
   - [useSelector](#useSelector)
   - [useDispatchEvent](#useDispatchEvent)
   - [useStyle](#useStyle)
-- [Context](#Context)
+  - [useRef](#useRef)
+  - [useContext](#useContext)
 
 ## Installation
 
@@ -51,18 +53,20 @@ yarn add functional-web-component
 
 ## Hooks
 
-- Hooks related with WebComponent
+- Original Hooks
 
   - [useAttribute](#useAttribute)
   - [useProperty](#useProperty)
   - [useDispatchEvent](#useDispatchEvent)
   - [useStyle](#useStyle)
 
-- Hooks like React's
+- React Hooks compatible
+
   - [useRef](#useRef)
   - useState
   - useReducer
-  - useContext
+  - [useContext](#useContext)
+  - useEffect
   - useMemo
   - useCallback
 
@@ -152,7 +156,7 @@ function HelloWorld() {
 
 ### useRef
 
-You can use ref like React by setting RefObject to attribute.
+You can use ref like React by setting value returned by `useRef` to attribute.
 
 ```js
 function Input() {
@@ -165,11 +169,11 @@ function Input() {
 }
 ```
 
-## Context
+### useContext
 
 `createContext` offers `Context`, and using`Context.defineProvider` to define provider.
 
-You can consume it useing `useContext(Context)`.
+You can consume it using `useContext(Context)`.
 
 ```js
 const ThemeContext = createContext();
@@ -178,7 +182,7 @@ const ThemeContext = createContext();
 ThemeContext.defineProvider("theme-provider");
 
 const App = () => html`
-  <theme-provider .value=${1}>
+  <theme-provider .value=${"dark"}>
     <theme-comsumer></theme-comsumer>
   </theme-provider>
 `;
