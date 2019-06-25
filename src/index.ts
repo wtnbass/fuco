@@ -6,9 +6,9 @@ export { createContext } from "./context";
 export {
   useAttribute,
   useProperty,
-  useSelector,
   useDispatchEvent,
   useStyle,
+  useRef,
   useState,
   useReducer,
   useContext,

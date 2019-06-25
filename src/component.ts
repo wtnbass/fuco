@@ -16,14 +16,21 @@ export interface Hooks<T> {
   cleanup: CleanupFn[];
 }
 
-export function hooks<T>(
-  first: (h: Hooks<T>, c: Component, i: number) => T,
-  always = false
-): T {
+interface LifecycleFn<T> {
+  (h: Hooks<T>, c: Component, i: number): T;
+}
+
+export function hooks<T>(config: {
+  oncreate?: LifecycleFn<T>;
+  onupdate?: LifecycleFn<T>;
+}): T {
   const h = currentComponent.hooks as Hooks<T>;
   const index = currentCursor++;
-  if (always || h.values.length <= index) {
-    h.values[index] = first(h, currentComponent, index);
+  if (h.values.length <= index && config.oncreate) {
+    h.values[index] = config.oncreate(h, currentComponent, index);
+  }
+  if (config.onupdate) {
+    h.values[index] = config.onupdate(h, currentComponent, index);
   }
   return h.values[index];
 }

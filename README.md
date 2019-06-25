@@ -55,11 +55,11 @@ yarn add functional-web-component
 
   - [useAttribute](#useAttribute)
   - [useProperty](#useProperty)
-  - [useSelector](#useSelector)
   - [useDispatchEvent](#useDispatchEvent)
   - [useStyle](#useStyle)
 
 - Hooks like React's
+  - [useRef](#useRef)
   - useState
   - useReducer
   - useContext
@@ -73,6 +73,10 @@ As same as `getAttribute`, but `useAttribute` updates the component when the val
 ```js
 defineElement("greet-element", () => {
   const name = useAttribute("name");
+  const hidden = useAttribute("hidden", value => value != null);
+  if (hidden) {
+    return html``;
+  }
   return html`
     <div>Hello, ${name}!</div>
   `;
@@ -81,6 +85,12 @@ defineElement("greet-element", () => {
 html`
   <greet-element name="World"></greet-element>
 `;
+// => `<div>Hello, World</div>`
+
+html`
+  <greet-element name="WebComponent" hidden></greet-element>
+`;
+// => ``
 ```
 
 ### useProperty
@@ -100,25 +110,6 @@ const heartAce = { mark: "♥", value: 1 };
 html`
   <card-element .card=${heartAce}></card-element>
 `;
-```
-
-### useSelector
-
-If you want to access DOM, `useSelector` makes you to touch the returned DOM.
-
-```js
-function App() {
-  const inputRef = useSelector("#todo");
-  // inputRef.current === <input id="todo" />
-  const buttonRef = useSelector("button");
-  // buttonRef.all === <button>A</button> and <button>A</button>
-
-  return html`
-    <input id="todo" />
-    <button>A</button>
-    <button>B</button>
-  `;
-}
 ```
 
 ### useDispatchEvent
@@ -155,6 +146,21 @@ function HelloWorld() {
   `);
   return html`
     <div>Hello, world</div>
+  `;
+}
+```
+
+### useRef
+
+You can use ref like React by setting RefObject to attribute.
+
+```js
+function Input() {
+  const [value, setValue] = useState("");
+  const inputRef = useRef(null);
+  return html`
+    <input ref=${inputRef} />
+    <button @click=${() => setValue(inputRef.current.value)}>push</button>
   `;
 }
 ```
