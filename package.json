@@ -1,6 +1,6 @@
 {
   "name": "functional-web-component",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Functional Component like React, but for Web Components",
   "main": "dist/functional-web-component.js",
   "module": "dist/functional-web-component.mjs",
