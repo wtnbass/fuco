@@ -11,10 +11,10 @@
   ],
   "scripts": {
     "build": "tsc && rollup -c",
-    "test": "tsc && karma start",
+    "test": "karma start",
     "lint": "tsc --noEmit && eslint src --ext .ts",
     "fmt": "npm run lint -- --fix",
-    "clean": "rm -fr dist .tsbuildinfo",
+    "clean": "rm -fr dist coverage .tsbuildinfo",
     "distclean": "npm run clean && rm -fr node_modules package-lock.json",
     "prepare": "npm run clean && npm run build"
   },
@@ -37,17 +37,20 @@
     "eslint": "5.16.0",
     "eslint-config-prettier": "5.1.0",
     "eslint-plugin-prettier": "3.1.0",
+    "istanbul-instrumenter-loader": "3.0.1",
     "karma": "4.1.0",
     "karma-chrome-launcher": "2.2.0",
+    "karma-coverage-istanbul-reporter": "2.0.5",
     "karma-firefox-launcher": "1.1.0",
     "karma-jasmine": "2.0.1",
-    "karma-mocha-reporter": "2.2.5",
-    "karma-rollup-preprocessor": "7.0.0",
+    "karma-sourcemap-loader": "0.3.7",
+    "karma-webpack": "4.0.2",
     "prettier": "1.18.2",
     "rollup": "1.16.2",
     "rollup-plugin-filesize": "6.1.1",
-    "rollup-plugin-node-resolve": "5.1.0",
     "rollup-plugin-terser": "5.0.0",
-    "typescript": "3.5.2"
+    "ts-loader": "6.0.4",
+    "typescript": "3.5.2",
+    "webpack": "4.35.0"
   }
 }

@@ -1,15 +1,16 @@
 module.exports = function(config) {
   config.set({
     frameworks: ["jasmine"],
-    files: [{ pattern: "dist/test/**/*_test.js", watched: false }],
+    files: [{ pattern: "src/**/*_test.ts", watched: false }],
     preprocessors: {
-      "dist/test/**/*_test.js": ["rollup"]
+      "src/**/*(?!_test).ts": ["webpack", "sourcemap"],
+      "src/**/*_test.ts": ["webpack", "sourcemap"]
     },
-    reporters: ["mocha"],
+    reporters: ["progress", "coverage-istanbul"],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
-    autoWatch: true,
+    autoWatch: false,
     browsers: ["FirefoxHeadless", "ChromeHeadless"],
     singleRun: true,
     client: {
@@ -17,13 +18,39 @@ module.exports = function(config) {
         timeoutInterval: 3000
       }
     },
-    rollupPreprocessor: {
-      output: {
-        format: "iife",
-        name: "FWC",
-        sourcemap: "inline"
+    webpack: {
+      mode: "development",
+      devtool: "inline-source-map",
+      resolve: {
+        extensions: [".ts"]
       },
-      plugins: [require("rollup-plugin-node-resolve")()]
+      module: {
+        rules: [
+          {
+            test: /\.ts$/,
+            use: [{ loader: "ts-loader" }]
+          },
+          {
+            test: /\.ts$/,
+            enforce: "post",
+            loader: "istanbul-instrumenter-loader",
+            exclude: /(node_modules|test)/,
+            options: { esModules: true }
+          }
+        ]
+      }
+    },
+    webpackMiddleware: {
+      stats: "errors-only"
+    },
+    coverageIstanbulReporter: {
+      dir: "coverage",
+      reports: ["html", "lcovonly", "text-summary"],
+      "report-config": {
+        html: {
+          subdir: "html"
+        }
+      }
     }
   });
 };
