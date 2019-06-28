@@ -1,5 +1,13 @@
 import { Component } from "./component";
-import { REQUEST_CONSUME, listenCustomEvent } from "./event";
+import { Context } from "./context";
+
+export const REQUEST_CONSUME = "functional-web-component:request-consume";
+
+export interface Detail<T> {
+  context: Context<T>;
+  consumer: Component;
+  register(provider: Provider<T>): void;
+}
 
 export abstract class Provider<T> extends HTMLElement {
   protected abstract get contextId(): number;
@@ -15,8 +23,11 @@ export abstract class Provider<T> extends HTMLElement {
   }
 
   protected connectedCallback() {
-    listenCustomEvent(this, REQUEST_CONSUME, e => {
-      const { context, consumer, register } = e.detail;
+    this.addEventListener(REQUEST_CONSUME, e => {
+      const {
+        detail: { context, consumer, register }
+      } = e as CustomEvent<Detail<T>>;
+
       if (this.contextId === context.id) {
         e.stopPropagation();
         this.consumers.add(consumer);
