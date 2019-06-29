@@ -183,7 +183,7 @@ const depsChanged = (prev: unknown[] | undefined, next: unknown[]) =>
 
 export const useEffect = (
   handler: () => void | (() => void),
-  deps: unknown[] = []
+  deps: unknown[]
 ) =>
   hooks<undefined>({
     onupdate(h, _, i) {
@@ -195,7 +195,7 @@ export const useEffect = (
     }
   });
 
-export const useMemo = <T>(fn: () => T, deps: unknown[] = []) =>
+export const useMemo = <T>(fn: () => T, deps: unknown[]) =>
   hooks<T>({
     onupdate(h, _, i) {
       let value = h.values[i];
@@ -207,7 +207,5 @@ export const useMemo = <T>(fn: () => T, deps: unknown[] = []) =>
     }
   });
 
-export const useCallback = <A, R>(
-  callback: (a: A) => R,
-  deps: unknown[] = []
-) => useMemo(() => callback, deps);
+export const useCallback = <A, R>(callback: (a: A) => R, deps: unknown[]) =>
+  useMemo(() => callback, deps);
