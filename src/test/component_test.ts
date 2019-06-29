@@ -1,4 +1,4 @@
-import { withFixture, selector, text, waitFor } from "./fixture";
+import { withFixtures, selector, text } from "./fixture";
 import { html, useState, useCallback } from "..";
 
 const fixture = () => {
@@ -7,7 +7,7 @@ const fixture = () => {
     for (let i = 0; i < 1000000; i++) {
       setCount(c => c + 1);
     }
-  });
+  }, []);
   return html`
     <div>${count}</div>
     <button @click=${million}>+1000000</button>
@@ -16,14 +16,13 @@ const fixture = () => {
 
 describe(
   "million update",
-  withFixture(fixture, name => {
+  withFixtures(fixture)(([f]) => {
     let target: Element;
     let button: HTMLButtonElement;
     let div: HTMLDivElement;
 
     const setup = async () => {
-      await waitFor();
-      target = selector(name);
+      target = await f.setup();
       div = selector("div", target);
       button = selector("button", target);
     };

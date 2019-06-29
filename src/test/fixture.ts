@@ -3,48 +3,53 @@
 import { defineElement } from "..";
 import { FunctionalComponent } from "../component";
 
-const genElementName = () =>
-  ["test", Date.now(), String(Math.random()).slice(2)].join("-");
+export function createFixture(fixtureFn: FunctionalComponent) {
+  const name = ["test", Date.now(), String(Math.random()).slice(2)].join("-");
 
-function mountFixture(html: string | Element) {
-  const fixture = document.createElement("div");
-  fixture.id = "fixture";
-  if (typeof html === "string") {
-    fixture.innerHTML = html;
-  } else {
-    fixture.appendChild(html);
-  }
-
-  document.body.appendChild(fixture);
-}
-
-export function unmountFixture() {
-  const fixture = document.getElementById("fixture");
-  fixture && document.body.removeChild(fixture);
-}
-
-export function withFixture(
-  fixture: FunctionalComponent,
-  fn: (elName: string) => void
-) {
-  return () => {
-    const elName = genElementName();
-
-    beforeAll(() => {
-      defineElement(elName, fixture);
-    });
-
-    beforeEach(() => {
-      mountFixture(document.createElement(elName));
-    });
-
-    afterEach(() => {
-      unmountFixture();
-    });
-
-    fn(elName);
+  return {
+    get name() {
+      return name;
+    },
+    async setup() {
+      await waitFor();
+      return selector(name);
+    },
+    define() {
+      defineElement(name, fixtureFn);
+    },
+    mount() {
+      const fixture = document.createElement(name);
+      document.body.appendChild(fixture);
+    },
+    unmount() {
+      const fixtures = document.getElementsByTagName(name);
+      for (const fixture of fixtures) {
+        fixture && document.body.removeChild(fixture);
+      }
+    }
   };
 }
+
+type Fixture = ReturnType<typeof createFixture>;
+
+export const withFixtures = (...fixtureFns: FunctionalComponent[]) => (
+  fn: (fs: Fixture[]) => void
+) => () => {
+  const fixtures = fixtureFns.map(createFixture);
+  beforeAll(() => {
+    fixtures.forEach(f => f.define());
+  });
+
+  beforeEach(() => {
+    fixtures.forEach(f => f.mount());
+  });
+
+  afterEach(() => {
+    fixtures.forEach(f => f.unmount());
+  });
+
+  fn(fixtures);
+};
 
 export const selector = <T extends Element>(s: string, hasShadow?: Element) =>
   (hasShadow ? hasShadow.shadowRoot! : document).querySelector<T>(s)!;

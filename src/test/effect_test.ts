@@ -1,4 +1,4 @@
-import { withFixture, unmountFixture, selector, waitFor } from "./fixture";
+import { withFixtures, waitFor } from "./fixture";
 import { html, useAttribute, useEffect } from "..";
 
 let updateCount = 0;
@@ -20,7 +20,7 @@ const fixture = () => {
 
 describe(
   "use-effect",
-  withFixture(fixture, elName => {
+  withFixtures(fixture)(([f]) => {
     beforeEach(() => {
       updateCount = 0;
       cleanupCount = 0;
@@ -33,13 +33,12 @@ describe(
 
     it("unmount", async () => {
       await waitFor();
-      unmountFixture();
+      f.unmount();
       expect(cleanupCount).toEqual(1);
     });
 
     it("update", async () => {
-      await waitFor();
-      const target = selector(elName);
+      const target = await f.setup();
       expect(updateCount).toEqual(1);
 
       target.setAttribute("value", "change");
@@ -50,8 +49,7 @@ describe(
     });
 
     it("no update", async () => {
-      await waitFor();
-      const target = selector(elName);
+      const target = await f.setup();
       expect(updateCount).toEqual(1);
 
       target.setAttribute("other-value", "change");

@@ -1,4 +1,4 @@
-import { withFixture, selector, waitFor } from "./fixture";
+import { withFixtures, selector } from "./fixture";
 import { html, defineElement, useDispatchEvent, useCallback } from "..";
 
 let recievedMessage = "";
@@ -6,7 +6,7 @@ let recievedMessage = "";
 const fixture = () => {
   const recieve = useCallback((e: CustomEvent<string>) => {
     recievedMessage = e.detail;
-  });
+  }, []);
   return html`
     <event-sender @send-event=${recieve}></event-sender>
   `;
@@ -14,14 +14,13 @@ const fixture = () => {
 
 describe(
   "use-dispatch-event",
-  withFixture(fixture, name => {
+  withFixtures(fixture)(([f]) => {
     let target: Element;
     let sender: Element;
     let button: HTMLButtonElement;
 
     const setup = async () => {
-      await waitFor();
-      target = selector(name);
+      target = await f.setup();
       sender = selector("event-sender", target);
       button = selector("button", sender);
     };

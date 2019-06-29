@@ -1,4 +1,4 @@
-import { withFixture, selector, selectorAll, text, waitFor } from "./fixture";
+import { withFixtures, selector, selectorAll, text } from "./fixture";
 import { html, useMemo, useState } from "..";
 
 let updateCount = 0;
@@ -28,7 +28,7 @@ const fixture = () => {
 
 describe(
   "use-memo",
-  withFixture(fixture, elName => {
+  withFixtures(fixture)(([f]) => {
     let target: Element;
     let firstName: HTMLInputElement;
     let lastName: HTMLInputElement;
@@ -36,8 +36,7 @@ describe(
     let div: HTMLDivElement;
 
     const setup = async () => {
-      await waitFor();
-      target = selector(elName);
+      target = await f.setup();
       [firstName, lastName, age] = selectorAll<HTMLInputElement>(
         "input",
         target

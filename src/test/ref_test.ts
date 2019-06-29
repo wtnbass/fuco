@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { withFixture, selector, text, waitFor } from "./fixture";
+import { withFixtures, selector, text } from "./fixture";
 import { html, useRef, useState, useEffect } from "..";
 
 const fixture = () => {
@@ -22,7 +22,7 @@ const fixture = () => {
 
 describe(
   "use-ref",
-  withFixture(fixture, elName => {
+  withFixtures(fixture)(([f]) => {
     let target: Element;
     let input: HTMLInputElement;
     let button: HTMLButtonElement;
@@ -30,8 +30,7 @@ describe(
     let prevValueDiv: HTMLDivElement;
 
     const setup = async () => {
-      await waitFor();
-      target = selector(elName);
+      target = await f.setup();
       input = selector("input", target);
       button = selector("button", target);
       valueDiv = selector("#value", target);
