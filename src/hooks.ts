@@ -160,6 +160,7 @@ export const useReducer = <S, A>(
 export const useContext = <T>(context: Context<T>) =>
   hooks<T | undefined>({
     oncreate: (h, c, i) => {
+      h.cleanup[i] = () => (h.deps[i][0] as Provider<T>).unsubscribe(c);
       c.dispatchEvent(
         new CustomEvent<Detail<T>>(REQUEST_CONSUME, {
           bubbles: true,
