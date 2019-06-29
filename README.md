@@ -3,6 +3,7 @@
 [![npm](https://img.shields.io/npm/v/functional-web-component.svg)](https://www.npmjs.com/package/functional-web-component)
 [![install size](https://packagephobia.now.sh/badge?p=functional-web-component)](https://packagephobia.now.sh/result?p=functional-web-component)
 [![Build Status](https://travis-ci.com/wtnbass/functional-web-component.svg?branch=master)](https://travis-ci.com/wtnbass/functional-web-component)
+[![codecov](https://codecov.io/gh/wtnbass/functional-web-component/branch/master/graph/badge.svg)](https://codecov.io/gh/wtnbass/functional-web-component)
 
 Functional Component like React, but for Web Components.
 
