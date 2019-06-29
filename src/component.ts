@@ -3,12 +3,16 @@ import { render, TemplateResult } from "lit-html";
 let currentCursor: number;
 let currentComponent: Component;
 
-export type FunctionalComponent = () => TemplateResult;
+export interface FunctionalComponent {
+  (): TemplateResult;
+}
 
-type EffectFn = () => void | CleanupFn;
-
-type CleanupFn = () => void;
-
+interface EffectFn {
+  (): void | CleanupFn;
+}
+interface CleanupFn {
+  (): void;
+}
 export interface Hooks<T> {
   values: T[];
   deps: unknown[][];
@@ -37,7 +41,7 @@ export function hooks<T>(config: {
 
 export abstract class Component extends HTMLElement {
   private updating = false;
-  public rootElement = this.attachShadow({ mode: "open" });
+  public $root = this.attachShadow({ mode: "open" });
   public hooks: Hooks<unknown> = {
     values: [],
     deps: [],
@@ -69,10 +73,16 @@ export abstract class Component extends HTMLElement {
 
     render(
       (this.constructor as typeof Component).functionalComponent(),
-      this.rootElement,
+      this.$root,
       { eventContext: this }
     );
 
+    this.affect();
+
+    this.updating = false;
+  }
+
+  private affect() {
     const h = this.hooks;
     for (let i = 0; i < h.effects.length; i++) {
       if (h.effects[i]) {
@@ -84,7 +94,5 @@ export abstract class Component extends HTMLElement {
         delete h.effects[i];
       }
     }
-
-    this.updating = false;
   }
 }

@@ -1,4 +1,4 @@
-import { withFixture, selector, selectorAll, text, waitFor } from "./fixture";
+import { withFixtures, selector, selectorAll, text } from "./fixture";
 
 import { html, useState } from "..";
 
@@ -13,14 +13,13 @@ const fixture = () => {
 
 describe(
   "use-state",
-  withFixture(fixture, elName => {
+  withFixtures(fixture)(([f]) => {
     let count: Element;
     let increment: HTMLButtonElement;
     let decrement: HTMLButtonElement;
 
     const setup = async () => {
-      await waitFor();
-      const target = selector(elName);
+      const target = await f.setup();
       count = selector("div", target);
       [increment, decrement] = selectorAll<HTMLButtonElement>("button", target);
     };

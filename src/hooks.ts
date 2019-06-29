@@ -1,10 +1,11 @@
 import { hooks, Component } from "./component";
 import { Context } from "./context";
-import { Provider } from "./provider";
 import { cssSymbol, HasCSSSymbol } from "./css";
-import { REQUEST_CONSUME, dispatchCustomEvent } from "./event";
+import { REQUEST_CONSUME, Detail, Provider } from "./provider";
 
-type AttributeConverter<T> = (attr: string | null) => T;
+export interface AttributeConverter<T> {
+  (attr: string | null): T;
+}
 
 export function useAttribute(name: string): string | null;
 
@@ -55,12 +56,12 @@ export const useProperty = <T>(name: string) =>
     }
   });
 
-export const useDispatchEvent = <T>(name: string, init: CustomEventInit = {}) =>
+export const useDispatchEvent = <T>(name: string, eventInit: EventInit = {}) =>
   hooks<(detail: T) => void>({
     oncreate: (_, c) => (detail: T) =>
       c.dispatchEvent(
         new CustomEvent(name, {
-          ...init,
+          ...eventInit,
           detail
         })
       )
@@ -77,8 +78,8 @@ export const useStyle = (...styles: HasCSSSymbol[]) =>
         for (let i = 0, l = styles.length; i < l; i++) {
           const styleSheet = new CSSStyleSheet();
           styleSheet.replace(styles[i][cssSymbol]);
-          c.rootElement.adoptedStyleSheets = [
-            ...c.rootElement.adoptedStyleSheets,
+          c.$root.adoptedStyleSheets = [
+            ...c.$root.adoptedStyleSheets,
             styleSheet
           ];
         }
@@ -87,7 +88,7 @@ export const useStyle = (...styles: HasCSSSymbol[]) =>
           for (let i = 0, l = styles.length; i < l; i++) {
             const style = document.createElement("style");
             style.textContent = styles[i][cssSymbol];
-            c.rootElement.appendChild(style);
+            c.$root.appendChild(style);
           }
         };
       }
@@ -111,7 +112,7 @@ export const useRef = <T>(initialValue: T | null) =>
       }),
     onupdate: (h, c, i) => {
       h.effects[i] = () => {
-        const value = c.rootElement.querySelector(`[ref="${refPrefix + i}"]`);
+        const value = c.$root.querySelector(`[ref="${refPrefix + i}"]`);
         if (value != null) {
           /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
           h.values[i].current = value as any;
@@ -158,18 +159,24 @@ export const useReducer = <S, A>(
 
 export const useContext = <T>(context: Context<T>) =>
   hooks<T | undefined>({
-    onupdate: (h, c, i) => {
-      if (!h.deps[i] || h.deps[i].length <= 0) {
-        dispatchCustomEvent(c, REQUEST_CONSUME, {
-          context,
-          consumer: c,
-          register(provider: Provider<T>) {
-            h.deps[i] = [provider];
+    oncreate: (h, c, i) => {
+      h.cleanup[i] = () => (h.deps[i][0] as Provider<T>).unsubscribe(c);
+      c.dispatchEvent(
+        new CustomEvent<Detail<T>>(REQUEST_CONSUME, {
+          bubbles: true,
+          composed: true,
+          detail: {
+            context,
+            consumer: c,
+            register(provider: Provider<T>) {
+              h.deps[i] = [provider];
+            }
           }
-        });
-      }
-      return (h.deps[i][0] as Provider<T>).value;
-    }
+        })
+      );
+      return context.initialValue;
+    },
+    onupdate: (h, _, i) => (h.deps[i][0] as Provider<T>).value
   });
 
 const depsChanged = (prev: unknown[] | undefined, next: unknown[]) =>
@@ -177,7 +184,7 @@ const depsChanged = (prev: unknown[] | undefined, next: unknown[]) =>
 
 export const useEffect = (
   handler: () => void | (() => void),
-  deps: unknown[] = []
+  deps: unknown[]
 ) =>
   hooks<undefined>({
     onupdate(h, _, i) {
@@ -189,8 +196,8 @@ export const useEffect = (
     }
   });
 
-export const useMemo = <T>(fn: () => T, deps: unknown[] = []) =>
-  hooks({
+export const useMemo = <T>(fn: () => T, deps: unknown[]) =>
+  hooks<T>({
     onupdate(h, _, i) {
       let value = h.values[i];
       if (depsChanged(h.deps[i], deps)) {
@@ -201,7 +208,5 @@ export const useMemo = <T>(fn: () => T, deps: unknown[] = []) =>
     }
   });
 
-export const useCallback = <A, R>(
-  callback: (a: A) => R,
-  deps: unknown[] = []
-) => useMemo(() => callback, deps);
+export const useCallback = <A, R>(callback: (a: A) => R, deps: unknown[]) =>
+  useMemo(() => callback, deps);

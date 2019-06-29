@@ -1,4 +1,4 @@
-import { withFixture, selector, selectorAll, waitFor } from "./fixture";
+import { withFixtures, selector, selectorAll } from "./fixture";
 
 import { html, useReducer, useCallback } from "..";
 
@@ -11,10 +11,12 @@ interface Todo {
 }
 
 const genId = (): ID => Date.now() + Math.random();
+
 const addTodo = (text: string) => ({
   type: "ADD_TODO" as "ADD_TODO",
   text
 });
+
 const toggleComplete = (id: ID) => ({
   type: "TOGGLE_COMPLETE" as "TOGGLE_COMPLETE",
   id
@@ -45,7 +47,7 @@ const fixture = () => {
       dispatch(addTodo(input.value));
       input.value = "";
     }
-  });
+  }, []);
 
   return html`
     <style>
@@ -71,15 +73,14 @@ const fixture = () => {
 
 describe(
   "use-reducer",
-  withFixture(fixture, elName => {
+  withFixtures(fixture)(([f]) => {
     let input: HTMLInputElement;
     let list: NodeListOf<Element>;
 
     beforeAll(() => {});
 
     const setup = async () => {
-      await waitFor();
-      const target = selector(elName);
+      const target = await f.setup();
       input = selector("input", target);
       list = selectorAll("ul > li", target);
     };

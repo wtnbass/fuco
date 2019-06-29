@@ -1,6 +1,8 @@
-import { withFixture, selector, text, waitFor } from "./fixture";
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { html, useProperty } from "..";
+import { withFixtures, text, selectorAll } from "./fixture";
+
+import { html, useProperty, useRef } from "..";
 
 interface User {
   name: string;
@@ -9,6 +11,7 @@ interface User {
 
 const fixture = () => {
   const user: User = useProperty("user");
+  const updateCount = useRef(0);
   if (!user) {
     return html`
       <div>No user</div>
@@ -16,19 +19,20 @@ const fixture = () => {
   }
   return html`
     <div>${user.name} (${user.age})</div>
+    <div>${updateCount.current!++}</div>
   `;
 };
 
 describe(
   "use-property",
-  withFixture(fixture, elName => {
-    let target: Element;
+  withFixtures(fixture)(([f]) => {
+    let target: Element & { user: User };
     let div: HTMLDivElement;
+    let count: HTMLDivElement;
 
     const setup = async () => {
-      await waitFor();
-      target = selector(elName);
-      div = selector("div", target);
+      target = (await f.setup()) as Element & { user: User };
+      [div, count] = selectorAll<HTMLDivElement>("div", target);
     };
 
     it("mount", async () => {
@@ -37,14 +41,22 @@ describe(
     });
 
     it("propeties changed", async () => {
-      await setup();
-      (target as Element & { user: User }).user = {
+      const user = {
         name: "Bob",
         age: "18"
       };
+      await setup();
+      target.user = user;
 
       await setup();
+      expect(target.user).toEqual(user);
       expect(text(div)).toEqual("Bob (18)");
+      expect(text(count)).toEqual("0");
+
+      // No update to set a same value
+      target.user = user;
+      await setup();
+      expect(text(count)).toEqual("0");
     });
   })
 );
