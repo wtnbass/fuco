@@ -3,6 +3,20 @@
 import { defineElement } from "..";
 import { FunctionalComponent } from "../component";
 
+export function waitFor() {
+  return new Promise(resolve => setTimeout(resolve));
+}
+
+export const selector = <T extends Element>(s: string, hasShadow?: Element) =>
+  (hasShadow ? hasShadow.shadowRoot! : document).querySelector<T>(s)!;
+
+export const selectorAll = <T extends Element>(
+  s: string,
+  hasShadow?: Element
+) => (hasShadow ? hasShadow.shadowRoot! : document).querySelectorAll<T>(s)!;
+
+export const text = (el: Element) => el.textContent!.trim();
+
 export function createFixture(fixtureFn: FunctionalComponent) {
   const name = ["test", Date.now(), String(Math.random()).slice(2)].join("-");
 
@@ -30,10 +44,8 @@ export function createFixture(fixtureFn: FunctionalComponent) {
   };
 }
 
-type Fixture = ReturnType<typeof createFixture>;
-
 export const withFixtures = (...fixtureFns: FunctionalComponent[]) => (
-  fn: (fs: Fixture[]) => void
+  fn: (fixtures: ReturnType<typeof createFixture>[]) => void
 ) => () => {
   const fixtures = fixtureFns.map(createFixture);
   beforeAll(() => {
@@ -50,17 +62,3 @@ export const withFixtures = (...fixtureFns: FunctionalComponent[]) => (
 
   fn(fixtures);
 };
-
-export const selector = <T extends Element>(s: string, hasShadow?: Element) =>
-  (hasShadow ? hasShadow.shadowRoot! : document).querySelector<T>(s)!;
-
-export const selectorAll = <T extends Element>(
-  s: string,
-  hasShadow?: Element
-) => (hasShadow ? hasShadow.shadowRoot! : document).querySelectorAll<T>(s)!;
-
-export const text = (el: Element) => el.textContent!.trim();
-
-export function waitFor() {
-  return new Promise(resolve => setTimeout(resolve));
-}
