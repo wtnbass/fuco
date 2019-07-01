@@ -140,7 +140,7 @@ export const useState = <T>(initialState: T) =>
   });
 
 export const useReducer = <S, A>(
-  reducer: (state: S | undefined, action: A) => S,
+  reducer: (state: S, action: A) => S,
   initialState: S
 ) =>
   hooks<[S, (action: A) => void]>({
