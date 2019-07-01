@@ -7,7 +7,7 @@
   "typings": "dist/index.d.ts",
   "files": [
     "dist",
-    "!dist/test"
+    "!dist/**/__tests__"
   ],
   "scripts": {
     "build": "tsc && rollup -c",
