@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { withFixtures, selectorAll, text } from "./fixture";
-
 import { html, useState, useRef } from "..";
 
 const fixture = () => {

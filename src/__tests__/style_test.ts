@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import { withFixtures } from "./fixture";
 import { html, css, unsafeCSS, useStyle } from "..";
 

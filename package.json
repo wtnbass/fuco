@@ -47,11 +47,11 @@
     "karma-sourcemap-loader": "0.3.7",
     "karma-webpack": "4.0.2",
     "prettier": "1.18.2",
-    "rollup": "1.16.2",
+    "rollup": "1.16.6",
     "rollup-plugin-filesize": "6.1.1",
-    "rollup-plugin-terser": "5.0.0",
+    "rollup-plugin-terser": "5.1.0",
     "ts-loader": "6.0.4",
     "typescript": "3.5.2",
-    "webpack": "4.35.0"
+    "webpack": "4.35.2"
   }
 }
