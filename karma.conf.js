@@ -3,8 +3,7 @@ module.exports = function(config) {
     frameworks: ["jasmine"],
     files: [{ pattern: "src/**/*_test.ts", watched: false }],
     preprocessors: {
-      "src/**/*(?!_test).ts": ["webpack", "sourcemap"],
-      "src/**/*_test.ts": ["webpack", "sourcemap"]
+      "src/**/*.ts": ["webpack", "sourcemap"]
     },
     reporters: ["progress", "coverage-istanbul"],
     port: 9876,
@@ -34,7 +33,7 @@ module.exports = function(config) {
             test: /\.ts$/,
             enforce: "post",
             loader: "istanbul-instrumenter-loader",
-            exclude: /(node_modules|test)/,
+            exclude: /(node_modules|__tests__)/,
             options: { esModules: true }
           }
         ]

@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import { withFixtures, text, selectorAll } from "./fixture";
-
 import { html, useProperty, useRef } from "..";
 
 interface User {
