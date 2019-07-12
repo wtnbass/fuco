@@ -122,10 +122,12 @@ export const useRef = <T>(initialValue: T | null) =>
     }
   });
 
-export const useState = <T>(initialState: T) =>
+export const useState = <T>(initialState: T | (() => T)) =>
   hooks<[T, ((t: T | ((s: T) => T)) => void)]>({
     oncreate: (h, c, i) => [
-      initialState,
+      typeof initialState === "function"
+        ? (initialState as (() => T))()
+        : initialState,
       function setState(nextState: T | ((s: T) => T)) {
         const state = h.values[i][0];
         if (typeof nextState === "function") {
