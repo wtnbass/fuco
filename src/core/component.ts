@@ -1,26 +1,16 @@
 let currentCursor: number;
 let currentComponent: Component;
 
-interface EffectFn {
-  (): void | CleanupFn;
-}
-interface CleanupFn {
-  (): void;
-}
 export interface Hooks<T> {
   values: T[];
   deps: unknown[][];
-  effects: EffectFn[];
-  cleanup: CleanupFn[];
-}
-
-interface LifecycleFn<T> {
-  (h: Hooks<T>, c: Component, i: number): T;
+  effects: (() => void | (() => void))[];
+  cleanup: (() => void)[];
 }
 
 export function hooks<T>(config: {
-  oncreate?: LifecycleFn<T>;
-  onupdate?: LifecycleFn<T>;
+  oncreate?: (h: Hooks<T>, c: Component, i: number) => T;
+  onupdate?: (h: Hooks<T>, c: Component, i: number) => T;
 }): T {
   const h = currentComponent.hooks as Hooks<T>;
   const index = currentCursor++;

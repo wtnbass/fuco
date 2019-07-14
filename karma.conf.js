@@ -3,12 +3,15 @@ module.exports = function(config) {
     frameworks: ["jasmine"],
     files: [{ pattern: "src/**/*_test.ts", watched: false }],
     preprocessors: {
-      "src/**/*.ts": ["webpack", "sourcemap"]
+      "src/**/*.ts": ["webpack"]
     },
     reporters: ["progress", "coverage-istanbul"],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
+    browserConsoleLogOptions: {
+      level: "disable"
+    },
     autoWatch: false,
     browsers: ["FirefoxHeadless", "ChromeHeadless"],
     singleRun: true,

@@ -1,5 +1,5 @@
 import { render, TemplateResult } from "lit-html";
-import { Component } from "./component";
+import { Component } from "./core";
 
 export { html } from "lit-html";
 export * from "./core";
