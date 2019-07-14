@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { withFixtures, selectorAll, text } from "./fixture";
+import { withFixtures, selector, selectorAll, text } from "./fixture";
 import { html, useState, useRef } from "..";
 
 const fixture = () => {
@@ -14,9 +14,16 @@ const fixture = () => {
   `;
 };
 
+const lazyInitialState = () => {
+  const [state] = useState(() => "it's lazy.");
+  return html`
+    <div>${state}</div>
+  `;
+};
+
 describe(
   "use-state",
-  withFixtures(fixture)(([f]) => {
+  withFixtures(fixture, lazyInitialState)(([f, f2]) => {
     let count: HTMLDivElement;
     let updated: HTMLDivElement;
     let increment: HTMLButtonElement;
@@ -30,6 +37,11 @@ describe(
         "button",
         target
       );
+    };
+
+    const setup2 = async () => {
+      const target = await f2.setup();
+      count = selector("div", target);
     };
 
     it("mount", async () => {
@@ -54,6 +66,11 @@ describe(
       await setup();
       expect(text(count)).toEqual("0");
       expect(text(updated)).toEqual("2");
+    });
+
+    it("lazy initial state", async () => {
+      await setup2();
+      expect(text(count)).toEqual("it's lazy.");
     });
   })
 );

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { defineElement } from "..";
-import { FunctionalComponent } from "../component";
+import { defineElement, FunctionalComponent } from "..";
 
 export function waitFor() {
   return new Promise(resolve => setTimeout(resolve));

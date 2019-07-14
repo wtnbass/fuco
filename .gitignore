@@ -1,5 +1,8 @@
-node_modules
-package-lock.json
-dist
-coverage
-.tsbuildinfo
+/node_modules
+/package-lock.json
+/dist
+/core
+/__tests__
+/index.*
+/coverage
+/.tsbuildinfo

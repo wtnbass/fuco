@@ -7,7 +7,7 @@
     "lib": ["es2017", "dom", "dom.iterable"],
     "declaration": true,
     "sourceMap": true,
-    "outDir": "./dist",
+    "outDir": "./",
     "moduleResolution": "node",
     "strict": true,
     "noUnusedLocals": true,
@@ -15,5 +15,6 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": []
 }

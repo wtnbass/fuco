@@ -1,32 +1,16 @@
-import { render, TemplateResult } from "lit-html";
-
 let currentCursor: number;
 let currentComponent: Component;
 
-export interface FunctionalComponent {
-  (): TemplateResult;
-}
-
-interface EffectFn {
-  (): void | CleanupFn;
-}
-interface CleanupFn {
-  (): void;
-}
 export interface Hooks<T> {
   values: T[];
   deps: unknown[][];
-  effects: EffectFn[];
-  cleanup: CleanupFn[];
-}
-
-interface LifecycleFn<T> {
-  (h: Hooks<T>, c: Component, i: number): T;
+  effects: (() => void | (() => void))[];
+  cleanup: (() => void)[];
 }
 
 export function hooks<T>(config: {
-  oncreate?: LifecycleFn<T>;
-  onupdate?: LifecycleFn<T>;
+  oncreate?: (h: Hooks<T>, c: Component, i: number) => T;
+  onupdate?: (h: Hooks<T>, c: Component, i: number) => T;
 }): T {
   const h = currentComponent.hooks as Hooks<T>;
   const index = currentCursor++;
@@ -49,7 +33,7 @@ export abstract class Component extends HTMLElement {
     cleanup: []
   };
 
-  protected static functionalComponent: FunctionalComponent;
+  protected abstract render(): void;
 
   protected connectedCallback() {
     this.update();
@@ -60,26 +44,22 @@ export abstract class Component extends HTMLElement {
   }
 
   public update() {
-    this.updating || this.enqueue();
-  }
+    if (this.updating) return;
 
-  private async enqueue() {
     this.updating = true;
 
-    await Promise.resolve();
+    Promise.resolve().then(() => {
+      try {
+        currentCursor = 0;
+        currentComponent = this;
 
-    currentCursor = 0;
-    currentComponent = this;
-
-    render(
-      (this.constructor as typeof Component).functionalComponent(),
-      this.$root,
-      { eventContext: this }
-    );
-
-    this.affect();
-
-    this.updating = false;
+        this.render();
+        this.affect();
+      } catch (e) {
+        console.error(e);
+      }
+      this.updating = false;
+    });
   }
 
   private affect() {

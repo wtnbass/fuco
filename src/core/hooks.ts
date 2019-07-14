@@ -71,25 +71,22 @@ const enabledAdoptedStyleSheets =
   "adoptedStyleSheets" in Document.prototype &&
   "replace" in CSSStyleSheet.prototype;
 
-export const useStyle = (...styles: HasCSSSymbol[]) =>
+export const useStyle = (cssCreator: () => HasCSSSymbol) =>
   hooks<undefined>({
     oncreate(h, c, i) {
+      const css = cssCreator()[cssSymbol];
       if (enabledAdoptedStyleSheets) {
-        for (let i = 0, l = styles.length; i < l; i++) {
-          const styleSheet = new CSSStyleSheet();
-          styleSheet.replace(styles[i][cssSymbol]);
-          c.$root.adoptedStyleSheets = [
-            ...c.$root.adoptedStyleSheets,
-            styleSheet
-          ];
-        }
+        const styleSheet = new CSSStyleSheet();
+        styleSheet.replace(css);
+        c.$root.adoptedStyleSheets = [
+          ...c.$root.adoptedStyleSheets,
+          styleSheet
+        ];
       } else {
         h.effects[i] = () => {
-          for (let i = 0, l = styles.length; i < l; i++) {
-            const style = document.createElement("style");
-            style.textContent = styles[i][cssSymbol];
-            c.$root.appendChild(style);
-          }
+          const style = document.createElement("style");
+          style.textContent = css;
+          c.$root.appendChild(style);
         };
       }
       return undefined;
@@ -122,10 +119,12 @@ export const useRef = <T>(initialValue: T | null) =>
     }
   });
 
-export const useState = <T>(initialState: T) =>
+export const useState = <T>(initialState: T | (() => T)) =>
   hooks<[T, ((t: T | ((s: T) => T)) => void)]>({
     oncreate: (h, c, i) => [
-      initialState,
+      typeof initialState === "function"
+        ? (initialState as (() => T))()
+        : initialState,
       function setState(nextState: T | ((s: T) => T)) {
         const state = h.values[i][0];
         if (typeof nextState === "function") {

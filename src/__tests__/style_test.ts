@@ -2,7 +2,7 @@
 import { withFixtures } from "./fixture";
 import { html, css, unsafeCSS, useStyle } from "..";
 
-const fontSize = (size: unknown) => css`
+const fontSize = (size: unknown) => () => css`
   div {
     font-size: ${size}px;
   }
@@ -28,7 +28,7 @@ describe(
     () => (useStyle(fontSize(unsafeCSS("10"))), html``),
     () => {
       useStyle(
-        css`
+        () => css`
           @import url(https://unpkg.com/normalize.css);
         `
       );
@@ -36,7 +36,7 @@ describe(
     },
     () => {
       useStyle(
-        css`
+        () => css`
           @import url(${new URL("./normalize.css", "https://unpkg.com")});
         `
       );
