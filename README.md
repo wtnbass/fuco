@@ -1,9 +1,9 @@
-# functional-web-component
+# fuco
 
-[![npm](https://img.shields.io/npm/v/functional-web-component.svg)](https://www.npmjs.com/package/functional-web-component)
-[![install size](https://packagephobia.now.sh/badge?p=functional-web-component)](https://packagephobia.now.sh/result?p=functional-web-component)
-[![Build Status](https://travis-ci.com/wtnbass/functional-web-component.svg?branch=master)](https://travis-ci.com/wtnbass/functional-web-component)
-[![codecov](https://codecov.io/gh/wtnbass/functional-web-component/branch/master/graph/badge.svg)](https://codecov.io/gh/wtnbass/functional-web-component)
+[![npm](https://img.shields.io/npm/v/fuco.svg)](https://www.npmjs.com/package/fuco)
+[![install size](https://packagephobia.now.sh/badge?p=fuco)](https://packagephobia.now.sh/result?p=fuco)
+[![Build Status](https://travis-ci.com/wtnbass/fuco.svg?branch=master)](https://travis-ci.com/wtnbass/fuco)
+[![codecov](https://codecov.io/gh/wtnbass/fuco/branch/master/graph/badge.svg)](https://codecov.io/gh/wtnbass/fuco)
 
 Functional Component like React, but for Web Components.
 
@@ -13,11 +13,7 @@ Functional Component like React, but for Web Components.
   <body>
     <counter-app></counter-app>
     <script type="module">
-      import {
-        html,
-        defineElement,
-        useState
-      } from "//unpkg.com/functional-web-component?module";
+      import { html, defineElement, useState } from "//unpkg.com/fuco?module";
 
       function Counter() {
         const [count, setCount] = useState(0);
@@ -38,18 +34,22 @@ Functional Component like React, but for Web Components.
 - [Hooks](#Hooks)
   - [useAttribute](#useAttribute)
   - [useProperty](#useProperty)
-  - [useSelector](#useSelector)
   - [useDispatchEvent](#useDispatchEvent)
   - [useStyle](#useStyle)
+  - [useState](#useState)
+  - [useReducer](#useReducer)
   - [useRef](#useRef)
   - [useContext](#useContext)
+  - [useEffect](#useEffect)
+  - [useMemo](#useMemo)
+  - [useCallback](#useCallback)
 
 ## Installation
 
 ```sh
-npm install functional-web-component
+npm install fuco
 # or use yarn
-yarn add functional-web-component
+yarn add fuco
 ```
 
 ## Hooks
@@ -63,17 +63,17 @@ yarn add functional-web-component
 
 - React Hooks compatible
 
+  - [useState](#useState)
+  - [useReducer](#useReducer)
   - [useRef](#useRef)
-  - useState
-  - useReducer
   - [useContext](#useContext)
-  - useEffect
-  - useMemo
-  - useCallback
+  - [useEffect](#useEffect)
+  - [useMemo](#useMemo)
+  - [useCallback](#useCallback)
 
 ### useAttribute
 
-As same as `getAttribute`, but `useAttribute` updates the component when the value of the specified attribute changes.
+`useAttribute` returens attribute value, and updates the component when the attribute specified by the first argument is changed.
 
 ```js
 defineElement("greet-element", () => {
@@ -83,7 +83,7 @@ defineElement("greet-element", () => {
     return html``;
   }
   return html`
-    <div>Hello, ${name}!</div>
+    <div>Hello, ${name}</div>
   `;
 });
 
@@ -100,8 +100,7 @@ html`
 
 ### useProperty
 
-If you use `useAttribute`, you can only receive string type values.
-Using `useProperty` allow to recieve node's Javascript property value and update the component when the value of this property changes.
+`useProperty` returns element's property value, and updates the component when the property values is changed.
 
 ```js
 defineElement("card-element", () => {
@@ -119,7 +118,7 @@ html`
 
 ### useDispatchEvent
 
-If you want to use CustomEvent, `useDispatchEvent` offers you `dispatch` function like `dispatchEvent`.
+`useDispatchEvent` offers `dispatch` function like `dispatchEvent` to use CustomEvent.
 
 ```js
 defineElement("send-message", () => {
@@ -140,24 +139,54 @@ html`
 
 ### useStyle
 
-At first time rendering, `useStyle` adapt StyleSheet to the component.
+`useStyle` can adapt a StyleSheet to the component.
 
 ```js
 function HelloWorld() {
-  useStyle(css`
-    div {
-      color: red;
-    }
-  `);
+  useStyle(
+    () => css`
+      div {
+        color: red;
+      }
+    `
+  );
   return html`
     <div>Hello, world</div>
   `;
 }
 ```
 
+### useState
+
+`useState` returns a pair of state and setter function, and upadates the component by updating state using setter function.
+
+```js
+function Counter() {
+  const [count, setCount] = useState(0);
+  return html`
+    <div>${count}</div>
+    <button @click=${() => setCount(count + 1)}>PLUS</button>
+  `;
+}
+```
+
+### useReducer
+
+`useReducer` returns a pair of state and dispatch function.
+
+```js
+function Counter() {
+  const [count, dispatch] = useReducer((state, action) => state + action, 0);
+  return html`
+    <div>${count}</div>
+    <button @click=${() => dispatch(1)}>PLUS</button>
+  `;
+}
+```
+
 ### useRef
 
-You can use ref like React by setting value returned by `useRef` to attribute.
+`useRef` returned a ref object like React's, and you can recieve a DOM by setting ref object to attribute.
 
 ```js
 function Input() {
@@ -172,9 +201,7 @@ function Input() {
 
 ### useContext
 
-`createContext` offers `Context`, and using`Context.defineProvider` to define provider.
-
-You can consume it using `useContext(Context)`.
+`createContext` offers `Context`, and using`Context.defineProvider` to define provider, and you can consume it using `useContext(Context)`.
 
 ```js
 const ThemeContext = createContext();
@@ -195,6 +222,46 @@ defineElement("theme-consumer", () => {
     <div>theme is ${theme}</div>
   `;
 });
+```
+
+### useEffect
+
+`useEffect` gives you a side effects. it will run after rendering the component.
+
+```js
+function Timer() {
+  useEffect(() => {
+    const id = setInterval(() => console.log("interval"));
+    return () => clearInterval(id);
+  }, []);
+  return html``;
+}
+```
+
+### useMemo
+
+`useMemo` returns a memorized value. the value will update when deps given as the second argument.
+
+```js
+function Plus() {
+  const value = useMemo(() => a + b, [a, b]);
+  return html`
+    ${value}
+  `;
+}
+```
+
+### useCallback
+
+`useCallback` returns memorized callback as same as `useMemo`.
+
+```js
+function Greet() {
+  const greet = useCallback(() => alert("Hello"));
+  return html`
+    <button @click=${greet}>hello</button>
+  `;
+}
 ```
 
 ## License

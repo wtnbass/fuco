@@ -1,9 +1,9 @@
 {
-  "name": "functional-web-component",
-  "version": "0.4.1",
+  "name": "fuco",
+  "version": "1.0.0",
   "description": "Functional Component like React, but for Web Components",
-  "main": "dist/functional-web-component.js",
-  "module": "dist/functional-web-component.mjs",
+  "main": "dist/fuco.js",
+  "module": "dist/fuco.mjs",
   "typings": "index.d.ts",
   "files": [
     "dist",
@@ -28,8 +28,8 @@
   ],
   "author": "Keisuke Watanabe",
   "license": "MIT",
-  "homepage": "https://github.com/wtnbass/functional-web-component",
-  "repository": "wtnbass/functional-web-component",
+  "homepage": "https://github.com/wtnbass/fuco",
+  "repository": "wtnbass/fuco",
   "dependencies": {
     "lit-html": "1.1.1"
   },

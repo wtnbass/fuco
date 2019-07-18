@@ -1,7 +1,8 @@
 import { Component } from "./component";
 import { Context } from "./context";
 
-export const REQUEST_CONSUME = "functional-web-component:request-consume";
+export const REQUEST_CONSUME =
+  "context:request-consume:" + String(Math.random()).slice(2);
 
 export interface Detail<T> {
   context: Context<T>;
