@@ -23,15 +23,19 @@ export function hooks<T>(config: {
   return h.values[index];
 }
 
-export abstract class Component extends HTMLElement {
-  private updating = false;
-  public $root = this.attachShadow({ mode: "open" });
-  public hooks: Hooks<unknown> = {
+function createHooks(): Hooks<unknown> {
+  return {
     values: [],
     deps: [],
     effects: [],
     cleanup: []
   };
+}
+
+export abstract class Component extends HTMLElement {
+  private updating = false;
+  public $root = this.attachShadow({ mode: "open" });
+  public hooks = createHooks();
 
   protected abstract render(): void;
 
@@ -41,6 +45,7 @@ export abstract class Component extends HTMLElement {
 
   protected disconnectedCallback() {
     this.hooks.cleanup.forEach(f => f());
+    this.hooks = createHooks();
   }
 
   public update() {
