@@ -58,5 +58,23 @@ describe(
       expect(cleanupCount).toEqual(0);
       expect(updateCount).toEqual(1);
     });
+
+    it("cleanup works well", async () => {
+      const target = await f.setup();
+      expect(updateCount).toEqual(1);
+      expect(cleanupCount).toEqual(0);
+
+      f.unmount();
+
+      await waitFor();
+      expect(updateCount).toEqual(1);
+      expect(cleanupCount).toEqual(1);
+
+      document.body.appendChild(target);
+
+      await waitFor();
+      expect(updateCount).toEqual(2);
+      expect(cleanupCount).toEqual(1);
+    });
   })
 );
