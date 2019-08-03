@@ -1,6 +1,6 @@
 import { hooks, Component } from "./component";
 import { Context } from "./context";
-import { cssSymbol, HasCSSSymbol } from "./css";
+import { stringifyCSS, HasCSSSymbol } from "./css";
 import { REQUEST_CONSUME, Detail, Provider } from "./provider";
 
 export interface AttributeConverter<T> {
@@ -74,7 +74,7 @@ const enabledAdoptedStyleSheets =
 export const useStyle = (cssCreator: () => HasCSSSymbol) =>
   hooks<undefined>({
     oncreate(h, c, i) {
-      const css = cssCreator()[cssSymbol];
+      const css = stringifyCSS(cssCreator());
       if (enabledAdoptedStyleSheets) {
         const styleSheet = new CSSStyleSheet();
         styleSheet.replace(css);
@@ -111,8 +111,7 @@ export const useRef = <T>(initialValue: T | null) =>
       h.effects[i] = () => {
         const value = c.$root.querySelector(`[ref="${refPrefix + i}"]`);
         if (value != null) {
-          /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-          h.values[i].current = value as any;
+          h.values[i].current = (value as unknown) as T;
         }
       };
       return h.values[i];

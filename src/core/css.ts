@@ -1,4 +1,4 @@
-export const cssSymbol = Symbol("css");
+const cssSymbol = Symbol("css");
 
 export interface HasCSSSymbol {
   [cssSymbol]: string;
@@ -22,3 +22,5 @@ export const css = (strings: readonly string[], ...values: unknown[]) => ({
 });
 
 export const unsafeCSS = (css: string) => ({ [cssSymbol]: css });
+
+export const stringifyCSS = (css: HasCSSSymbol) => css[cssSymbol];
