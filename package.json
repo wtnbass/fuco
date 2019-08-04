@@ -1,6 +1,6 @@
 {
   "name": "fuco",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Functional Component like React, but for Web Components",
   "main": "dist/fuco.js",
   "module": "dist/fuco.mjs",
