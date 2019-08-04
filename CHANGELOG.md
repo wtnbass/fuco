@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 <!-- ### Added -->
-<!-- ### Changed -->
 <!-- ### Removed -->
+
+### Changed
+
+- Encapsulation of `Symbol("css")`. ([#22](https://github.com/wtnbass/fuco/pull/22))
 
 ### Fixed
 
