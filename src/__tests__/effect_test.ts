@@ -3,6 +3,7 @@ import { html, useAttribute, useEffect } from "..";
 
 let updateCount = 0;
 let cleanupCount = 0;
+let count2 = [0, 0];
 
 const fixture = () => {
   const value = useAttribute("value");
@@ -13,6 +14,11 @@ const fixture = () => {
       cleanupCount++;
     };
   }, [value]);
+
+  useEffect(() => {
+    count2[0]++;
+    return () => count2[1]++;
+  });
   return html`
     ${value} ${otherValue}
   `;
@@ -24,6 +30,7 @@ describe(
     beforeEach(() => {
       updateCount = 0;
       cleanupCount = 0;
+      count2 = [0, 0];
     });
 
     it("mount", async () => {
@@ -75,6 +82,21 @@ describe(
       await waitFor();
       expect(updateCount).toEqual(2);
       expect(cleanupCount).toEqual(1);
+    });
+
+    it("run every update time", async () => {
+      const target = await f.setup();
+      expect(count2).toEqual([1, 0]);
+
+      target.setAttribute("value", "change");
+
+      await waitFor();
+      expect(count2).toEqual([2, 1]);
+
+      target.setAttribute("other-value", "change");
+
+      await waitFor();
+      expect(count2).toEqual([3, 2]);
     });
   })
 );

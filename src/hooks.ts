@@ -72,7 +72,7 @@ const enabledAdoptedStyleSheets =
   "replace" in CSSStyleSheet.prototype;
 
 export const useStyle = (cssCreator: () => HasCSSSymbol) =>
-  hooks<undefined>({
+  hooks<void>({
     oncreate(h, c, i) {
       const css = stringifyCSS(cssCreator());
       if (enabledAdoptedStyleSheets) {
@@ -89,7 +89,6 @@ export const useStyle = (cssCreator: () => HasCSSSymbol) =>
           c.$root.appendChild(style);
         };
       }
-      return undefined;
     }
   });
 
@@ -182,24 +181,23 @@ const depsChanged = (prev: unknown[] | undefined, next: unknown[]) =>
 
 export const useEffect = (
   handler: () => void | (() => void),
-  deps: unknown[]
+  deps?: unknown[]
 ) =>
-  hooks<undefined>({
+  hooks<void>({
     onupdate(h, _, i) {
-      if (depsChanged(h.deps[i], deps)) {
-        h.deps[i] = deps;
+      if (!deps || depsChanged(h.deps[i], deps)) {
+        h.deps[i] = deps || [];
         h.effects[i] = handler;
       }
-      return undefined;
     }
   });
 
-export const useMemo = <T>(fn: () => T, deps: unknown[]) =>
+export const useMemo = <T>(fn: () => T, deps?: unknown[]) =>
   hooks<T>({
     onupdate(h, _, i) {
       let value = h.values[i];
-      if (depsChanged(h.deps[i], deps)) {
-        h.deps[i] = deps;
+      if (!deps || depsChanged(h.deps[i], deps)) {
+        h.deps[i] = deps || [];
         value = fn();
       }
       return value;
