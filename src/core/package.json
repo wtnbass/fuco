@@ -1,6 +1,0 @@
-{
-  "name": "core",
-  "main": "core.js",
-  "module": "core.mjs",
-  "typings": "index.d.ts"
-}
