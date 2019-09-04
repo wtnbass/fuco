@@ -1,5 +1,9 @@
 /node_modules
 /package-lock.json
-/dist
+
 /coverage
 /.tsbuildinfo
+/__tests__
+/lib
+/core.*
+/index.*

@@ -1,25 +1,22 @@
-import pkg from "./package.json";
 import resolve from "rollup-plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
 import filesize from "rollup-plugin-filesize";
 
 export default [
   {
-    input: "./dist/index.js",
-    external: Object.keys(pkg.dependencies),
+    input: "./index.js",
     output: {
-      file: pkg.main,
+      file: "index.bundle.js",
       format: "cjs"
     },
-    plugins: [resolve(), filesize()]
+    plugins: [resolve(), terser(), filesize()]
   },
   {
-    input: "./dist/index.js",
-    external: Object.keys(pkg.dependencies),
+    input: "./core.js",
     output: {
-      file: pkg.module,
-      format: "esm"
+      file: "core.bundle.js",
+      format: "cjs"
     },
-    plugins: [resolve(), terser(), filesize()]
+    plugins: [terser(), filesize()]
   }
 ];

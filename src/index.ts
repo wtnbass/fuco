@@ -1,23 +1,8 @@
 import { render, TemplateResult } from "lit-html";
-import { Component } from "./component";
+import { Component } from "./core";
 
 export { html } from "lit-html";
-export { Component } from "./component";
-export { css, unsafeCSS } from "./css";
-export { createContext } from "./context";
-export {
-  useAttribute,
-  useProperty,
-  useDispatchEvent,
-  useStyle,
-  useRef,
-  useState,
-  useReducer,
-  useContext,
-  useEffect,
-  useMemo,
-  useCallback
-} from "./hooks";
+export * from "./core";
 
 export interface FunctionalComponent {
   (): TemplateResult;
