@@ -7,7 +7,7 @@ export default [
     input: "./index.js",
     output: {
       file: "index.bundle.js",
-      format: "cjs"
+      format: "esm"
     },
     plugins: [resolve(), terser(), filesize()]
   },
@@ -15,7 +15,7 @@ export default [
     input: "./core.js",
     output: {
       file: "core.bundle.js",
-      format: "cjs"
+      format: "esm"
     },
     plugins: [terser(), filesize()]
   }

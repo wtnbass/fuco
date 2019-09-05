@@ -1,5 +1,5 @@
 import { withFixtures, waitFor } from "./fixture";
-import { html, useAttribute, useEffect } from "..";
+import { html, useAttribute, useProperty, useEffect } from "..";
 
 let updateCount = 0;
 let cleanupCount = 0;
@@ -24,13 +24,23 @@ const fixture = () => {
   `;
 };
 
+let countFNum = 0;
+const fixtureNumber = () => {
+  const num = useProperty("num");
+  useEffect(() => {
+    countFNum++;
+  }, [num]);
+  return html``;
+};
+
 describe(
   "use-effect",
-  withFixtures(fixture)(([f]) => {
+  withFixtures(fixture, fixtureNumber)(([f, fNum]) => {
     beforeEach(() => {
       updateCount = 0;
       cleanupCount = 0;
       count2 = [0, 0];
+      countFNum = 0;
     });
 
     it("mount", async () => {
@@ -97,6 +107,31 @@ describe(
 
       await waitFor();
       expect(count2).toEqual([3, 2]);
+    });
+
+    it("compare deps as SameValue", async () => {
+      let target!: Element & { num: number };
+      const setup = async () => {
+        target = (await fNum.setup()) as Element & { num: number };
+      };
+      await setup();
+      expect(countFNum).toEqual(1);
+
+      target.num = +0;
+      await setup();
+      expect(countFNum).toEqual(2);
+
+      target.num = -0;
+      await setup();
+      expect(countFNum).toEqual(3);
+
+      target.num = NaN;
+      await setup();
+      expect(countFNum).toEqual(4);
+
+      target.num = Number("a");
+      await setup();
+      expect(countFNum).toEqual(4);
     });
   })
 );

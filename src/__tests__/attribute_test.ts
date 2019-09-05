@@ -30,9 +30,23 @@ const fixtureBooleanAttribute = () => {
   `;
 };
 
+const fixtureNumberAttribute = () => {
+  const num = useAttribute("number", Number);
+  const updateCount = useRef(0);
+  return html`
+    <div>${num}</div>
+    <div>${updateCount.current!++}</div>
+  `;
+};
+
 describe(
   "use-attribute",
-  withFixtures(fixture, fixturewithConvert, fixtureBooleanAttribute)(fs => {
+  withFixtures(
+    fixture,
+    fixturewithConvert,
+    fixtureBooleanAttribute,
+    fixtureNumberAttribute
+  )(fs => {
     it("row attribute", async () => {
       let target!: Element;
       let div!: HTMLDivElement;
@@ -99,6 +113,45 @@ describe(
 
       await setup();
       expect(text(div)).toEqual("false");
+    });
+
+    it("compare as SameValue", async () => {
+      let target!: Element;
+      let count!: HTMLDivElement;
+      const setup = async () => {
+        target = await fs[3].setup();
+        [, count] = selectorAll<HTMLDivElement>("div", target);
+      };
+
+      await setup();
+      expect(target.getAttribute("number")).toBeNull();
+      expect(text(count)).toEqual("0");
+
+      target.setAttribute("number", "+0");
+
+      await setup();
+      expect(target.getAttribute("number")).toEqual("+0");
+      expect(text(count)).toEqual("0");
+
+      // +0 => -0
+      target.setAttribute("number", "-0");
+
+      await setup();
+      expect(target.getAttribute("number")).toEqual("-0");
+      expect(text(count)).toEqual("1");
+
+      target.setAttribute("number", "aaa");
+
+      await setup();
+      expect(target.getAttribute("number")).toEqual("aaa");
+      expect(text(count)).toEqual("2");
+
+      // NaN => NaN
+      target.setAttribute("number", "bbb");
+
+      await setup();
+      expect(target.getAttribute("number")).toEqual("bbb");
+      expect(text(count)).toEqual("2");
     });
   })
 );

@@ -71,25 +71,34 @@ const fixture = () => {
   `;
 };
 
+const fixtureNumber = () => {
+  const [, dispatch] = useReducer<number, number>((_, a) => a, +0);
+  const updated = useRef(0);
+
+  return html`
+    <div>${updated.current!++}</div>
+    <button @click=${() => dispatch(-0)}></button>
+    <button @click=${() => dispatch(NaN)}></button>
+    <button @click=${() => dispatch(Number("a"))}></button>
+  `;
+};
+
 describe(
   "use-reducer",
-  withFixtures(fixture)(([f]) => {
-    let input: HTMLInputElement;
-    let list: NodeListOf<Element>;
-    let noop: HTMLButtonElement;
-    let updated: HTMLDivElement;
-
-    beforeAll(() => {});
-
-    const setup = async () => {
-      const target = await f.setup();
-      input = selector("input", target);
-      list = selectorAll("ul > li", target);
-      noop = selector("button", target);
-      updated = selector("div", target);
-    };
-
+  withFixtures(fixture, fixtureNumber)(f => {
     it("mount", async () => {
+      let input!: HTMLInputElement;
+      let list!: NodeListOf<Element>;
+      let noop!: HTMLButtonElement;
+      let updated!: HTMLDivElement;
+
+      const setup = async () => {
+        const target = await f[0].setup();
+        input = selector("input", target);
+        list = selectorAll("ul > li", target);
+        noop = selector("button", target);
+        updated = selector("div", target);
+      };
       await setup();
       expect(input.value).toEqual("");
       expect(list.length).toEqual(0);
@@ -118,6 +127,36 @@ describe(
 
       // noop
       noop.click();
+
+      await setup();
+      expect(text(updated)).toEqual("2");
+    });
+
+    it("compare as SameValue", async () => {
+      let btns!: HTMLButtonElement[];
+      let updated!: HTMLDivElement;
+      const setup = async () => {
+        const target = await f[1].setup();
+        btns = [...selectorAll<HTMLButtonElement>("button", target)];
+        updated = selector("div", target);
+      };
+
+      await setup();
+      expect(text(updated)).toEqual("0");
+
+      // +0 => -0
+      btns[0].click();
+
+      await setup();
+      expect(text(updated)).toEqual("1");
+
+      btns[1].click();
+
+      await setup();
+      expect(text(updated)).toEqual("2");
+
+      // NaN => NaN
+      btns[2].click();
 
       await setup();
       expect(text(updated)).toEqual("2");
