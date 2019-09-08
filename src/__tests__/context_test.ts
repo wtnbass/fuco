@@ -9,6 +9,7 @@ import {
   useContext,
   useCallback
 } from "..";
+import { Provider } from "../lib/provider";
 
 type Theme = "light" | "dark";
 type Theme2 = "green" | "red";
@@ -44,6 +45,7 @@ defineElement("theme-consumer-count", () => {
     <div>${count.current!++}</div>
   `;
 });
+
 function Single() {
   const [theme, setTheme] = useState<Theme>("dark");
   const toggle = useCallback(() => {
@@ -154,9 +156,27 @@ function ValueChanged() {
   `;
 }
 
+const NumContext = createContext<number>();
+NumContext.defineProvider("num-context");
+defineElement("num-consumer", () => {
+  useContext(NumContext);
+  const updated = useRef(0);
+  return html`
+    <div>${updated.current!++}</div>
+  `;
+});
+
+function Num() {
+  return html`
+    <num-context>
+      <num-consumer></num-consumer>
+    </num-context>
+  `;
+}
+
 describe(
   "use-context",
-  withFixtures(Single, Double, Same, Duplicate, Unsubscribe, ValueChanged)(
+  withFixtures(Single, Double, Same, Duplicate, Unsubscribe, ValueChanged, Num)(
     fixs => {
       it("single context", async () => {
         let target!: Element;
@@ -326,6 +346,38 @@ describe(
 
         await setup();
         expect(text(count)).toEqual("2");
+      });
+
+      it("compare as SameValue", async () => {
+        let updated!: HTMLDivElement;
+        let provider!: Provider<number>;
+        const setup = async () => {
+          const target = await fixs[6].setup();
+          const consumer = selector("num-consumer", target);
+          provider = selector("num-context", target);
+          updated = selector<HTMLDivElement>("div", consumer);
+        };
+
+        await setup();
+        expect(text(updated)).toEqual("0");
+
+        provider.value = +0;
+        await setup();
+        expect(text(updated)).toEqual("1");
+
+        // +0 => -0
+        provider.value = -0;
+        await setup();
+        expect(text(updated)).toEqual("2");
+
+        provider.value = NaN;
+        await setup();
+        expect(text(updated)).toEqual("3");
+
+        // NaN => NaN
+        provider.value = Number("a");
+        await setup();
+        expect(text(updated)).toEqual("3");
       });
     }
   )

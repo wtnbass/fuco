@@ -24,7 +24,7 @@ export function useAttribute<T>(
         const newValue = converter
           ? converter(c.getAttribute(name))
           : c.getAttribute(name);
-        if (h.values[i] !== newValue) {
+        if (!Object.is(h.values[i], newValue)) {
           h.values[i] = newValue;
           c.update();
         }
@@ -46,7 +46,7 @@ export const useProperty = <T>(name: string) =>
           return h.values[i];
         },
         set(newValue) {
-          if (h.values[i] !== newValue) {
+          if (!Object.is(h.values[i], newValue)) {
             h.values[i] = newValue;
             c.update();
           }
@@ -128,7 +128,7 @@ export const useState = <T>(initialState: T | (() => T)) =>
         if (typeof nextState === "function") {
           nextState = (nextState as (s: T) => T)(state);
         }
-        if (state !== nextState) {
+        if (!Object.is(state, nextState)) {
           h.values[i][0] = nextState;
           c.update();
         }
@@ -146,7 +146,7 @@ export const useReducer = <S, A>(
       function dispatch(action: A) {
         const state = h.values[i][0];
         const nextState = reducer(state, action);
-        if (state !== nextState) {
+        if (!Object.is(state, nextState)) {
           h.values[i][0] = nextState;
           c.update();
         }
@@ -177,7 +177,7 @@ export const useContext = <T>(context: Context<T>) =>
   });
 
 const depsChanged = (prev: unknown[] | undefined, next: unknown[]) =>
-  prev == null || next.some((f, i) => f !== prev[i]);
+  prev == null || next.some((f, i) => !Object.is(f, prev[i]));
 
 export const useEffect = (
   handler: () => void | (() => void),

@@ -46,7 +46,7 @@ export abstract class Provider<T> extends HTMLElement {
   }
 
   public set value(newValue) {
-    if (this._value !== newValue) {
+    if (!Object.is(this._value, newValue)) {
       this._value = newValue;
       this.consumers.forEach(c => c.update());
     }
