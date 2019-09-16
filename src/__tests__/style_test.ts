@@ -47,6 +47,10 @@ describe(
       return html`
         <div>Test</div>
       `;
+    },
+    () => {
+      useStyle(fontSize(10)());
+      return html``;
     }
   )(fs => {
     it("number value", async () => {
@@ -77,6 +81,11 @@ describe(
     it("disallow-type", async () => {
       const target = await fs[5].setup();
       expect(target.shadowRoot!.innerHTML).toEqual("");
+    });
+
+    it("allows css tag as argument", async () => {
+      const target = await fs[6].setup();
+      expect(getCssText(target)).toEqual("div { font-size: 10px; }");
     });
   })
 );

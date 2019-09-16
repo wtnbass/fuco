@@ -71,10 +71,13 @@ const enabledAdoptedStyleSheets =
   "adoptedStyleSheets" in Document.prototype &&
   "replace" in CSSStyleSheet.prototype;
 
-export const useStyle = (cssCreator: () => HasCSSSymbol) =>
+export const useStyle = (cssStyle: HasCSSSymbol | (() => HasCSSSymbol)) =>
   hooks<void>({
     oncreate(h, c, i) {
-      const css = stringifyCSS(cssCreator());
+      if (typeof cssStyle === "function") {
+        cssStyle = cssStyle();
+      }
+      const css = stringifyCSS(cssStyle);
       if (enabledAdoptedStyleSheets) {
         const styleSheet = new CSSStyleSheet();
         styleSheet.replace(css);
