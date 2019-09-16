@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Allows css tag as the argument of `useStyle`.([#27](https://github.com/wtnbass/fuco/pull/27))
+
 - Compare as SameValue using `Object.is`. ([#26](https://github.com/wtnbass/fuco/pull/26))
 
 - Effects run every updated if deps is undefined. ([#23](https://github.com/wtnbass/fuco/pull/23))
