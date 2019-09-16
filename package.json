@@ -1,6 +1,6 @@
 {
   "name": "fuco",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Functional Component like React, but for Web Components",
   "main": "index.js",
   "module": "index.js",
