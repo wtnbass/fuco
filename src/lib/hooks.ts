@@ -1,7 +1,8 @@
-import { hooks, Component } from "./component";
+import { Component } from "./component";
 import { Context } from "./context";
 import { stringifyCSS, HasCSSSymbol } from "./css";
 import { REQUEST_CONSUME, Detail, Provider } from "./provider";
+import { hooks } from "./update";
 
 export interface AttributeConverter<T> {
   (attr: string | null): T;
@@ -86,7 +87,7 @@ export const useStyle = (cssStyle: HasCSSSymbol | (() => HasCSSSymbol)) =>
           styleSheet
         ];
       } else {
-        h.effects[i] = () => {
+        h.layoutEffects[i] = () => {
           const style = document.createElement("style");
           style.textContent = css;
           c.$root.appendChild(style);
@@ -110,7 +111,7 @@ export const useRef = <T>(initialValue: T | null) =>
         }
       }),
     onupdate: (h, c, i) => {
-      h.effects[i] = () => {
+      h.layoutEffects[i] = () => {
         const value = c.$root.querySelector(`[ref="${refPrefix + i}"]`);
         if (value != null) {
           h.values[i].current = (value as unknown) as T;
@@ -191,6 +192,19 @@ export const useEffect = (
       if (!deps || depsChanged(h.deps[i], deps)) {
         h.deps[i] = deps || [];
         h.effects[i] = handler;
+      }
+    }
+  });
+
+export const useLayoutEffect = (
+  handler: () => void | (() => void),
+  deps?: unknown[]
+) =>
+  hooks<void>({
+    onupdate(h, _, i) {
+      if (!deps || depsChanged(h.deps[i], deps)) {
+        h.deps[i] = deps || [];
+        h.layoutEffects[i] = handler;
       }
     }
   });

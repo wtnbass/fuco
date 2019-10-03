@@ -1,4 +1,4 @@
-import { withFixtures, waitFor } from "./fixture";
+import { withFixtures } from "./fixture";
 import { html, useAttribute, useProperty, useEffect } from "..";
 
 let updateCount = 0;
@@ -44,12 +44,12 @@ describe(
     });
 
     it("mount", async () => {
-      await waitFor();
+      await f.setup();
       expect(updateCount).toEqual(1);
     });
 
     it("unmount", async () => {
-      await waitFor();
+      await f.setup();
       f.unmount();
       expect(cleanupCount).toEqual(1);
     });
@@ -60,7 +60,7 @@ describe(
 
       target.setAttribute("value", "change");
 
-      await waitFor();
+      await f.setup();
       expect(cleanupCount).toEqual(1);
       expect(updateCount).toEqual(2);
     });
@@ -71,25 +71,25 @@ describe(
 
       target.setAttribute("other-value", "change");
 
-      await waitFor();
+      await f.setup();
       expect(cleanupCount).toEqual(0);
       expect(updateCount).toEqual(1);
     });
 
     it("cleanup works well", async () => {
-      const target = await f.setup();
+      await f.setup();
       expect(updateCount).toEqual(1);
       expect(cleanupCount).toEqual(0);
 
       f.unmount();
 
-      await waitFor();
+      await f.setup();
       expect(updateCount).toEqual(1);
       expect(cleanupCount).toEqual(1);
 
-      document.body.appendChild(target);
+      f.mount();
 
-      await waitFor();
+      await f.setup();
       expect(updateCount).toEqual(2);
       expect(cleanupCount).toEqual(1);
     });
@@ -100,12 +100,12 @@ describe(
 
       target.setAttribute("value", "change");
 
-      await waitFor();
+      await f.setup();
       expect(count2).toEqual([2, 1]);
 
       target.setAttribute("other-value", "change");
 
-      await waitFor();
+      await f.setup();
       expect(count2).toEqual([3, 2]);
     });
 

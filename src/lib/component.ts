@@ -1,82 +1,50 @@
-let currentCursor: number;
-let currentComponent: Component;
+import { Hooks, enqueueUpdate } from "./update";
 
-export interface Hooks<T> {
-  values: T[];
-  deps: unknown[][];
-  effects: (() => void | (() => void))[];
-  cleanup: (() => void)[];
-}
-
-export function hooks<T>(config: {
-  oncreate?: (h: Hooks<T>, c: Component, i: number) => T;
-  onupdate?: (h: Hooks<T>, c: Component, i: number) => T;
-}): T {
-  const h = currentComponent.hooks as Hooks<T>;
-  const index = currentCursor++;
-  if (h.values.length <= index && config.oncreate) {
-    h.values[index] = config.oncreate(h, currentComponent, index);
-  }
-  if (config.onupdate) {
-    h.values[index] = config.onupdate(h, currentComponent, index);
-  }
-  return h.values[index];
-}
-
-function createHooks(): Hooks<unknown> {
-  return {
+export abstract class Component extends HTMLElement {
+  public abstract render(): void;
+  public _dirty = false;
+  public _connected = false;
+  public $root = this.attachShadow({ mode: "open" });
+  public hooks: Hooks<unknown> = {
     values: [],
     deps: [],
     effects: [],
+    layoutEffects: [],
     cleanup: []
   };
-}
-
-export abstract class Component extends HTMLElement {
-  private updating = false;
-  public $root = this.attachShadow({ mode: "open" });
-  public hooks = createHooks();
-
-  protected abstract render(): void;
 
   protected connectedCallback() {
+    this._connected = true;
     this.update();
   }
 
   protected disconnectedCallback() {
-    this.hooks.cleanup.forEach(f => f());
-    this.hooks = createHooks();
+    this._connected = false;
+    const cleanups = this.hooks.cleanup;
+    for (let i = 0; i < cleanups.length; i++) {
+      if (cleanups[i]) {
+        cleanups[i]();
+        delete cleanups[i];
+      }
+    }
   }
 
   public update() {
-    if (this.updating) return;
-
-    this.updating = true;
-
-    Promise.resolve().then(() => {
-      try {
-        currentCursor = 0;
-        currentComponent = this;
-
-        this.render();
-        this.affect();
-      } catch (e) {
-        console.error(e);
-      }
-      this.updating = false;
-    });
+    if (this._dirty) return;
+    this._dirty = true;
+    enqueueUpdate(this);
   }
 
-  private affect() {
-    const h = this.hooks;
-    for (let i = 0; i < h.effects.length; i++) {
-      if (h.effects[i]) {
-        h.cleanup[i] && h.cleanup[i]();
-        const cleanup = h.effects[i]();
+  public flushEffects(effects: (() => void | (() => void))[]) {
+    const cleanups = this.hooks.cleanup;
+    for (let i = 0; i < effects.length; i++) {
+      if (effects[i]) {
+        cleanups[i] && cleanups[i]();
+        const cleanup = effects[i]();
         if (cleanup) {
-          h.cleanup[i] = cleanup;
+          cleanups[i] = cleanup;
         }
-        delete h.effects[i];
+        delete effects[i];
       }
     }
   }

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { withFixtures } from "./fixture";
+import { withFixtures, createFixture } from "./fixture";
 import { html, css, unsafeCSS, useStyle } from "..";
 
 const fontSize = (size: unknown) => () => css`
@@ -43,12 +43,6 @@ describe(
       return html``;
     },
     () => {
-      useStyle(fontSize("10"));
-      return html`
-        <div>Test</div>
-      `;
-    },
-    () => {
       useStyle(fontSize(10)());
       return html``;
     }
@@ -79,12 +73,27 @@ describe(
     });
 
     it("disallow-type", async () => {
-      const target = await fs[5].setup();
-      expect(target.shadowRoot!.innerHTML).toEqual("");
+      let error: unknown = null;
+      const f = createFixture(() => {
+        useStyle(() => {
+          try {
+            return fontSize("10")();
+          } catch (e) {
+            error = e;
+            return css``;
+          }
+        });
+        return html``;
+      });
+      f.define();
+      f.mount();
+      await f.setup();
+
+      expect(error).not.toBeNull();
     });
 
     it("allows css tag as argument", async () => {
-      const target = await fs[6].setup();
+      const target = await fs[5].setup();
       expect(getCssText(target)).toEqual("div { font-size: 10px; }");
     });
   })

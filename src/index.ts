@@ -12,7 +12,7 @@ export function defineElement(name: string, fn: FunctionalComponent) {
   window.customElements.define(
     name,
     class extends Component {
-      protected render() {
+      public render() {
         render(fn(), this.$root, { eventContext: this });
       }
     }
