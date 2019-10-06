@@ -1,8 +1,7 @@
-import { Component } from "./component";
+import { Component, hooks } from "./component";
 import { Context } from "./context";
 import { stringifyCSS, HasCSSSymbol } from "./css";
 import { REQUEST_CONSUME, Detail, Provider } from "./provider";
-import { hooks } from "./update";
 
 export interface AttributeConverter<T> {
   (attr: string | null): T;
@@ -27,7 +26,7 @@ export function useAttribute<T>(
           : c.getAttribute(name);
         if (!Object.is(h.values[i], newValue)) {
           h.values[i] = newValue;
-          c.update();
+          c.performUpdate();
         }
       });
       m.observe(c, { attributes: true, attributeFilter: [name] });
@@ -74,7 +73,7 @@ const enabledAdoptedStyleSheets =
 
 export const useStyle = (cssStyle: HasCSSSymbol | (() => HasCSSSymbol)) =>
   hooks<void>({
-    oncreate(h, c, i) {
+    oncreate(_, c, i) {
       if (typeof cssStyle === "function") {
         cssStyle = cssStyle();
       }
@@ -87,7 +86,7 @@ export const useStyle = (cssStyle: HasCSSSymbol | (() => HasCSSSymbol)) =>
           styleSheet
         ];
       } else {
-        h.layoutEffects[i] = () => {
+        c.renderCallback[i] = () => {
           const style = document.createElement("style");
           style.textContent = css;
           c.$root.appendChild(style);
@@ -111,7 +110,7 @@ export const useRef = <T>(initialValue: T | null) =>
         }
       }),
     onupdate: (h, c, i) => {
-      h.layoutEffects[i] = () => {
+      c.renderCallback[i] = () => {
         const value = c.$root.querySelector(`[ref="${refPrefix + i}"]`);
         if (value != null) {
           h.values[i].current = (value as unknown) as T;

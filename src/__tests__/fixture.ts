@@ -2,7 +2,7 @@
 import { defineElement, FunctionalComponent } from "..";
 
 function waitFor() {
-  return new Promise(resolve => setTimeout(resolve, 8));
+  return new Promise(resolve => setTimeout(resolve, 10));
 }
 
 export const selector = <T extends Element>(s: string, hasShadow?: Element) =>
