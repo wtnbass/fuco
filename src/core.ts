@@ -11,6 +11,7 @@ export {
   useReducer,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useCallback
 } from "./lib/hooks";

@@ -1,5 +1,5 @@
 import { withFixtures } from "./fixture";
-import { html, useAttribute, useProperty, useEffect } from "..";
+import { html, useAttribute, useProperty, useLayoutEffect } from "..";
 
 let updateCount = 0;
 let cleanupCount = 0;
@@ -8,14 +8,14 @@ let count2 = [0, 0];
 const fixture = () => {
   const value = useAttribute("value");
   const otherValue = useAttribute("other-value");
-  useEffect(() => {
+  useLayoutEffect(() => {
     updateCount++;
     return () => {
       cleanupCount++;
     };
   }, [value]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     count2[0]++;
     return () => count2[1]++;
   });
@@ -27,14 +27,14 @@ const fixture = () => {
 let countFNum = 0;
 const fixtureNumber = () => {
   const num = useProperty("num");
-  useEffect(() => {
+  useLayoutEffect(() => {
     countFNum++;
   }, [num]);
   return html``;
 };
 
 describe(
-  "use-effect",
+  "use-layout-effect",
   withFixtures(fixture, fixtureNumber)(([f, fNum]) => {
     beforeEach(() => {
       updateCount = 0;

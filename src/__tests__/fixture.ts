@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { defineElement, FunctionalComponent } from "..";
 
-export function waitFor() {
-  return new Promise(resolve => setTimeout(resolve));
+function waitFor() {
+  return new Promise(resolve => setTimeout(resolve, 10));
 }
 
 export const selector = <T extends Element>(s: string, hasShadow?: Element) =>

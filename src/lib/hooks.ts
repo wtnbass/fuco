@@ -1,4 +1,4 @@
-import { hooks, Component } from "./component";
+import { Component, hooks } from "./component";
 import { Context } from "./context";
 import { stringifyCSS, HasCSSSymbol } from "./css";
 import { REQUEST_CONSUME, Detail, Provider } from "./provider";
@@ -26,7 +26,7 @@ export function useAttribute<T>(
           : c.getAttribute(name);
         if (!Object.is(h.values[i], newValue)) {
           h.values[i] = newValue;
-          c.update();
+          c.performUpdate();
         }
       });
       m.observe(c, { attributes: true, attributeFilter: [name] });
@@ -73,7 +73,7 @@ const enabledAdoptedStyleSheets =
 
 export const useStyle = (cssStyle: HasCSSSymbol | (() => HasCSSSymbol)) =>
   hooks<void>({
-    oncreate(h, c, i) {
+    oncreate(_, c, i) {
       if (typeof cssStyle === "function") {
         cssStyle = cssStyle();
       }
@@ -86,7 +86,7 @@ export const useStyle = (cssStyle: HasCSSSymbol | (() => HasCSSSymbol)) =>
           styleSheet
         ];
       } else {
-        h.effects[i] = () => {
+        c.renderCallback[i] = () => {
           const style = document.createElement("style");
           style.textContent = css;
           c.$root.appendChild(style);
@@ -110,7 +110,7 @@ export const useRef = <T>(initialValue: T | null) =>
         }
       }),
     onupdate: (h, c, i) => {
-      h.effects[i] = () => {
+      c.renderCallback[i] = () => {
         const value = c.$root.querySelector(`[ref="${refPrefix + i}"]`);
         if (value != null) {
           h.values[i].current = (value as unknown) as T;
@@ -191,6 +191,19 @@ export const useEffect = (
       if (!deps || depsChanged(h.deps[i], deps)) {
         h.deps[i] = deps || [];
         h.effects[i] = handler;
+      }
+    }
+  });
+
+export const useLayoutEffect = (
+  handler: () => void | (() => void),
+  deps?: unknown[]
+) =>
+  hooks<void>({
+    onupdate(h, _, i) {
+      if (!deps || depsChanged(h.deps[i], deps)) {
+        h.deps[i] = deps || [];
+        h.layoutEffects[i] = handler;
       }
     }
   });
