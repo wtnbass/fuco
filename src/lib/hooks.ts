@@ -220,5 +220,7 @@ export const useMemo = <T>(fn: () => T, deps?: unknown[]) =>
     }
   });
 
-export const useCallback = <A, R>(callback: (a: A) => R, deps: unknown[]) =>
-  useMemo(() => callback, deps);
+export const useCallback = <T extends Function>(
+  callback: T,
+  deps?: unknown[]
+) => useMemo(() => callback, deps);
