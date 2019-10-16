@@ -68,6 +68,7 @@ yarn add fuco
   - [useRef](#useRef)
   - [useContext](#useContext)
   - [useEffect](#useEffect)
+  - [useLayoutEffect](#useLayoutEffect)
   - [useMemo](#useMemo)
   - [useCallback](#useCallback)
 
@@ -235,6 +236,22 @@ function Timer() {
     return () => clearInterval(id);
   }, []);
   return html``;
+}
+```
+
+### useLayoutEffect
+
+`useLayoutEffect` runs after the DOM has been updated, but before the browser has had a chance to paint those changes
+
+```js
+function Box() {
+  const ref = useRef(null);
+  useLayoutEffect(() => {
+    ref.current.style.top = "100px";
+  });
+  return html`
+    <div ref=${ref}></div>
+  `;
 }
 ```
 
