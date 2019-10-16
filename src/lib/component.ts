@@ -51,36 +51,43 @@ const flushEffects = (
   }
 };
 
-type QueueCallback<T> = (t: T) => void;
-
-const queue = <T>(callback: QueueCallback<T>) => {
+const batch = <T>(
+  runner: (f: () => void) => () => void,
+  pick: (p: T[]) => T | undefined,
+  callback: (p: T) => void
+) => {
   const q: T[] = [];
-  const enqueue = () => {
+  const flush = () => {
     let p;
-    while ((p = q.pop())) callback(p);
+    while ((p = pick(q))) callback(p);
   };
-  return [q, enqueue] as const;
+  const run = runner(flush);
+  return (c: T) => q.push(c) === 1 && run();
 };
 
-const microtask = <T>(callback: QueueCallback<T>) => {
-  const [q, enqueue] = queue(callback);
-  return (c: T) => q.push(c) === 1 && queueMicrotask(enqueue);
+const fifo = <T>(q: T[]) => q.shift();
+
+const filo = <T>(q: T[]) => q.pop();
+
+const microtask = (flush: () => void) => {
+  return () => queueMicrotask(flush);
 };
 
-const task = <T>(callback: QueueCallback<T>) => {
-  const [q, enqueue] = queue(callback);
+const task = (flush: () => void) => {
   const ch = new MessageChannel();
-  ch.port1.onmessage = enqueue;
-  return (c: T) => q.push(c) === 1 && ch.port2.postMessage(null);
+  ch.port1.onmessage = flush;
+  return () => ch.port2.postMessage(null);
 };
 
-const commitLayoutEffects = microtask<Component>(c =>
+const enqueueUpdate = batch<Component>(microtask, fifo, c => c.performUpdate());
+
+const commitLayoutEffects = batch<Component>(microtask, filo, c =>
   flushEffects(c.hooks, "layoutEffects")
 );
 
-const commitEffects = task<Component>(c => flushEffects(c.hooks, "effects"));
-
-const enqueueUpdate = microtask<Component>(c => c.performUpdate());
+const commitEffects = batch<Component>(task, filo, c =>
+  flushEffects(c.hooks, "effects")
+);
 
 export abstract class Component extends HTMLElement {
   private _dirty = false;
