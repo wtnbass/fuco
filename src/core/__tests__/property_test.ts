@@ -32,7 +32,10 @@ const fixtureNumber = () => {
 
 describe(
   "use-property",
-  withFixtures(fixture, fixtureNumber)(f => {
+  withFixtures(
+    fixture,
+    fixtureNumber
+  )(f => {
     let target: Element & { user: User; num: number };
     let div: HTMLDivElement;
     let count: HTMLDivElement;

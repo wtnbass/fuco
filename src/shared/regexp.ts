@@ -1,0 +1,12 @@
+export const openTagRegexp = /^\s*<\s*([a-zA-Z1-9-]+)/;
+export const closeTagRegexp = /^\s*<\s*\/\s*([a-zA-Z1-9-]+)>/;
+export const tagEndRegexp = /^\s*(\/)?>/;
+export const voidTagNameRegexp = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;
+export const attrNameRegexp = /\s*([.?@a-zA-Z1-9-]+)\s*=/;
+export const quotedAttrValueRegexp = /\s*(["'])((?:.)*?)\1/;
+export const rawAttrValueRegexp = /\s*(.+?)[\s>]/;
+export const doctypeRegexp = /^\s*<!DOCTYPE [^>]+>/i;
+export const commentStartRegexp = /^\s*<!--/;
+export const commentEndRegexp = /-->/;
+export const spreadAttrRegexp = /\s*(\.{3})\s*$/;
+export const attrPrefixRegexp = /^(@|\.|\?)([a-zA-Z1-9-]+)/;

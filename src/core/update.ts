@@ -1,3 +1,5 @@
+import { Component } from "./component";
+
 let currentCursor: number;
 let currentComponent: Component;
 
@@ -24,7 +26,7 @@ export function hooks<T>(config: {
   return h.values[index];
 }
 
-const flushCallbacks = (callbacks: (() => void)[]) => {
+export const flushCallbacks = (callbacks: (() => void)[]) => {
   for (let i = 0, len = callbacks.length; i < len; i++) {
     if (callbacks[i]) {
       callbacks[i]();
@@ -74,12 +76,19 @@ const microtask = (flush: () => void) => {
 };
 
 const task = (flush: () => void) => {
-  const ch = new MessageChannel();
-  ch.port1.onmessage = flush;
-  return () => ch.port2.postMessage(null);
+  try {
+    const ch = new MessageChannel();
+    ch.port1.onmessage = flush;
+    return () => ch.port2.postMessage(null);
+  } catch (_e) {
+    // Avoid to bundling Node polyfills
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { setImmidiate } = (module as any)[
+      ("require" + Math.random()).slice(7)
+    ]("timers");
+    return () => setImmidiate(flush);
+  }
 };
-
-const enqueueUpdate = batch<Component>(microtask, fifo, c => c.performUpdate());
 
 const commitLayoutEffects = batch<Component>(microtask, filo, c =>
   flushEffects(c.hooks, "layoutEffects")
@@ -89,48 +98,15 @@ const commitEffects = batch<Component>(task, filo, c =>
   flushEffects(c.hooks, "effects")
 );
 
-export abstract class Component extends HTMLElement {
-  private _dirty = false;
-  private _connected = false;
-  protected abstract render(): void;
-  public $root = this.attachShadow({ mode: "open" });
-  public renderCallback: (() => void)[] = [];
-  public hooks: Hooks<unknown> = {
-    values: [],
-    deps: [],
-    effects: [],
-    layoutEffects: [],
-    cleanup: []
-  };
+export const enqueueUpdate = batch<Component>(microtask, fifo, c =>
+  c.performUpdate()
+);
 
-  protected connectedCallback() {
-    this._connected = true;
-    this.update();
-  }
-
-  protected disconnectedCallback() {
-    this._connected = false;
-    flushCallbacks(this.hooks.cleanup);
-  }
-
-  public update() {
-    if (this._dirty) return;
-    this._dirty = true;
-    enqueueUpdate(this);
-  }
-
-  public performUpdate() {
-    if (!this._connected) return;
-    try {
-      currentCursor = 0;
-      currentComponent = this;
-      this.render();
-      flushCallbacks(this.renderCallback);
-      commitLayoutEffects(this);
-      commitEffects(this);
-    } catch (e) {
-      console.error(e);
-    }
-    this._dirty = false;
-  }
-}
+export const update = (c: Component) => {
+  currentCursor = 0;
+  currentComponent = c;
+  c.render();
+  flushCallbacks(c.renderCallback);
+  commitLayoutEffects(c);
+  commitEffects(c);
+};

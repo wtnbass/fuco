@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-explicit-any */
-import { html } from "../..";
+/* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-function */
+import { html } from "..";
 
 describe("parse", () => {
   let container!: HTMLDivElement;

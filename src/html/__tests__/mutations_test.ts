@@ -3,7 +3,7 @@
   @typescript-eslint/no-explicit-any,
   @typescript-eslint/camelcase
 */
-import { html, render } from "../..";
+import { html, render } from "..";
 
 describe("mutations", () => {
   let container!: HTMLDivElement;
