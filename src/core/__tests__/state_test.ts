@@ -34,7 +34,11 @@ const fixtureNumber = () => {
 
 describe(
   "use-state",
-  withFixtures(fixture, lazyInitialState, fixtureNumber)(([f, f2, f3]) => {
+  withFixtures(
+    fixture,
+    lazyInitialState,
+    fixtureNumber
+  )(([f, f2, f3]) => {
     let count: HTMLDivElement;
     let updated: HTMLDivElement;
     let increment: HTMLButtonElement;

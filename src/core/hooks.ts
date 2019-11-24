@@ -1,7 +1,8 @@
-import { Component, hooks } from "./component";
+import { Component } from "./component";
 import { Context } from "./context";
 import { stringifyCSS, HasCSSSymbol } from "./css";
 import { REQUEST_CONSUME, Detail, Provider } from "./provider";
+import { hooks } from "./update";
 
 export interface AttributeConverter<T> {
   (attr: string | null): T;
@@ -95,36 +96,16 @@ export const useStyle = (cssStyle: HasCSSSymbol | (() => HasCSSSymbol)) =>
     }
   });
 
-const refPrefix = `ref:${String(Math.random()).slice(2)}:`;
-
 export const useRef = <T>(initialValue: T | null) =>
   hooks<{ current: T | null }>({
-    oncreate: (_h, _c, i) =>
-      Object.defineProperties(Object.create(null), {
-        current: {
-          value: initialValue,
-          writable: true
-        },
-        toString: {
-          value: () => refPrefix + i
-        }
-      }),
-    onupdate: (h, c, i) => {
-      c.renderCallback[i] = () => {
-        const value = c.$root.querySelector(`[ref="${refPrefix + i}"]`);
-        if (value != null) {
-          h.values[i].current = (value as unknown) as T;
-        }
-      };
-      return h.values[i];
-    }
+    oncreate: (_h, _c) => ({ current: initialValue })
   });
 
 export const useState = <T>(initialState: T | (() => T)) =>
-  hooks<[T, ((t: T | ((s: T) => T)) => void)]>({
+  hooks<[T, (t: T | ((s: T) => T)) => void]>({
     oncreate: (h, c, i) => [
       typeof initialState === "function"
-        ? (initialState as (() => T))()
+        ? (initialState as () => T)()
         : initialState,
       function setState(nextState: T | ((s: T) => T)) {
         const state = h.values[i][0];

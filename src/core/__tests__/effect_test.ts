@@ -35,7 +35,10 @@ const fixtureNumber = () => {
 
 describe(
   "use-effect",
-  withFixtures(fixture, fixtureNumber)(([f, fNum]) => {
+  withFixtures(
+    fixture,
+    fixtureNumber
+  )(([f, fNum]) => {
     beforeEach(() => {
       updateCount = 0;
       cleanupCount = 0;

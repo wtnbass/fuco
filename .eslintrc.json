@@ -16,7 +16,6 @@
       {
         "argsIgnorePattern": "^_"
       }
-    ],
-    "@typescript-eslint/no-use-before-define": [2, { "functions": false }]
+    ]
   }
 }

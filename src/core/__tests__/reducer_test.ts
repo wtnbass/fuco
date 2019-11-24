@@ -85,7 +85,10 @@ const fixtureNumber = () => {
 
 describe(
   "use-reducer",
-  withFixtures(fixture, fixtureNumber)(f => {
+  withFixtures(
+    fixture,
+    fixtureNumber
+  )(f => {
     it("mount", async () => {
       let input!: HTMLInputElement;
       let list!: NodeListOf<Element>;
