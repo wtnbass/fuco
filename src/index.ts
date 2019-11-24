@@ -1,11 +1,9 @@
-import { render, TemplateResult } from "lit-html";
-import { Component } from "./core";
+import { Component, render } from "./core";
 
-export { html } from "lit-html";
 export * from "./core";
 
 export interface FunctionalComponent {
-  (): TemplateResult;
+  (): unknown;
 }
 
 export function defineElement(name: string, fn: FunctionalComponent) {
@@ -13,7 +11,7 @@ export function defineElement(name: string, fn: FunctionalComponent) {
     name,
     class extends Component {
       protected render() {
-        render(fn(), this.$root, { eventContext: this });
+        render(fn(), this.$root);
       }
     }
   );
