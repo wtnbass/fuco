@@ -33,9 +33,6 @@
   "license": "MIT",
   "homepage": "https://github.com/wtnbass/fuco",
   "repository": "wtnbass/fuco",
-  "dependencies": {
-    "lit-html": "^1.0.0"
-  },
   "devDependencies": {
     "@types/jasmine": "3.4.4",
     "@typescript-eslint/eslint-plugin": "2.4.0",
