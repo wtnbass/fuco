@@ -46,7 +46,7 @@ export const withFixtures = (...fixtureFns: FunctionalComponent[]) => (
   fn: (fixtures: ReturnType<typeof createFixture>[]) => void
 ) => () => {
   const fixtures = fixtureFns.map(createFixture);
-  beforeAll(() => {
+  before(() => {
     fixtures.forEach(f => f.define());
   });
 

@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-explicit-any */
+import { expect } from "chai";
+import * as sinon from "sinon";
 import { html, render } from "..";
 
 describe("render", () => {
@@ -6,7 +8,7 @@ describe("render", () => {
 
   function test(tmpl: unknown, innerHTML: string) {
     render(tmpl, container);
-    expect(container.innerHTML.replace(/<!---->/g, "")).toEqual(
+    expect(container.innerHTML.replace(/<!---->/g, "")).to.equal(
       innerHTML,
       "render"
     );
@@ -98,7 +100,7 @@ describe("render", () => {
       <div ref=${(node: HTMLDivElement) => (refNode = node)}></div>
     `;
     render(app, container);
-    expect(container.querySelector("div")).toEqual(refNode);
+    expect(container.querySelector("div")).to.equal(refNode);
   });
 
   it("ref object attribute", () => {
@@ -107,11 +109,11 @@ describe("render", () => {
       <div ref=${ref}></div>
     `;
     render(app, container);
-    expect(container.querySelector("div")).toEqual(ref.current);
+    expect(container.querySelector("div")).to.equal(ref.current);
   });
 
   it("spread attribute", () => {
-    const cb = jasmine.createSpy();
+    const cb = sinon.spy();
     const props = { a: 1, "?b": 2, ".c": 3, "@d": cb };
     const app = html`
       <div ...${props}></div>
@@ -132,17 +134,17 @@ describe("render", () => {
       <div .value=${value}>Hello</div>
     `;
     test(app, `<div>Hello</div>`);
-    expect((container.querySelector("div")! as any).value).toEqual(value);
+    expect((container.querySelector("div")! as any).value).to.equal(value);
   });
 
   it("evnet handler", () => {
-    const cb = jasmine.createSpy();
+    const cb = sinon.spy();
     const app = html`
       <button @click=${cb}>click</button>
     `;
     test(app, `<button>click</button>`);
     container.querySelector("button")!.click();
-    expect(cb).toHaveBeenCalled();
+    expect(cb.calledOnce).to.be.true;
   });
 
   it("array", () => {

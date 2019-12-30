@@ -1,3 +1,4 @@
+import { expect } from "chai";
 import { withFixtures, selector, selectorAll, text } from "./fixture";
 import { html, useMemo, useState } from "..";
 
@@ -58,17 +59,17 @@ describe(
 
     it("mount", async () => {
       await setup();
-      expect(firstName.value).toEqual("Keisuke");
-      expect(lastName.value).toEqual("Watanabe");
-      expect(age.value).toEqual("27");
-      expect(text(div)).toEqual("Keisuke Watanabe (27)");
-      expect(updateCount).toEqual(1);
+      expect(firstName.value).to.equal("Keisuke");
+      expect(lastName.value).to.equal("Watanabe");
+      expect(age.value).to.equal("27");
+      expect(text(div)).to.equal("Keisuke Watanabe (27)");
+      expect(updateCount).to.equal(1);
     });
 
     it("update fields", async () => {
       await setup();
-      expect(updateCount).toEqual(1);
-      expect(updateCount2).toEqual(1);
+      expect(updateCount).to.equal(1);
+      expect(updateCount2).to.equal(1);
 
       firstName.value = "Taro";
       firstName.dispatchEvent(
@@ -76,12 +77,12 @@ describe(
       );
 
       await setup();
-      expect(firstName.value).toEqual("Taro");
-      expect(lastName.value).toEqual("Watanabe");
-      expect(age.value).toEqual("27");
-      expect(text(div)).toEqual("Taro Watanabe (27)");
-      expect(updateCount).toEqual(2);
-      expect(updateCount2).toEqual(2);
+      expect(firstName.value).to.equal("Taro");
+      expect(lastName.value).to.equal("Watanabe");
+      expect(age.value).to.equal("27");
+      expect(text(div)).to.equal("Taro Watanabe (27)");
+      expect(updateCount).to.equal(2);
+      expect(updateCount2).to.equal(2);
 
       lastName.value = "Tanaka";
       lastName.dispatchEvent(
@@ -89,23 +90,23 @@ describe(
       );
 
       await setup();
-      expect(firstName.value).toEqual("Taro");
-      expect(lastName.value).toEqual("Tanaka");
-      expect(text(div)).toEqual("Taro Tanaka (27)");
-      expect(age.value).toEqual("27");
-      expect(updateCount).toEqual(3);
-      expect(updateCount2).toEqual(3);
+      expect(firstName.value).to.equal("Taro");
+      expect(lastName.value).to.equal("Tanaka");
+      expect(text(div)).to.equal("Taro Tanaka (27)");
+      expect(age.value).to.equal("27");
+      expect(updateCount).to.equal(3);
+      expect(updateCount2).to.equal(3);
 
       age.value = "100";
       age.dispatchEvent(Object.assign(new Event("keyup"), { keyCode: 13 }));
 
       await setup();
-      expect(firstName.value).toEqual("Taro");
-      expect(lastName.value).toEqual("Tanaka");
-      expect(text(div)).toEqual("Taro Tanaka (100)");
-      expect(age.value).toEqual("100");
-      expect(updateCount).toEqual(3);
-      expect(updateCount2).toEqual(4);
+      expect(firstName.value).to.equal("Taro");
+      expect(lastName.value).to.equal("Tanaka");
+      expect(text(div)).to.equal("Taro Tanaka (100)");
+      expect(age.value).to.equal("100");
+      expect(updateCount).to.equal(3);
+      expect(updateCount2).to.equal(4);
     });
   })
 );

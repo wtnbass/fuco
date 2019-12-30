@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { expect } from "chai";
 import { withFixtures, selector, text, selectorAll } from "./fixture";
 import { html, useAttribute, useRef } from "..";
 
@@ -57,23 +58,23 @@ describe(
       };
 
       await setup();
-      expect(target.getAttribute("greet-name")).toBeNull();
-      expect(text(div)).toEqual("");
-      expect(text(count)).toEqual("0");
+      expect(target.getAttribute("greet-name")).to.be.null;
+      expect(text(div)).to.equal("");
+      expect(text(count)).to.equal("0");
 
       // change
       target.setAttribute("greet-name", "property");
 
       await setup();
-      expect(target.getAttribute("greet-name")).toEqual("property");
-      expect(div.textContent).toEqual("property");
-      expect(text(count)).toEqual("1");
+      expect(target.getAttribute("greet-name")).to.equal("property");
+      expect(div.textContent).to.equal("property");
+      expect(text(count)).to.equal("1");
 
       // same change
       target.setAttribute("greet-name", "property");
 
       await setup();
-      expect(text(count)).toEqual("1");
+      expect(text(count)).to.equal("1");
     });
 
     it("with converter", async () => {
@@ -90,8 +91,8 @@ describe(
       target.setAttribute("user", value);
 
       await setup();
-      expect(target.getAttribute("user")).toEqual(value);
-      expect(text(div)).toEqual("Keisuke (28)");
+      expect(target.getAttribute("user")).to.equal(value);
+      expect(text(div)).to.equal("Keisuke (28)");
     });
 
     it("boolean attribute", async () => {
@@ -107,12 +108,12 @@ describe(
       target.setAttribute("checked", "");
 
       await setup();
-      expect(text(div)).toEqual("true");
+      expect(text(div)).to.equal("true");
 
       target.removeAttribute("checked");
 
       await setup();
-      expect(text(div)).toEqual("false");
+      expect(text(div)).to.equal("false");
     });
 
     it("compare as SameValue", async () => {
@@ -124,34 +125,34 @@ describe(
       };
 
       await setup();
-      expect(target.getAttribute("number")).toBeNull();
-      expect(text(count)).toEqual("0");
+      expect(target.getAttribute("number")).to.be.null;
+      expect(text(count)).to.equal("0");
 
       target.setAttribute("number", "+0");
 
       await setup();
-      expect(target.getAttribute("number")).toEqual("+0");
-      expect(text(count)).toEqual("0");
+      expect(target.getAttribute("number")).to.equal("+0");
+      expect(text(count)).to.equal("0");
 
       // +0 => -0
       target.setAttribute("number", "-0");
 
       await setup();
-      expect(target.getAttribute("number")).toEqual("-0");
-      expect(text(count)).toEqual("1");
+      expect(target.getAttribute("number")).to.equal("-0");
+      expect(text(count)).to.equal("1");
 
       target.setAttribute("number", "aaa");
 
       await setup();
-      expect(target.getAttribute("number")).toEqual("aaa");
-      expect(text(count)).toEqual("2");
+      expect(target.getAttribute("number")).to.equal("aaa");
+      expect(text(count)).to.equal("2");
 
       // NaN => NaN
       target.setAttribute("number", "bbb");
 
       await setup();
-      expect(target.getAttribute("number")).toEqual("bbb");
-      expect(text(count)).toEqual("2");
+      expect(target.getAttribute("number")).to.equal("bbb");
+      expect(text(count)).to.equal("2");
     });
   })
 );

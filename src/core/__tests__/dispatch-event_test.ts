@@ -1,3 +1,4 @@
+import { expect } from "chai";
 import { withFixtures, selector } from "./fixture";
 import { html, defineElement, useDispatchEvent, useCallback } from "..";
 
@@ -25,7 +26,7 @@ describe(
       button = selector("button", sender);
     };
 
-    beforeAll(() => {
+    before(() => {
       defineElement("event-sender", () => {
         const dispatch = useDispatchEvent<string>("send-event");
         return html`
@@ -43,7 +44,7 @@ describe(
       button.click();
 
       await setup();
-      expect(recievedMessage).toEqual("Hello!!!");
+      expect(recievedMessage).to.equal("Hello!!!");
     });
   })
 );

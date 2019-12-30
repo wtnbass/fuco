@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { expect } from "chai";
 import { withFixtures, text, selectorAll } from "./fixture";
 import { html, useProperty, useRef } from "..";
 
@@ -50,7 +51,7 @@ describe(
 
     it("mount", async () => {
       await setup(0);
-      expect(text(div)).toEqual("No user");
+      expect(text(div)).to.equal("No user");
     });
 
     it("propeties changed", async () => {
@@ -62,39 +63,39 @@ describe(
       target.user = user;
 
       await setup(0);
-      expect(target.user).toEqual(user);
-      expect(text(div)).toEqual("Bob (18)");
-      expect(text(count)).toEqual("0");
+      expect(target.user).to.equal(user);
+      expect(text(div)).to.equal("Bob (18)");
+      expect(text(count)).to.equal("0");
 
       // No update to set a same value
       target.user = user;
       await setup(0);
-      expect(text(count)).toEqual("0");
+      expect(text(count)).to.equal("0");
     });
 
     it("compare as SameValue", async () => {
       await setup(1);
-      expect(text(count)).toEqual("0");
+      expect(text(count)).to.equal("0");
 
       target.num = +0;
 
       await setup(1);
-      expect(text(count)).toEqual("1");
+      expect(text(count)).to.equal("1");
 
       target.num = -0;
 
       await setup(1);
-      expect(text(count)).toEqual("2");
+      expect(text(count)).to.equal("2");
 
       target.num = NaN;
 
       await setup(1);
-      expect(text(count)).toEqual("3");
+      expect(text(count)).to.equal("3");
 
       target.num = Number("a");
 
       await setup(1);
-      expect(text(count)).toEqual("3");
+      expect(text(count)).to.equal("3");
     });
   })
 );

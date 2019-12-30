@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { expect } from "chai";
 import { withFixtures, selector, selectorAll, text } from "./fixture";
 import { html, useReducer, useCallback, useRef } from "..";
 
@@ -103,9 +104,9 @@ describe(
         updated = selector("div", target);
       };
       await setup();
-      expect(input.value).toEqual("");
-      expect(list.length).toEqual(0);
-      expect(text(updated)).toEqual("0");
+      expect(input.value).to.equal("");
+      expect(list.length).to.equal(0);
+      expect(text(updated)).to.equal("0");
 
       // add todo
       await setup();
@@ -116,23 +117,23 @@ describe(
 
       await setup();
       setup();
-      expect(input.value).toEqual("");
-      expect(list.length).toEqual(1);
-      expect(text(updated)).toEqual("1");
+      expect(input.value).to.equal("");
+      expect(list.length).to.equal(1);
+      expect(text(updated)).to.equal("1");
 
       // toggle complete
       await setup();
       list[0].dispatchEvent(new Event("click"));
 
       await setup();
-      expect(list[0].getAttribute("class")).toEqual("completed");
-      expect(text(updated)).toEqual("2");
+      expect(list[0].getAttribute("class")).to.equal("completed");
+      expect(text(updated)).to.equal("2");
 
       // noop
       noop.click();
 
       await setup();
-      expect(text(updated)).toEqual("2");
+      expect(text(updated)).to.equal("2");
     });
 
     it("compare as SameValue", async () => {
@@ -145,24 +146,24 @@ describe(
       };
 
       await setup();
-      expect(text(updated)).toEqual("0");
+      expect(text(updated)).to.equal("0");
 
       // +0 => -0
       btns[0].click();
 
       await setup();
-      expect(text(updated)).toEqual("1");
+      expect(text(updated)).to.equal("1");
 
       btns[1].click();
 
       await setup();
-      expect(text(updated)).toEqual("2");
+      expect(text(updated)).to.equal("2");
 
       // NaN => NaN
       btns[2].click();
 
       await setup();
-      expect(text(updated)).toEqual("2");
+      expect(text(updated)).to.equal("2");
     });
   })
 );

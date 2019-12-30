@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { expect } from "chai";
 import { withFixtures, createFixture } from "./fixture";
 import { html, css, unsafeCSS, useStyle } from "..";
 
@@ -49,27 +50,27 @@ describe(
   )(fs => {
     it("number value", async () => {
       const target = await fs[0].setup();
-      expect(getCssText(target)).toEqual("div { font-size: 10px; }");
+      expect(getCssText(target)).to.equal("div { font-size: 10px; }");
     });
 
     it("css value", async () => {
       const target = await fs[1].setup();
-      expect(getCssText(target)).toEqual("div { font-size: 10px; }");
+      expect(getCssText(target)).to.equal("div { font-size: 10px; }");
     });
 
     it("unsafe css", async () => {
       const target = await fs[2].setup();
-      expect(getCssText(target)).toEqual("div { font-size: 10px; }");
+      expect(getCssText(target)).to.equal("div { font-size: 10px; }");
     });
 
     it("import style", async () => {
       const target = await fs[3].setup();
-      expect(getCssText(target)).not.toEqual("");
+      expect(getCssText(target)).not.to.equal("");
     });
 
     it("import using url value", async () => {
       const target = await fs[4].setup();
-      expect(getCssText(target)).not.toEqual("");
+      expect(getCssText(target)).not.to.equal("");
     });
 
     it("disallow-type", async () => {
@@ -89,12 +90,12 @@ describe(
       f.mount();
       await f.setup();
 
-      expect(error).not.toBeNull();
+      expect(error).not.to.be.null;
     });
 
     it("allows css tag as argument", async () => {
       const target = await fs[5].setup();
-      expect(getCssText(target)).toEqual("div { font-size: 10px; }");
+      expect(getCssText(target)).to.equal("div { font-size: 10px; }");
     });
   })
 );

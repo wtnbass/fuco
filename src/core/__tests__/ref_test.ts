@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { expect } from "chai";
 import { withFixtures, selector, text } from "./fixture";
 import { html, useRef, useState, useEffect } from "..";
 
@@ -38,25 +39,25 @@ describe(
 
     it("mount", async () => {
       await setup();
-      expect(input.value).toEqual("");
-      expect(text(valueDiv)).toEqual("");
-      expect(text(prevValueDiv)).toEqual("");
+      expect(input.value).to.equal("");
+      expect(text(valueDiv)).to.equal("");
+      expect(text(prevValueDiv)).to.equal("");
 
       input.value = "one";
       button.click();
 
       await setup();
-      expect(input.value).toEqual("one");
-      expect(text(valueDiv)).toEqual("one");
-      expect(text(prevValueDiv)).toEqual("");
+      expect(input.value).to.equal("one");
+      expect(text(valueDiv)).to.equal("one");
+      expect(text(prevValueDiv)).to.equal("");
 
       input.value = "two";
       button.click();
 
       await setup();
-      expect(input.value).toEqual("two");
-      expect(text(valueDiv)).toEqual("two");
-      expect(text(prevValueDiv)).toEqual("one");
+      expect(input.value).to.equal("two");
+      expect(text(valueDiv)).to.equal("two");
+      expect(text(prevValueDiv)).to.equal("one");
     });
   })
 );

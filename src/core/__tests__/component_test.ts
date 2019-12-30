@@ -1,3 +1,4 @@
+import { expect } from "chai";
 import { withFixtures, selector, text } from "./fixture";
 import { html, useState, useCallback } from "..";
 
@@ -29,12 +30,12 @@ describe(
 
     it("million update", async () => {
       await setup();
-      expect(text(div)).toEqual("0");
+      expect(text(div)).to.equal("0");
 
       button.click();
 
       await setup();
-      expect(text(div)).toEqual("1000000");
+      expect(text(div)).to.equal("1000000");
     });
   })
 );

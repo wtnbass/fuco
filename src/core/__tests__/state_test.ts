@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { expect } from "chai";
 import { withFixtures, selector, selectorAll, text } from "./fixture";
 import { html, useState, useRef } from "..";
 
@@ -68,53 +69,53 @@ describe(
 
     it("mount", async () => {
       await setup();
-      expect(text(count)).toEqual("0");
-      expect(text(updated)).toEqual("0");
+      expect(text(count)).to.equal("0");
+      expect(text(updated)).to.equal("0");
 
       increment.click();
 
       await setup();
-      expect(text(count)).toEqual("1");
-      expect(text(updated)).toEqual("1");
+      expect(text(count)).to.equal("1");
+      expect(text(updated)).to.equal("1");
 
       equal.click();
 
       await setup();
-      expect(text(count)).toEqual("1");
-      expect(text(updated)).toEqual("1");
+      expect(text(count)).to.equal("1");
+      expect(text(updated)).to.equal("1");
 
       decrement.click();
 
       await setup();
-      expect(text(count)).toEqual("0");
-      expect(text(updated)).toEqual("2");
+      expect(text(count)).to.equal("0");
+      expect(text(updated)).to.equal("2");
     });
 
     it("lazy initial state", async () => {
       await setup2();
-      expect(text(count)).toEqual("it's lazy.");
+      expect(text(count)).to.equal("it's lazy.");
     });
 
     it("compare as SameValue", async () => {
       await setup3();
-      expect(text(updated)).toEqual("0");
+      expect(text(updated)).to.equal("0");
 
       // +0 => -0
       buttons[0].click();
 
       await setup3();
-      expect(text(updated)).toEqual("1");
+      expect(text(updated)).to.equal("1");
 
       buttons[1].click();
 
       await setup3();
-      expect(text(updated)).toEqual("2");
+      expect(text(updated)).to.equal("2");
 
       // NaN => NaN
       buttons[2].click();
 
       await setup3();
-      expect(text(updated)).toEqual("2");
+      expect(text(updated)).to.equal("2");
     });
   })
 );

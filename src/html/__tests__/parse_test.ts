@@ -1,25 +1,19 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-function */
+import { expect } from "chai";
 import { html } from "..";
+import { items } from "../template";
 
 describe("parse", () => {
   let container!: HTMLDivElement;
-  const [Template] = Object.getOwnPropertySymbols(html``);
 
-  function test(
-    tmpl: any,
-    vdom?: unknown,
-    variables?: unknown[],
-    key?: unknown
-  ) {
-    expect(vdom).toEqual(tmpl[Template][0], "vdom");
-    if (variables) {
-      expect(variables).toEqual(
-        Array.from(tmpl[Template][1]).slice(1),
-        "variables"
-      );
+  function test(tmpl: any, vdom?: unknown, args?: unknown[], key?: unknown) {
+    const [actualVdom, actualArgs, actualKey] = items(tmpl);
+    expect(vdom).to.deep.equal(actualVdom, "vdom");
+    if (args) {
+      expect(args).to.deep.equal(Array.from(actualArgs).slice(1), "variables");
     }
     if (key != null) {
-      expect(key).toEqual(tmpl[Template][2], "key");
+      expect(key).to.equal(actualKey, "key");
     }
   }
 
