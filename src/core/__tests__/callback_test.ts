@@ -1,3 +1,4 @@
+import { expect } from "chai";
 import { withFixtures, selector, selectorAll, text } from "./fixture";
 import { html, useState, useCallback } from "..";
 
@@ -38,36 +39,36 @@ describe(
 
     it("mount", async () => {
       await setup();
-      expect(text(div)).toEqual("0");
-      expect(updateCounts).toEqual([0, 0]);
+      expect(text(div)).to.equal("0");
+      expect(updateCounts).to.deep.equal([0, 0]);
 
       add.click();
 
       await setup();
-      expect(text(div)).toEqual("1");
-      expect(updateCounts).toEqual([1, 0]);
+      expect(text(div)).to.equal("1");
+      expect(updateCounts).to.deep.equal([1, 0]);
     });
 
     it("callback has watched fields", async () => {
       await setup();
-      expect(updateCounts).toEqual([0, 0]);
+      expect(updateCounts).to.deep.equal([0, 0]);
 
       add.click();
 
       await setup();
-      expect(text(div)).toEqual("1");
-      expect(updateCounts).toEqual([1, 0]);
+      expect(text(div)).to.equal("1");
+      expect(updateCounts).to.deep.equal([1, 0]);
     });
 
     it("callback doesn't have watched fields", async () => {
       await setup();
-      expect(updateCounts).toEqual([0, 0]);
+      expect(updateCounts).to.deep.equal([0, 0]);
 
       minus.click();
 
       await setup();
-      expect(text(div)).toEqual("-1");
-      expect(updateCounts).toEqual([0, 1]);
+      expect(text(div)).to.equal("-1");
+      expect(updateCounts).to.deep.equal([0, 1]);
     });
   })
 );

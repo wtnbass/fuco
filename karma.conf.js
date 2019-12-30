@@ -1,11 +1,11 @@
 module.exports = function(config) {
   config.set({
-    frameworks: ["jasmine"],
+    frameworks: ["mocha"],
     files: [{ pattern: "**/__tests__/**/*_test.ts", watched: false }],
     preprocessors: {
       "src/**/*.ts": ["webpack"]
     },
-    reporters: ["progress", "coverage-istanbul"],
+    reporters: ["mocha", "coverage-istanbul"],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
@@ -24,7 +24,7 @@ module.exports = function(config) {
       mode: "development",
       devtool: "inline-source-map",
       resolve: {
-        extensions: [".ts"]
+        extensions: [".ts", ".js"]
       },
       module: {
         rules: [

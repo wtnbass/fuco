@@ -3,6 +3,8 @@
   @typescript-eslint/no-explicit-any,
   @typescript-eslint/camelcase
 */
+import { expect } from "chai";
+import * as sinon from "sinon";
 import { html, render } from "..";
 
 describe("mutations", () => {
@@ -22,19 +24,19 @@ describe("mutations", () => {
     `;
 
     render(app("string"), container);
-    expect(container.querySelector("div")!.innerText).toEqual("string");
+    expect(container.querySelector("div")!.innerText).to.equal("string");
 
     render(app("change"), container);
-    expect(container.querySelector("div")!.innerText).toEqual("change");
+    expect(container.querySelector("div")!.innerText).to.equal("change");
 
     render(app(1000), container);
-    expect(container.querySelector("div")!.innerText).toEqual("1000");
+    expect(container.querySelector("div")!.innerText).to.equal("1000");
 
     render(app(true), container);
-    expect(container.querySelector("div")!.innerText).toEqual("true");
+    expect(container.querySelector("div")!.innerText).to.equal("true");
 
     render(app(false), container);
-    expect(container.querySelector("div")!.innerText).toEqual("false");
+    expect(container.querySelector("div")!.innerText).to.equal("false");
   });
 
   it("text array", () => {
@@ -44,23 +46,23 @@ describe("mutations", () => {
 
     // first
     render(app("a", "b", "c"), container);
-    expect(container.querySelector("div")!.innerText).toEqual("abc");
+    expect(container.querySelector("div")!.innerText).to.equal("abc");
 
     // change
     render(app("d", "e", "f"), container);
-    expect(container.querySelector("div")!.innerText).toEqual("def");
+    expect(container.querySelector("div")!.innerText).to.equal("def");
 
     // add
     render(app("d", "e", "f", "g", "h"), container);
-    expect(container.querySelector("div")!.innerText).toEqual("defgh");
+    expect(container.querySelector("div")!.innerText).to.equal("defgh");
 
     // remove
     render(app("e", "f", "g"), container);
-    expect(container.querySelector("div")!.innerText).toEqual("efg");
+    expect(container.querySelector("div")!.innerText).to.equal("efg");
 
     // remove and insert
     render(app("z", "e", "g", "a", "b"), container);
-    expect(container.querySelector("div")!.innerText).toEqual("zegab");
+    expect(container.querySelector("div")!.innerText).to.equal("zegab");
   });
 
   it("template", () => {
@@ -73,12 +75,12 @@ describe("mutations", () => {
     `;
 
     render(app("foo"), container);
-    expect(container.querySelector("div")!.innerHTML).toEqual(
+    expect(container.querySelector("div")!.innerHTML).to.equal(
       "<!----><p>foo<!----></p><!----><!---->"
     );
 
     render(app("bar"), container);
-    expect(container.querySelector("div")!.innerHTML).toEqual(
+    expect(container.querySelector("div")!.innerHTML).to.equal(
       "<!----><p>bar<!----></p><!----><!---->"
     );
   });
@@ -109,11 +111,11 @@ describe("mutations", () => {
       .querySelector("ul")!
       .querySelectorAll("li");
 
-    expect(li1_1.innerText).toEqual("aaa");
-    expect(li1_2.innerText).toEqual("bbb");
-    expect(li1_3.innerText).toEqual("ccc");
-    expect(li1_4.innerText).toEqual("ddd");
-    expect(li1_5.innerText).toEqual("eee");
+    expect(li1_1.innerText).to.equal("aaa");
+    expect(li1_2.innerText).to.equal("bbb");
+    expect(li1_3.innerText).to.equal("ccc");
+    expect(li1_4.innerText).to.equal("ddd");
+    expect(li1_5.innerText).to.equal("eee");
 
     // insert
     render(
@@ -140,20 +142,20 @@ describe("mutations", () => {
       li2_7
     ] = container.querySelector("ul")!.querySelectorAll("li");
 
-    expect(li2_8.innerText).toEqual("hhh");
-    expect(li2_1.innerText).toEqual("aaa");
-    expect(li2_2.innerText).toEqual("bbb");
-    expect(li2_3.innerText).toEqual("ccc");
-    expect(li2_6.innerText).toEqual("fff");
-    expect(li2_4.innerText).toEqual("ddd");
-    expect(li2_5.innerText).toEqual("eee");
-    expect(li2_7.innerText).toEqual("ggg");
+    expect(li2_8.innerText).to.equal("hhh");
+    expect(li2_1.innerText).to.equal("aaa");
+    expect(li2_2.innerText).to.equal("bbb");
+    expect(li2_3.innerText).to.equal("ccc");
+    expect(li2_6.innerText).to.equal("fff");
+    expect(li2_4.innerText).to.equal("ddd");
+    expect(li2_5.innerText).to.equal("eee");
+    expect(li2_7.innerText).to.equal("ggg");
 
-    expect(li2_1).toEqual(li1_1);
-    expect(li2_2).toEqual(li1_2);
-    expect(li2_3).toEqual(li1_3);
-    expect(li2_4).toEqual(li1_4);
-    expect(li2_5).toEqual(li1_5);
+    expect(li2_1).to.equal(li1_1);
+    expect(li2_2).to.equal(li1_2);
+    expect(li2_3).to.equal(li1_3);
+    expect(li2_4).to.equal(li1_4);
+    expect(li2_5).to.equal(li1_5);
 
     // delete
     render(
@@ -169,15 +171,15 @@ describe("mutations", () => {
       .querySelector("ul")!
       .querySelectorAll("li");
 
-    expect(li3_8.innerText).toEqual("hhh");
-    expect(li3_6.innerText).toEqual("fff");
-    expect(li3_4.innerText).toEqual("ddd");
-    expect(li3_5.innerText).toEqual("eee");
+    expect(li3_8.innerText).to.equal("hhh");
+    expect(li3_6.innerText).to.equal("fff");
+    expect(li3_4.innerText).to.equal("ddd");
+    expect(li3_5.innerText).to.equal("eee");
 
-    expect(li3_8).toEqual(li2_8);
-    expect(li3_6).toEqual(li2_6);
-    expect(li3_4).toEqual(li2_4);
-    expect(li3_5).toEqual(li2_5);
+    expect(li3_8).to.equal(li2_8);
+    expect(li3_6).to.equal(li2_6);
+    expect(li3_4).to.equal(li2_4);
+    expect(li3_5).to.equal(li2_5);
 
     // delete and insert
     render(
@@ -194,15 +196,15 @@ describe("mutations", () => {
       .querySelector("ul")!
       .querySelectorAll("li");
 
-    expect(li4_8.innerText).toEqual("hhh");
-    expect(li4_4.innerText).toEqual("ddd");
-    expect(li4_9.innerText).toEqual("iii");
-    expect(li4_5.innerText).toEqual("eee");
-    expect(li4_10.innerText).toEqual("jjj");
+    expect(li4_8.innerText).to.equal("hhh");
+    expect(li4_4.innerText).to.equal("ddd");
+    expect(li4_9.innerText).to.equal("iii");
+    expect(li4_5.innerText).to.equal("eee");
+    expect(li4_10.innerText).to.equal("jjj");
 
-    expect(li4_8).toEqual(li3_8);
-    expect(li4_4).toEqual(li3_4);
-    expect(li4_5).toEqual(li3_5);
+    expect(li4_8).to.equal(li3_8);
+    expect(li4_4).to.equal(li3_4);
+    expect(li4_5).to.equal(li3_5);
   });
 
   it("template array without key", () => {
@@ -231,11 +233,11 @@ describe("mutations", () => {
       .querySelector("ul")!
       .querySelectorAll("li");
 
-    expect(li1_1.innerText).toEqual("aaa");
-    expect(li1_2.innerText).toEqual("bbb");
-    expect(li1_3.innerText).toEqual("ccc");
-    expect(li1_4.innerText).toEqual("ddd");
-    expect(li1_5.innerText).toEqual("eee");
+    expect(li1_1.innerText).to.equal("aaa");
+    expect(li1_2.innerText).to.equal("bbb");
+    expect(li1_3.innerText).to.equal("ccc");
+    expect(li1_4.innerText).to.equal("ddd");
+    expect(li1_5.innerText).to.equal("eee");
 
     // insert
     render(
@@ -262,20 +264,20 @@ describe("mutations", () => {
       li2_7
     ] = container.querySelector("ul")!.querySelectorAll("li");
 
-    expect(li2_8.innerText).toEqual("hhh");
-    expect(li2_1.innerText).toEqual("aaa");
-    expect(li2_2.innerText).toEqual("bbb");
-    expect(li2_3.innerText).toEqual("ccc");
-    expect(li2_6.innerText).toEqual("fff");
-    expect(li2_4.innerText).toEqual("ddd");
-    expect(li2_5.innerText).toEqual("eee");
-    expect(li2_7.innerText).toEqual("ggg");
+    expect(li2_8.innerText).to.equal("hhh");
+    expect(li2_1.innerText).to.equal("aaa");
+    expect(li2_2.innerText).to.equal("bbb");
+    expect(li2_3.innerText).to.equal("ccc");
+    expect(li2_6.innerText).to.equal("fff");
+    expect(li2_4.innerText).to.equal("ddd");
+    expect(li2_5.innerText).to.equal("eee");
+    expect(li2_7.innerText).to.equal("ggg");
 
-    expect(li2_8).toEqual(li1_1);
-    expect(li2_1).toEqual(li1_2);
-    expect(li2_2).toEqual(li1_3);
-    expect(li2_3).toEqual(li1_4);
-    expect(li2_6).toEqual(li1_5);
+    expect(li2_8).to.equal(li1_1);
+    expect(li2_1).to.equal(li1_2);
+    expect(li2_2).to.equal(li1_3);
+    expect(li2_3).to.equal(li1_4);
+    expect(li2_6).to.equal(li1_5);
 
     // delete
     render(
@@ -291,15 +293,15 @@ describe("mutations", () => {
       .querySelector("ul")!
       .querySelectorAll("li");
 
-    expect(li3_8.innerText).toEqual("hhh");
-    expect(li3_6.innerText).toEqual("fff");
-    expect(li3_4.innerText).toEqual("ddd");
-    expect(li3_5.innerText).toEqual("eee");
+    expect(li3_8.innerText).to.equal("hhh");
+    expect(li3_6.innerText).to.equal("fff");
+    expect(li3_4.innerText).to.equal("ddd");
+    expect(li3_5.innerText).to.equal("eee");
 
-    expect(li3_8).toEqual(li2_8);
-    expect(li3_6).toEqual(li2_1);
-    expect(li3_4).toEqual(li2_2);
-    expect(li3_5).toEqual(li2_3);
+    expect(li3_8).to.equal(li2_8);
+    expect(li3_6).to.equal(li2_1);
+    expect(li3_4).to.equal(li2_2);
+    expect(li3_5).to.equal(li2_3);
 
     // delete and insert
     render(
@@ -316,16 +318,16 @@ describe("mutations", () => {
       .querySelector("ul")!
       .querySelectorAll("li");
 
-    expect(li4_8.innerText).toEqual("hhh");
-    expect(li4_4.innerText).toEqual("ddd");
-    expect(li4_9.innerText).toEqual("iii");
-    expect(li4_5.innerText).toEqual("eee");
-    expect(li4_10.innerText).toEqual("jjj");
+    expect(li4_8.innerText).to.equal("hhh");
+    expect(li4_4.innerText).to.equal("ddd");
+    expect(li4_9.innerText).to.equal("iii");
+    expect(li4_5.innerText).to.equal("eee");
+    expect(li4_10.innerText).to.equal("jjj");
 
-    expect(li4_8).toEqual(li3_8);
-    expect(li4_4).toEqual(li3_6);
-    expect(li4_9).toEqual(li3_4);
-    expect(li4_5).toEqual(li3_5);
+    expect(li4_8).to.equal(li3_8);
+    expect(li4_4).to.equal(li3_6);
+    expect(li4_9).to.equal(li3_4);
+    expect(li4_5).to.equal(li3_5);
   });
 
   it("attribute", () => {
@@ -340,27 +342,27 @@ describe("mutations", () => {
       </div>
     `;
 
-    const cb1 = jasmine.createSpy();
+    const cb1 = sinon.spy();
     render(app("Alice", false, 100, cb1), container);
     const div = container.querySelector("div")! as HTMLDivElement & {
       value: unknown;
     };
     div.click();
 
-    expect(div.getAttribute("name")).toEqual("Alice");
-    expect(div.hasAttribute("bool")).toEqual(false);
-    expect(div.value).toEqual(100);
-    expect(cb1).toHaveBeenCalled();
+    expect(div.getAttribute("name")).to.equal("Alice");
+    expect(div.hasAttribute("bool")).to.equal(false);
+    expect(div.value).to.equal(100);
+    expect(cb1.calledOnce).to.be.true;
 
-    const cb2 = jasmine.createSpy();
+    const cb2 = sinon.spy();
     render(app("Bob", true, 200, cb2), container);
     div.click();
 
-    expect(div.getAttribute("name")).toEqual("Bob");
-    expect(div.hasAttribute("bool")).toEqual(true);
-    expect(div.value).toEqual(200);
-    expect(cb2).toHaveBeenCalledTimes(1);
-    expect(cb1).toHaveBeenCalledTimes(1);
+    expect(div.getAttribute("name")).to.equal("Bob");
+    expect(div.hasAttribute("bool")).to.equal(true);
+    expect(div.value).to.equal(200);
+    expect(cb2.calledOnce).to.be.true;
+    expect(cb1.calledOnce).to.be.true;
   });
 
   it("spread attribute", () => {
@@ -370,7 +372,7 @@ describe("mutations", () => {
       </div>
     `;
 
-    const cb1 = jasmine.createSpy();
+    const cb1 = sinon.spy();
     render(
       app({ name: "Alice", "?bool": true, ".value": 100, "@click": cb1 }),
       container
@@ -380,23 +382,23 @@ describe("mutations", () => {
     };
     div.click();
 
-    expect(div.getAttribute("name")).toEqual("Alice");
-    expect(div.hasAttribute("bool")).toEqual(true);
-    expect(div.value).toEqual(100);
-    expect(cb1).toHaveBeenCalled();
+    expect(div.getAttribute("name")).to.equal("Alice");
+    expect(div.hasAttribute("bool")).to.equal(true);
+    expect(div.value).to.equal(100);
+    expect(cb1.calledOnce).to.be.true;
 
-    const cb2 = jasmine.createSpy();
+    const cb2 = sinon.spy();
     render(
       app({ name: "Bob", "?bool": false, ".value": 200, "@click": cb2 }),
       container
     );
     div.click();
 
-    expect(div.getAttribute("name")).toEqual("Bob");
-    expect(div.hasAttribute("bool")).toEqual(false);
-    expect(div.value).toEqual(200);
-    expect(cb2).toHaveBeenCalledTimes(1);
-    expect(cb1).toHaveBeenCalledTimes(1);
+    expect(div.getAttribute("name")).to.equal("Bob");
+    expect(div.hasAttribute("bool")).to.equal(false);
+    expect(div.value).to.equal(200);
+    expect(cb2.calledOnce).to.be.true;
+    expect(cb1.calledOnce).to.be.true;
   });
 
   it("unsafe html", () => {
@@ -407,17 +409,17 @@ describe("mutations", () => {
     `;
     render(app(), container);
     const span1 = container.querySelector("div")!.querySelector("span")!;
-    expect(span1.innerText).toEqual("unsafe");
+    expect(span1.innerText).to.equal("unsafe");
 
     render(app(), container);
     const span2 = container.querySelector("div")!.querySelector("span")!;
-    expect(span2.innerText).toEqual("unsafe");
-    expect(span2).toEqual(span1);
+    expect(span2.innerText).to.equal("unsafe");
+    expect(span2).to.equal(span1);
   });
 
   it("text -> template", () => {
     render("the text", container);
-    expect(container.innerText).toEqual("the text");
+    expect(container.innerText).to.equal("the text");
 
     render(
       html`
@@ -425,7 +427,7 @@ describe("mutations", () => {
       `,
       container
     );
-    expect(container.innerText).toEqual("the template");
+    expect(container.innerText).to.equal("the template");
   });
 
   it("template -> text", () => {
@@ -435,10 +437,10 @@ describe("mutations", () => {
       `,
       container
     );
-    expect(container.innerText).toEqual("the template");
+    expect(container.innerText).to.equal("the template");
 
     render("the text", container);
-    expect(container.innerText).toEqual("the text");
+    expect(container.innerText).to.equal("the text");
   });
 
   it("template - another template", () => {
@@ -448,7 +450,7 @@ describe("mutations", () => {
       `,
       container
     );
-    expect(container.innerHTML.replace(/<!---->/g, "")).toEqual(
+    expect(container.innerHTML.replace(/<!---->/g, "")).to.equal(
       "<div>first</div>"
     );
     render(
@@ -457,7 +459,7 @@ describe("mutations", () => {
       `,
       container
     );
-    expect(container.innerHTML.replace(/<!---->/g, "")).toEqual(
+    expect(container.innerHTML.replace(/<!---->/g, "")).to.equal(
       "<section>second</section>"
     );
   });

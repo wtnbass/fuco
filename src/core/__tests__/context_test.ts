@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { expect } from "chai";
 import { withFixtures, selector, selectorAll, text } from "./fixture";
 import {
   html,
@@ -199,12 +200,12 @@ describe(
       };
 
       await setup();
-      expect(text(inner)).toEqual("Theme is dark.");
+      expect(text(inner)).to.equal("Theme is dark.");
 
       button.click();
 
       await setup();
-      expect(text(inner)).toEqual("Theme is light.");
+      expect(text(inner)).to.equal("Theme is light.");
     });
 
     it("double contexts", async () => {
@@ -225,20 +226,20 @@ describe(
         inner2 = selector("div", consumer2);
       };
       await setup();
-      expect(text(inner1)).toEqual("Theme is dark.");
-      expect(text(inner2)).toEqual("Theme2 is redred.");
+      expect(text(inner1)).to.equal("Theme is dark.");
+      expect(text(inner2)).to.equal("Theme2 is redred.");
 
       button1.click();
 
       await setup();
-      expect(text(inner1)).toEqual("Theme is light.");
-      expect(text(inner2)).toEqual("Theme2 is redred.");
+      expect(text(inner1)).to.equal("Theme is light.");
+      expect(text(inner2)).to.equal("Theme2 is redred.");
 
       button2.click();
 
       await setup();
-      expect(text(inner1)).toEqual("Theme is light.");
-      expect(text(inner2)).toEqual("Theme2 is greengreen.");
+      expect(text(inner1)).to.equal("Theme is light.");
+      expect(text(inner2)).to.equal("Theme2 is greengreen.");
     });
 
     it("same contexts", async () => {
@@ -258,20 +259,20 @@ describe(
         inner2 = selector("div", consumer2);
       };
       await setup();
-      expect(text(inner1)).toEqual("Theme2 is redred.");
-      expect(text(inner2)).toEqual("Theme2 is redred.");
+      expect(text(inner1)).to.equal("Theme2 is redred.");
+      expect(text(inner2)).to.equal("Theme2 is redred.");
 
       button1.click();
 
       await setup();
-      expect(text(inner1)).toEqual("Theme2 is greengreen.");
-      expect(text(inner2)).toEqual("Theme2 is redred.");
+      expect(text(inner1)).to.equal("Theme2 is greengreen.");
+      expect(text(inner2)).to.equal("Theme2 is redred.");
 
       button2.click();
 
       await setup();
-      expect(text(inner1)).toEqual("Theme2 is greengreen.");
-      expect(text(inner2)).toEqual("Theme2 is greengreen.");
+      expect(text(inner1)).to.equal("Theme2 is greengreen.");
+      expect(text(inner2)).to.equal("Theme2 is greengreen.");
     });
 
     it("duplicate contexts", async () => {
@@ -291,20 +292,20 @@ describe(
         inner2 = selector("div", consumer2);
       };
       await setup();
-      expect(text(inner1)).toEqual("Theme is dark.");
-      expect(text(inner2)).toEqual("Theme is dark.");
+      expect(text(inner1)).to.equal("Theme is dark.");
+      expect(text(inner2)).to.equal("Theme is dark.");
 
       button1.click();
 
       await setup();
-      expect(text(inner1)).toEqual("Theme is light.");
-      expect(text(inner2)).toEqual("Theme is dark.");
+      expect(text(inner1)).to.equal("Theme is light.");
+      expect(text(inner2)).to.equal("Theme is dark.");
 
       button2.click();
 
       await setup();
-      expect(text(inner1)).toEqual("Theme is light.");
-      expect(text(inner2)).toEqual("Theme is light.");
+      expect(text(inner1)).to.equal("Theme is light.");
+      expect(text(inner2)).to.equal("Theme is light.");
     });
 
     it("unsubscribe when consumer is unmounted", async () => {
@@ -317,12 +318,12 @@ describe(
         button = selector("button", target);
       };
       await setup();
-      expect(provider.consumers.size).toEqual(1);
+      expect(provider.consumers.size).to.equal(1);
 
       button.click();
 
       await setup();
-      expect(provider.consumers.size).toEqual(0);
+      expect(provider.consumers.size).to.equal(0);
     });
 
     it("count value changed", async () => {
@@ -337,22 +338,22 @@ describe(
         count = selector("div", consumer);
       };
       await setup();
-      expect(text(count)).toEqual("0");
+      expect(text(count)).to.equal("0");
 
       light.click();
 
       await setup();
-      expect(text(count)).toEqual("1");
+      expect(text(count)).to.equal("1");
 
       light.click();
 
       await setup();
-      expect(text(count)).toEqual("1");
+      expect(text(count)).to.equal("1");
 
       dark.click();
 
       await setup();
-      expect(text(count)).toEqual("2");
+      expect(text(count)).to.equal("2");
     });
 
     it("compare as SameValue", async () => {
@@ -366,25 +367,25 @@ describe(
       };
 
       await setup();
-      expect(text(updated)).toEqual("0");
+      expect(text(updated)).to.equal("0");
 
       provider.value = +0;
       await setup();
-      expect(text(updated)).toEqual("1");
+      expect(text(updated)).to.equal("1");
 
       // +0 => -0
       provider.value = -0;
       await setup();
-      expect(text(updated)).toEqual("2");
+      expect(text(updated)).to.equal("2");
 
       provider.value = NaN;
       await setup();
-      expect(text(updated)).toEqual("3");
+      expect(text(updated)).to.equal("3");
 
       // NaN => NaN
       provider.value = Number("a");
       await setup();
-      expect(text(updated)).toEqual("3");
+      expect(text(updated)).to.equal("3");
     });
   })
 );
