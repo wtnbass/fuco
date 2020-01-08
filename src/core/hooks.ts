@@ -1,8 +1,5 @@
-import { Component } from "./component";
-import { Context } from "./context";
-import { stringifyCSS, HasCSSSymbol } from "./css";
-import { hooks } from "./update";
 import { Component, Deps, EffectFn, hooks } from "./component";
+import { HasCSSSymbol, stringifyCSS } from "./css";
 import { Context, Detail, REQUEST_CONSUME } from "./context";
 
 export interface AttributeConverter<T> {
@@ -28,7 +25,9 @@ export function useAttribute<T>(
           : c.getAttribute(name);
         if (!Object.is(h.values[i], newValue)) {
           h.values[i] = newValue;
-          c.performUpdate();
+          if (c._dirty) return;
+          c._dirty = true;
+          c._performUpdate();
         }
       });
       m.observe(c, { attributes: true, attributeFilter: [name] });
@@ -75,7 +74,7 @@ const enabledAdoptedStyleSheets =
 
 export const useStyle = (cssStyle: HasCSSSymbol | (() => HasCSSSymbol)) =>
   hooks<void>({
-    oncreate(_, c, i) {
+    oncreate(h, c, i) {
       if (typeof cssStyle === "function") {
         cssStyle = cssStyle();
       }
@@ -88,7 +87,7 @@ export const useStyle = (cssStyle: HasCSSSymbol | (() => HasCSSSymbol)) =>
           styleSheet
         ];
       } else {
-        c.renderCallback[i] = () => {
+        h.layoutEffects[i] = () => {
           const style = document.createElement("style");
           style.textContent = css;
           c.$root.appendChild(style);
@@ -165,13 +164,10 @@ export const useContext = <T>(context: Context<T>) =>
     }
   });
 
-const depsChanged = (prev: unknown[] | undefined, next: unknown[]) =>
+const depsChanged = (prev: Deps | undefined, next: Deps) =>
   prev == null || next.some((f, i) => !Object.is(f, prev[i]));
 
-export const useEffect = (
-  handler: () => void | (() => void),
-  deps?: unknown[]
-) =>
+export const useEffect = (handler: EffectFn, deps?: Deps) =>
   hooks<void>({
     onupdate(h, _, i) {
       if (!deps || depsChanged(h.deps[i], deps)) {
@@ -181,10 +177,7 @@ export const useEffect = (
     }
   });
 
-export const useLayoutEffect = (
-  handler: () => void | (() => void),
-  deps?: unknown[]
-) =>
+export const useLayoutEffect = (handler: EffectFn, deps?: Deps) =>
   hooks<void>({
     onupdate(h, _, i) {
       if (!deps || depsChanged(h.deps[i], deps)) {
@@ -194,7 +187,7 @@ export const useLayoutEffect = (
     }
   });
 
-export const useMemo = <T>(fn: () => T, deps?: unknown[]) =>
+export const useMemo = <T>(fn: () => T, deps?: Deps) =>
   hooks<T>({
     onupdate(h, _, i) {
       let value = h.values[i];
@@ -206,7 +199,5 @@ export const useMemo = <T>(fn: () => T, deps?: unknown[]) =>
     }
   });
 
-export const useCallback = <T extends Function>(
-  callback: T,
-  deps?: unknown[]
-) => useMemo(() => callback, deps);
+export const useCallback = <T extends Function>(callback: T, deps?: Deps) =>
+  useMemo(() => callback, deps);
