@@ -1,8 +1,9 @@
 import { Component } from "./component";
 import { Context } from "./context";
 import { stringifyCSS, HasCSSSymbol } from "./css";
-import { REQUEST_CONSUME, Detail, Provider } from "./provider";
 import { hooks } from "./update";
+import { Component, Deps, EffectFn, hooks } from "./component";
+import { Context, Detail, REQUEST_CONSUME } from "./context";
 
 export interface AttributeConverter<T> {
   (attr: string | null): T;
@@ -141,23 +142,27 @@ export const useReducer = <S, A>(
 export const useContext = <T>(context: Context<T>) =>
   hooks<T | undefined>({
     oncreate: (h, c, i) => {
-      h.cleanup[i] = () => (h.deps[i][0] as Provider<T>).unsubscribe(c);
+      h.values[i] = context.initialValue;
       c.dispatchEvent(
         new CustomEvent<Detail<T>>(REQUEST_CONSUME, {
           bubbles: true,
           composed: true,
           detail: {
             context,
-            consumer: c,
-            register(provider: Provider<T>) {
-              h.deps[i] = [provider];
+            register(provider) {
+              h.values[i] = provider.value;
+              h.cleanup[i] = provider.subscribe(() => {
+                if (!Object.is(h.values[i], provider.value)) {
+                  h.values[i] = provider.value;
+                  c.update();
+                }
+              });
             }
           }
         })
       );
-      return context.initialValue;
-    },
-    onupdate: (h, _, i) => (h.deps[i][0] as Provider<T>).value
+      return h.values[i];
+    }
   });
 
 const depsChanged = (prev: unknown[] | undefined, next: unknown[]) =>

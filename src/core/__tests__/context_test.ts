@@ -10,7 +10,7 @@ import {
   useContext,
   useCallback
 } from "..";
-import { Provider } from "../provider";
+import { Provider } from "../context";
 
 type Theme = "light" | "dark";
 type Theme2 = "green" | "red";
@@ -310,7 +310,7 @@ describe(
 
     it("unsubscribe when consumer is unmounted", async () => {
       let target!: Element;
-      let provider!: Element & { consumers: Set<unknown> };
+      let provider!: Element & { listeners: [] };
       let button!: HTMLButtonElement;
       const setup = async () => {
         target = await fixs[4].setup();
@@ -318,12 +318,12 @@ describe(
         button = selector("button", target);
       };
       await setup();
-      expect(provider.consumers.size).to.equal(1);
+      expect(provider.listeners).to.length(1);
 
       button.click();
 
       await setup();
-      expect(provider.consumers.size).to.equal(0);
+      expect(provider.listeners).to.length(0);
     });
 
     it("count value changed", async () => {
