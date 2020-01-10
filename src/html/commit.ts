@@ -22,10 +22,18 @@ import {
 } from "./mutations";
 
 export function commit(mutations: Mutation[], args: ArgValues) {
+  const q = [];
   for (let i = 1; i < mutations.length; i++) {
     const m = mutations[i];
-    m && commitMutation(m, args[i]);
+    if (m) {
+      if (isAttributeMutation(m) && m.name[0] === ".") {
+        q.push(() => commitMutation(m, args[i]));
+      } else {
+        commitMutation(m, args[i]);
+      }
+    }
   }
+  q.forEach(f => f());
 }
 
 function commitMutation(m: Mutation, arg: unknown) {

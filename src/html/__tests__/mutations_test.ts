@@ -463,4 +463,23 @@ describe("mutations", () => {
       "<section>second</section>"
     );
   });
+
+  it("default value of <select>", () => {
+    const app = (selectValue: string) => html`
+      <select .value=${selectValue}>
+        ${["a", "b", "c"].map(
+          v => html`
+            <option value=${v}>${v}</option>
+          `
+        )}
+      </select>
+      ${"dummy"}
+    `;
+
+    render(app("c"), container);
+    expect(container.querySelector("select")!.value).to.be.equal("c");
+
+    render(app("a"), container);
+    expect(container.querySelector("select")!.value).to.be.equal("a");
+  });
 });
