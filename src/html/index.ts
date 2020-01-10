@@ -1,7 +1,8 @@
 /* eslint-disable prefer-rest-params */
 
 import { parse } from "./parse";
-import { mount, resolve } from "./dom";
+import { mount } from "./mount";
+import { commit } from "./commit";
 import { createTemplate, HtmlTemplate } from "./template";
 
 const Cache = new WeakMap();
@@ -25,5 +26,5 @@ export function render(template: unknown, container: Node) {
     mount(vdom, container, (mutations = []));
     Cache.set(container, mutations);
   }
-  resolve(mutations, args);
+  commit(mutations, args);
 }
