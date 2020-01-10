@@ -3,15 +3,16 @@ import { expect } from "chai";
 import * as sinon from "sinon";
 import { html, render } from "..";
 
+function stripComments(html: string) {
+  return html.replace(/<!---->/g, "");
+}
+
 describe("render", () => {
   let container!: HTMLDivElement;
 
   function test(tmpl: unknown, innerHTML: string) {
     render(tmpl, container);
-    expect(container.innerHTML.replace(/<!---->/g, "")).to.equal(
-      innerHTML,
-      "render"
-    );
+    expect(stripComments(container.innerHTML)).to.equal(innerHTML, "render");
   }
 
   beforeEach(() => {
@@ -232,5 +233,21 @@ describe("render", () => {
     `;
 
     test(app, "<div><p>unsafe</p></div>");
+  });
+
+  it("default value of <select>", () => {
+    const defaultValue = "c";
+    const app = html`
+      <select .value=${defaultValue}>
+        ${["a", "b", "c"].map(
+          v => html`
+            <option value=${v}>${v}</option>
+          `
+        )}
+      </select>
+    `;
+
+    render(app, container);
+    expect(container.querySelector("select")!.value).to.be.equal(defaultValue);
   });
 });
