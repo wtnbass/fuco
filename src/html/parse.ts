@@ -1,19 +1,17 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { VDOM, VNode, VPropValue } from "./template";
-import {
-  openTagRegexp,
-  closeTagRegexp,
-  tagEndRegexp,
-  voidTagNameRegexp,
-  attrNameRegexp,
-  quotedAttrValueRegexp,
-  rawAttrValueRegexp,
-  doctypeRegexp,
-  commentStartRegexp,
-  commentEndRegexp,
-  spreadAttrRegexp
-} from "../shared/regexp";
+const openTagRegexp = /^\s*<\s*([a-zA-Z1-9-]+)/;
+const closeTagRegexp = /^\s*<\s*\/\s*([a-zA-Z1-9-]+)>/;
+const tagEndRegexp = /^\s*(\/)?>/;
+const voidTagNameRegexp = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;
+const attrNameRegexp = /\s*([.?@a-zA-Z1-9-]+)\s*=/;
+const quotedAttrValueRegexp = /\s*(["'])((?:.)*?)\1/;
+const rawAttrValueRegexp = /\s*(.+?)[\s>]/;
+const doctypeRegexp = /^\s*<!DOCTYPE [^>]+>/i;
+const commentStartRegexp = /^\s*<!--/;
+const commentEndRegexp = /-->/;
+const spreadAttrRegexp = /\s*(\.{3})\s*$/;
 
 interface VRoot {
   children: VDOM[];

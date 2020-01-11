@@ -1,3 +1,5 @@
+import { isBrowser } from "./env";
+
 const cssSymbol = Symbol("css");
 
 export interface HasCSSSymbol {
@@ -23,4 +25,31 @@ export const css = (strings: readonly string[], ...values: unknown[]) => ({
 
 export const unsafeCSS = (css: string) => ({ [cssSymbol]: css });
 
-export const stringifyCSS = (css: HasCSSSymbol) => css[cssSymbol];
+const enabledAdoptedStyleSheets =
+  isBrowser &&
+  "adoptedStyleSheets" in Document.prototype &&
+  "replace" in CSSStyleSheet.prototype;
+
+export const adoptCssStyle = (root: ShadowRoot, css: HasCSSSymbol) => {
+  const cssStyle = css[cssSymbol];
+  if (enabledAdoptedStyleSheets) {
+    const styleSheet = new CSSStyleSheet();
+    styleSheet.replace(cssStyle);
+    root.adoptedStyleSheets = [...root.adoptedStyleSheets, styleSheet];
+  } else {
+    const style = document.createElement("style");
+    style.textContent = cssStyle;
+    root.appendChild(style);
+  }
+};
+
+declare global {
+  interface ShadowRoot {
+    adoptedStyleSheets: CSSStyleSheet[];
+  }
+
+  interface CSSStyleSheet {
+    replace(css: string): Promise<unknown>;
+    replaceSync(css: string): void;
+  }
+}

@@ -1,5 +1,6 @@
 export { html, render } from "../html";
-export { Component, defineElement, FunctionalComponent } from "./component";
+export { Component } from "./component";
+export { defineElement, FunctionalComponent } from "./define-element";
 export { css, unsafeCSS } from "./css";
 export { createContext } from "./context";
 export {
