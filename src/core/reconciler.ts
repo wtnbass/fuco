@@ -1,5 +1,5 @@
 import { Component } from "./component";
-import { isBrowser } from "../shared/env";
+import { isBrowser } from "./env";
 
 const batch = <T>(
   runner: (f: () => void) => () => void,

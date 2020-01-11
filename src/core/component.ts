@@ -1,59 +1,34 @@
-import { isBrowser } from "../shared/env";
-import { render } from "../html";
+import { adoptCssStyle, HasCSSSymbol } from "./css";
+import { defaultHooks, Hooks, setCurrent } from "./hook";
 import {
   enqueueEffects,
   enqueueLayoutEffects,
   enqueueUpdate
 } from "./reconciler";
+import { isBrowser } from "./env";
 
-export interface Hooks<T> {
-  values: T[];
-  deps: Deps[];
-  effects: EffectFn[];
-  layoutEffects: EffectFn[];
-  cleanup: Cleanup[];
+export interface FucoComponent {
+  hooks: Hooks<unknown>;
+  _attr<T>(name: string, converter?: AttributeConverter<T>): T | string | null;
+  _observeAttr(name: string, callback: () => void): void;
+  _dispatch<T>(name: string, init: CustomEventInit<T>): void;
+  _adoptStyle(css: HasCSSSymbol): void;
 }
 
-export type Deps = unknown[];
-
-export type EffectFn = () => void | Cleanup;
-
-export type Cleanup = () => void;
-
-let currentCursor: number;
-let currentComponent: Component;
-
-export function hooks<T>(config: {
-  oncreate?: (h: Hooks<T>, c: Component, i: number) => T;
-  onupdate?: (h: Hooks<T>, c: Component, i: number) => T;
-  onSSR?: (h: Hooks<T>, c: Component, i: number) => T;
-}): T {
-  const h = currentComponent.hooks as Hooks<T>;
-  const index = currentCursor++;
-  if (currentComponent instanceof Component) {
-    if (h.values.length <= index && config.oncreate) {
-      h.values[index] = config.oncreate(h, currentComponent, index);
-    }
-    if (config.onupdate) {
-      h.values[index] = config.onupdate(h, currentComponent, index);
-    }
-  } else {
-    config.onSSR && config.onSSR(h, currentComponent, index);
-  }
-  return h.values[index];
+export interface AttributeConverter<T> {
+  (attr: string | null): T;
 }
 
-export abstract class Component extends HTMLElement {
+if (!isBrowser) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (global as any).HTMLElement = Function;
+}
+
+export abstract class Component extends HTMLElement implements FucoComponent {
   public _dirty = false;
   public _connected = false;
   public $root = this.attachShadow({ mode: "open" });
-  public hooks: Hooks<unknown> = {
-    values: [],
-    deps: [],
-    effects: [],
-    layoutEffects: [],
-    cleanup: []
-  };
+  public hooks = defaultHooks();
 
   public abstract render(): void;
 
@@ -82,8 +57,7 @@ export abstract class Component extends HTMLElement {
   public _performUpdate() {
     if (!this._connected) return;
     try {
-      currentCursor = 0;
-      currentComponent = this;
+      setCurrent(this);
       this.render();
       enqueueLayoutEffects(this);
       enqueueEffects(this);
@@ -109,23 +83,23 @@ export abstract class Component extends HTMLElement {
       }
     }
   }
-}
 
-export type FunctionalComponent = () => unknown;
+  public _attr<T>(name: string, converter?: AttributeConverter<T>) {
+    return converter
+      ? converter(this.getAttribute(name))
+      : this.getAttribute(name);
+  }
+  public _observeAttr(name: string, callback: () => void) {
+    const m = new MutationObserver(() => callback());
+    m.observe(this, { attributes: true, attributeFilter: [name] });
+    return () => m.disconnect();
+  }
 
-export const functionalComponents: { [name: string]: FunctionalComponent } = {};
+  public _dispatch<T>(name: string, init: CustomEventInit<T>) {
+    this.dispatchEvent(new CustomEvent<T>(name, init));
+  }
 
-export function defineElement(name: string, fn: FunctionalComponent) {
-  if (isBrowser) {
-    customElements.define(
-      name,
-      class extends Component {
-        public render() {
-          render(fn(), this.$root);
-        }
-      }
-    );
-  } else {
-    functionalComponents[name] = fn;
+  public _adoptStyle(css: HasCSSSymbol) {
+    adoptCssStyle(this.$root, css);
   }
 }

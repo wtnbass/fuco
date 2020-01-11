@@ -1,10 +1,7 @@
-import { Component, Deps, EffectFn, hooks } from "./component";
-import { HasCSSSymbol, stringifyCSS } from "./css";
+import { AttributeConverter, Component } from "./component";
 import { Context, Detail, REQUEST_CONSUME } from "./context";
-
-export interface AttributeConverter<T> {
-  (attr: string | null): T;
-}
+import { HasCSSSymbol } from "./css";
+import { Deps, EffectFn, hooks } from "./hook";
 
 export function useAttribute(name: string): string | null;
 
@@ -19,20 +16,14 @@ export function useAttribute<T>(
 ) {
   return hooks<string | T | null>({
     oncreate(h, c, i) {
-      const m = new MutationObserver(() => {
-        const newValue = converter
-          ? converter(c.getAttribute(name))
-          : c.getAttribute(name);
+      h.cleanup[i] = c._observeAttr(name, () => {
+        const newValue = c._attr(name, converter);
         if (!Object.is(h.values[i], newValue)) {
           h.values[i] = newValue;
-          if (c._dirty) return;
-          c._dirty = true;
           c._performUpdate();
         }
       });
-      m.observe(c, { attributes: true, attributeFilter: [name] });
-      h.cleanup[i] = () => m.disconnect();
-      return converter ? converter(c.getAttribute(name)) : c.getAttribute(name);
+      return c._attr(name, converter);
     }
   });
 }
@@ -60,39 +51,14 @@ export const useProperty = <T>(name: string) =>
 export const useDispatchEvent = <T>(name: string, eventInit: EventInit = {}) =>
   hooks<(detail: T) => void>({
     oncreate: (_, c) => (detail: T) =>
-      c.dispatchEvent(
-        new CustomEvent(name, {
-          ...eventInit,
-          detail
-        })
-      )
+      c._dispatch(name, { ...eventInit, detail })
   });
-
-const enabledAdoptedStyleSheets =
-  "adoptedStyleSheets" in Document.prototype &&
-  "replace" in CSSStyleSheet.prototype;
 
 export const useStyle = (cssStyle: HasCSSSymbol | (() => HasCSSSymbol)) =>
   hooks<void>({
     oncreate(h, c, i) {
-      if (typeof cssStyle === "function") {
-        cssStyle = cssStyle();
-      }
-      const css = stringifyCSS(cssStyle);
-      if (enabledAdoptedStyleSheets) {
-        const styleSheet = new CSSStyleSheet();
-        styleSheet.replace(css);
-        c.$root.adoptedStyleSheets = [
-          ...c.$root.adoptedStyleSheets,
-          styleSheet
-        ];
-      } else {
-        h.layoutEffects[i] = () => {
-          const style = document.createElement("style");
-          style.textContent = css;
-          c.$root.appendChild(style);
-        };
-      }
+      h.layoutEffects[i] = () =>
+        c._adoptStyle(typeof cssStyle === "function" ? cssStyle() : cssStyle);
     }
   });
 
@@ -142,24 +108,22 @@ export const useContext = <T>(context: Context<T>) =>
   hooks<T | undefined>({
     oncreate: (h, c, i) => {
       h.values[i] = context.initialValue;
-      c.dispatchEvent(
-        new CustomEvent<Detail<T>>(REQUEST_CONSUME, {
-          bubbles: true,
-          composed: true,
-          detail: {
-            context,
-            register(provider) {
-              h.values[i] = provider.value;
-              h.cleanup[i] = provider.subscribe(() => {
-                if (!Object.is(h.values[i], provider.value)) {
-                  h.values[i] = provider.value;
-                  c.update();
-                }
-              });
-            }
+      c._dispatch<Detail<T>>(REQUEST_CONSUME, {
+        bubbles: true,
+        composed: true,
+        detail: {
+          context,
+          register(provider) {
+            h.values[i] = provider.value;
+            h.cleanup[i] = provider.subscribe(() => {
+              if (!Object.is(h.values[i], provider.value)) {
+                h.values[i] = provider.value;
+                c.update();
+              }
+            });
           }
-        })
-      );
+        }
+      });
       return h.values[i];
     }
   });

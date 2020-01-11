@@ -9,7 +9,6 @@ import {
   VText,
   ArgValues
 } from "./template";
-import { attrPrefixRegexp } from "../shared/regexp";
 import { mount } from "./mount";
 import {
   isAttributeMutation,
@@ -53,7 +52,7 @@ function commitAttribute(
   next: unknown,
   prev?: unknown
 ) {
-  const r = name.match(attrPrefixRegexp);
+  const r = name.match(/^(@|\.|\?)([a-zA-Z1-9-]+)/);
   if (r) {
     /* istanbul ignore else */
     if (r[1] === "?") {
