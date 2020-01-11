@@ -1,19 +1,6 @@
 {
+  "extends": "./tsconfig",
   "compilerOptions": {
-    "target": "es2017",
-    "module": "commonjs",
-    "lib": ["es2017", "dom", "dom.iterable"],
-    "moduleResolution": "node",
-    "outDir": "./",
-    "declarationDir": "./",
-    "declaration": true,
-    "sourceMap": true,
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
-  },
-  "include": ["src/**/*.ts"],
-  "exclude": []
+    "module": "commonjs"
+  }
 }
