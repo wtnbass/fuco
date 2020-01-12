@@ -6,51 +6,71 @@ import {
   VProps,
   ArgValues
 } from "../html/template";
-import { attrPrefixRegexp, voidTagNameRegexp } from "../shared/regexp";
 import { compose } from "./compose";
 
-export function stringify(vdom: VDOM | VDOM[], args?: ArgValues): string {
+const voidTagNameRegexp = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;
+
+export function stringify(
+  vdom: VDOM | VDOM[],
+  args?: ArgValues,
+  selectValue?: string
+): string {
   if (Array.isArray(vdom)) {
-    return vdom.reduce<string>((acc, v) => acc + stringify(v, args), "");
+    return vdom.reduce<string>(
+      (acc, v) => acc + stringify(v, args, selectValue),
+      ""
+    );
   } else if (vdom == null) {
     return "";
   } else if (typeof vdom === "number" && args) {
-    return stringify(args[vdom]);
+    return stringify(args[vdom], undefined, selectValue);
   } else if (isTemplate(vdom)) {
     const i = items(vdom);
-    return stringify(i[0], i[1]);
+    return stringify(i[0], i[1], selectValue);
   } else if (!isVNode(vdom)) {
-    return "" + vdom;
+    return String(vdom);
   } else {
-    const { tag, props, children } = compose(vdom);
-
     let s = "";
-    let r;
-    const attrs = Object.assign([] as string[], { _html: "" });
 
+    const { tag, props, children } = compose(vdom, args);
     if (props) {
-      const _attrs = (_props: VProps, _args?: ArgValues) => {
-        for (const name of Object.keys(_props)) {
+      let attrs = "";
+      let html, r;
+      const propsToString = (props: VProps, args?: ArgValues) => {
+        for (const name in props) {
           if (name === "key" || name === "ref") continue;
-          let v = _props[name];
-          if (typeof v === "number" && _args) v = _args[v];
+          let v = props[name];
+          if (typeof v === "number" && args) v = args[v];
           if (name === "...") {
-            _attrs(v as VProps);
+            propsToString(v as VProps);
           } else if (name === "unsafe-html") {
-            attrs._html = v as string;
-          } else if ((r = name.match(attrPrefixRegexp))) {
-            if (r[1] === "?" && v) attrs.push(r[2]);
+            html = v as string;
+          } else if ((r = name.match(/^(@|\.|\?)([a-zA-Z1-9-]+)/))) {
+            if (r[1] === "?" && v) attrs += ` ${r[2]}`;
           } else if (v != null) {
-            attrs.push(`${name}="${v}"`);
+            attrs += ` ${name}="${v}"`;
+          }
+
+          if (tag === "option" && name === "value" && v === selectValue) {
+            attrs += " selected";
+            selectValue = undefined;
+          }
+          if (tag === "select" && name === ".value" && v != null) {
+            selectValue = v as string;
           }
         }
       };
-      _attrs(props, args);
-      (s = "") || (s = attrs.join(" "));
+      propsToString(props, args);
+
+      s = `<${tag}${attrs}>`;
+      if (html) {
+        return `${s}${html}</${tag}>`;
+      }
+    } else {
+      s = `<${tag}>`;
     }
-    s = `<${tag}${s && " " + s}>`;
     if (!voidTagNameRegexp.test(tag)) {
-      s += `${attrs._html || stringify(children, args)}</${tag}>`;
+      s += `${stringify(children, args, selectValue)}</${tag}>`;
     }
     return s;
   }
