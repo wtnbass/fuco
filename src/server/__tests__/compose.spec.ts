@@ -111,4 +111,26 @@ describe("compose", () => {
         "</test-slot>"
     );
   });
+
+  it("attributes", () => {
+    const s = renderToString(html`
+      <div
+        attr=${"foo"}
+        .prop=${"bar"}
+        @evnt=${() => !1}
+        ?bool-true=${true}
+        ?bool-false=${false}
+        unsafe-html=${"<p>unsafe</p>"}
+        key=${"ignored"}
+        ref=${() => !1}
+        ...=${{ "spread-attr": "spread", ".spreadProp": "baz" }}
+      >
+        ignored
+      </div>
+    `);
+
+    expect(s).to.equal(
+      '<div attr="foo" bool-true spread-attr="spread"><p>unsafe</p></div>'
+    );
+  });
 });
