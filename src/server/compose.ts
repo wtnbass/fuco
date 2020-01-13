@@ -1,53 +1,26 @@
 import { __FucoRegistry__ } from "../fuco";
-import {
-  VNode,
-  VDOM,
-  isVNode,
-  ArgValues,
-  VProps,
-  isTemplate,
-  items
-} from "../html";
-import { Component, CmpProps } from "./component";
+import { VNode, VDOM, isVNode, ArgValues, isTemplate, items } from "../html";
+import { Component } from "./component";
 
 export function compose(vnode: VNode, args: ArgValues | undefined): VNode {
   let fc;
   if (!(fc = __FucoRegistry__[vnode.tag])) {
     return vnode;
   }
-  const c = new Component(fc, createCmpProps(vnode.props, args));
-  const children = replaceSlot(1, [, c.result], vnode.children);
+  const { tag, props, children } = vnode;
+  const c = new Component(fc, props, args);
+  const nextProps = props
+    ? Object.keys(props)
+        .filter(key => key !== "unsafe-html" && key !== "ref" && key !== "key")
+        .reduce((acc, key) => ({ ...acc, [key]: props[key] }), {})
+    : undefined;
+  const nextChildren = replaceSlot(1, [, c.result], children);
   const template = {
     tag: "template",
     props: { "shadow-root": "" },
-    children: Array.isArray(children) ? children : [children]
+    children: Array.isArray(nextChildren) ? nextChildren : [nextChildren]
   };
-  return { ...vnode, children: [template] };
-}
-
-function createCmpProps(
-  props: VProps | undefined,
-  args: ArgValues | undefined
-) {
-  const cmpProps: CmpProps = {};
-  if (props) {
-    const resolveArgs = (_props: VProps) => {
-      for (const key in _props) {
-        if (key === "...") {
-          resolveArgs(_props[key] as VProps);
-        } else {
-          const value = _props[key];
-          if (typeof value === "number" && args) {
-            cmpProps[key] = args[value];
-          } else {
-            cmpProps[key] = value as string;
-          }
-        }
-      }
-    };
-    resolveArgs(props);
-  }
-  return cmpProps;
+  return { tag, props: nextProps, children: [template] };
 }
 
 function replaceSlot(
