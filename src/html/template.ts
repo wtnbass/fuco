@@ -40,8 +40,8 @@ export function isTemplateHavingKey(t: HtmlTemplate) {
   return t[Template][2] != null;
 }
 
-export function isVNode(vdom: VDOM): vdom is VNode {
-  return !!(vdom as VNode).tag;
+export function isVNode(vdom: unknown): vdom is VNode {
+  return vdom && !!(vdom as VNode).tag;
 }
 
 export function items(t: HtmlTemplate) {

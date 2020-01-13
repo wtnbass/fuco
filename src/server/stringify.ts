@@ -1,11 +1,4 @@
-import {
-  isTemplate,
-  items,
-  isVNode,
-  VDOM,
-  VProps,
-  ArgValues
-} from "../html/template";
+import { isTemplate, items, isVNode, VDOM, VProps, ArgValues } from "../html";
 import { compose } from "./compose";
 
 const voidTagNameRegexp = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;

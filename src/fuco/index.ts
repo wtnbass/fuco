@@ -1,8 +1,13 @@
 export { html, render } from "../html";
-export { Component } from "./component";
-export { defineElement, FunctionalComponent } from "./define-element";
+export { Component, AttributeConverter } from "./component";
+export {
+  defineElement,
+  FunctionalComponent,
+  __FucoRegistry__
+} from "./define-element";
 export { css, unsafeCSS } from "./css";
 export { createContext } from "./context";
+export { defaultHooks, Hooks, HookableComponent, __setCurrent__ } from "./hook";
 export {
   useAttribute,
   useProperty,

@@ -1,9 +1,8 @@
 import typescript from "rollup-plugin-typescript2";
 import { terser } from "rollup-plugin-terser";
-import * as pkg from "./package.json";
 
-const tsOptions = { useTsconfigDeclarationDir: true };
-const terserOptions = {
+const tsOpts = { useTsconfigDeclarationDir: true };
+const terserOpts = {
   compress: Object.assign({
     keep_infinity: true,
     pure_getters: true,
@@ -14,20 +13,51 @@ const terserOptions = {
   warnings: true
 };
 
+const CJS_PROD = file => ({
+  file: `${file}.production.js`,
+  format: "cjs",
+  plugins: [terser(terserOpts)]
+});
+
+const CJS_DEV = file => ({
+  file: `${file}.development.js`,
+  format: "cjs"
+});
+
+const MJS_PROD = file => ({
+  file: `${file}.production.mjs`,
+  format: "esm",
+  plugins: [terser(terserOpts)]
+});
+
+const MJS_DEV = file => ({
+  file: `${file}.development.mjs`,
+  format: "esm"
+});
+
 export default [
+  /// mjs
   {
-    input: "./src/core/index.ts",
-    output: [
-      { file: pkg.main, format: "cjs", plugins: [terser(terserOptions)] },
-      { file: pkg.module, format: "esm", plugins: [terser(terserOptions)] },
-      { file: "core/fuco.dev.js", format: "cjs" },
-      { file: "core/fuco.dev.mjs", format: "esm" }
-    ],
-    plugins: [typescript(tsOptions)]
+    input: "./src/fuco/index.ts",
+    output: [MJS_PROD, MJS_DEV].map(f => f("fuco/fuco")),
+    plugins: [typescript(tsOpts)]
+  },
+  // cjs
+  {
+    input: "./src/fuco/index.ts",
+    output: [CJS_PROD, CJS_DEV].map(f => f("fuco/fuco")),
+    external: ["../html"],
+    plugins: [typescript(tsOpts)]
+  },
+  {
+    input: "./src/html/index.ts",
+    output: [CJS_PROD, CJS_DEV].map(f => f("html/html")),
+    plugins: [typescript(tsOpts)]
   },
   {
     input: "./src/server/index.ts",
-    output: { file: "server/index.js", format: "cjs" },
-    plugins: [typescript(tsOptions), terser(terserOptions)]
+    output: [CJS_PROD, CJS_DEV].map(f => f("server/server")),
+    external: ["../html", "../fuco"],
+    plugins: [typescript(tsOpts)]
   }
 ];

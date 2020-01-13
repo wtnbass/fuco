@@ -4,7 +4,7 @@ import { isBrowser } from "./env";
 
 export type FunctionalComponent = () => unknown;
 
-export const Registry: { [name: string]: FunctionalComponent } = {};
+export const __FucoRegistry__: { [name: string]: FunctionalComponent } = {};
 
 export function defineElement(name: string, fn: FunctionalComponent) {
   if (isBrowser) {
@@ -17,6 +17,6 @@ export function defineElement(name: string, fn: FunctionalComponent) {
       }
     );
   } else {
-    Registry[name] = fn;
+    __FucoRegistry__[name] = fn;
   }
 }

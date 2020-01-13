@@ -1,19 +1,11 @@
 import { adoptCssStyle, HasCSSSymbol } from "./css";
-import { defaultHooks, Hooks, setCurrent } from "./hook";
+import { defaultHooks, Hooks, HookableComponent, __setCurrent__ } from "./hook";
 import {
   enqueueEffects,
   enqueueLayoutEffects,
   enqueueUpdate
 } from "./reconciler";
 import { isBrowser } from "./env";
-
-export interface FucoComponent {
-  hooks: Hooks<unknown>;
-  _attr<T>(name: string, converter?: AttributeConverter<T>): T | string | null;
-  _observeAttr(name: string, callback: () => void): void;
-  _dispatch<T>(name: string, init: CustomEventInit<T>): void;
-  _adoptStyle(css: HasCSSSymbol): void;
-}
 
 export interface AttributeConverter<T> {
   (attr: string | null): T;
@@ -24,7 +16,8 @@ if (!isBrowser) {
   (global as any).HTMLElement = Function;
 }
 
-export abstract class Component extends HTMLElement implements FucoComponent {
+export abstract class Component extends HTMLElement
+  implements HookableComponent {
   public _dirty = false;
   public _connected = false;
   public $root = this.attachShadow({ mode: "open" });
@@ -57,7 +50,7 @@ export abstract class Component extends HTMLElement implements FucoComponent {
   public _performUpdate() {
     if (!this._connected) return;
     try {
-      setCurrent(this);
+      __setCurrent__(this);
       this.render();
       enqueueLayoutEffects(this);
       enqueueEffects(this);

@@ -1,18 +1,23 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 
-import { defaultHooks, setCurrent } from "../core/hook";
-import { AttributeConverter, FucoComponent } from "../core/component";
-import { FunctionalComponent } from "../core/define-element";
+import {
+  AttributeConverter,
+  FunctionalComponent,
+  HookableComponent,
+  defaultHooks,
+  __setCurrent__
+} from "../fuco";
+
 export type CmpProps = { [key: string]: string };
 
-export class Component implements FucoComponent {
+export class Component implements HookableComponent {
   props: CmpProps;
   hooks = defaultHooks();
   result: unknown;
 
   constructor(fc: FunctionalComponent, props: CmpProps) {
     this.props = props;
-    setCurrent(this);
+    __setCurrent__(this);
     this.result = fc();
   }
 
