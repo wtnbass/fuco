@@ -1,4 +1,4 @@
-import { Registry } from "../core/define-element";
+import { __FucoRegistry__ } from "../fuco";
 import {
   VNode,
   VDOM,
@@ -7,12 +7,12 @@ import {
   VProps,
   isTemplate,
   items
-} from "../html/template";
+} from "../html";
 import { Component, CmpProps } from "./component";
 
 export function compose(vnode: VNode, args: ArgValues | undefined): VNode {
   let fc;
-  if (!(fc = Registry[vnode.tag])) {
+  if (!(fc = __FucoRegistry__[vnode.tag])) {
     return vnode;
   }
   const c = new Component(fc, createCmpProps(vnode.props, args));

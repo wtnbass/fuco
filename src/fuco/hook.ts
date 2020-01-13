@@ -1,4 +1,5 @@
-import { Component, FucoComponent } from "./component";
+import { Component, AttributeConverter } from "./component";
+import { HasCSSSymbol } from "./css";
 
 export interface Hooks<T> {
   values: T[];
@@ -15,9 +16,17 @@ export type EffectFn = () => void | Cleanup;
 export type Cleanup = () => void;
 
 let currentCursor: number;
-let currentComponent: FucoComponent;
+let currentComponent: HookableComponent;
 
-export function defaultHooks<T>(): Hooks<T> {
+export interface HookableComponent {
+  hooks: Hooks<unknown>;
+  _attr<T>(name: string, converter?: AttributeConverter<T>): T | string | null;
+  _observeAttr(name: string, callback: () => void): void;
+  _dispatch<T>(name: string, init: CustomEventInit<T>): void;
+  _adoptStyle(css: HasCSSSymbol): void;
+}
+
+export function defaultHooks(): Hooks<unknown> {
   return {
     values: [],
     deps: [],
@@ -27,7 +36,7 @@ export function defaultHooks<T>(): Hooks<T> {
   };
 }
 
-export function setCurrent(c: FucoComponent) {
+export function __setCurrent__(c: HookableComponent) {
   currentComponent = c;
   currentCursor = 0;
 }

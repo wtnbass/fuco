@@ -1,7 +1,15 @@
 /node_modules
 /package-lock.json
 
-/core
-/html
-/server
+fuco/**/*.d.ts
+fuco/**/*.production.js
+fuco/**/*.development.js
+fuco/**/*.production.mjs
+fuco/**/*.development.mjs
+html/**/*.d.ts
+html/**/*.production.js
+html/**/*.development.js
+server/**/*.d.ts
+server/**/*.production.js
+server/**/*.development.js
 /coverage

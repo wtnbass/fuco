@@ -1,12 +1,12 @@
 {
   "name": "fuco",
-  "version": "1.2.0",
+  "version": "2.0.0-next",
   "description": "Functional Component like React, but for Web Components",
-  "main": "core/fuco.js",
-  "module": "core/fuco.mjs",
-  "typings": "core/index.d.ts",
+  "main": "fuco/index.js",
+  "module": "fuco/fuco.production.mjs",
+  "typings": "fuco/index.d.ts",
   "files": [
-    "core",
+    "fuco",
     "html",
     "server",
     "!**/__tests__/**"
@@ -17,12 +17,11 @@
     "testall": "run-p test:*",
     "test:node": "TS_NODE_PROJECT=tsconfig.test.json nyc mocha src/**/__tests__/**/*.spec.ts",
     "test:browser": "karma start",
-    "filesize": "cat core/fuco.js | gzip -9 | wc -c",
     "lint": "tsc --noEmit && eslint src --ext .ts",
     "fmt": "prettier --write 'src/**/*'",
-    "clean": "rimraf core html server coverage",
+    "clean": "rimraf '{fuco,html,server}/**/*.{d,development,production}.{ts,js,mjs}' coverage",
     "distclean": "npm run clean && rm -fr node_modules package-lock.json",
-    "prepare": "npm run clean && npm run build"
+    "prepare": "run-s clean build"
   },
   "keywords": [
     "webcomponents",

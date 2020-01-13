@@ -5,6 +5,8 @@ import { mount } from "./mount";
 import { commit } from "./commit";
 import { createTemplate, HtmlTemplate } from "./template";
 
+export * from "./template";
+
 const Cache = new WeakMap();
 
 export function html(
