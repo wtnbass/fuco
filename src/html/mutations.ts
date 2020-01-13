@@ -34,7 +34,3 @@ export function isAttributeMutation(m: Mutation): m is AttributeMutation {
 export function isTemplateMutation(m: Mutation): m is TemplateMutation {
   return !!(m as TemplateMutation)._mutations;
 }
-
-export function isTextMutation(m: Mutation): m is TextMutation {
-  return !!(m as TextMutation)._texts;
-}

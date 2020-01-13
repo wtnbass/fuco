@@ -15,7 +15,7 @@
     "build": "rollup -c",
     "test": "run-s lint build testall",
     "testall": "run-p test:*",
-    "test:node": "TS_NODE_PROJECT=tsconfig.test.json mocha -r ts-node/register src/**/__tests__/**/*.spec.ts",
+    "test:node": "TS_NODE_PROJECT=tsconfig.test.json nyc mocha src/**/__tests__/**/*.spec.ts",
     "test:browser": "karma start",
     "filesize": "cat core/fuco.js | gzip -9 | wc -c",
     "lint": "tsc --noEmit && eslint src --ext .ts",
@@ -54,6 +54,7 @@
     "karma-webpack": "4.0.2",
     "mocha": "7.0.0",
     "npm-run-all": "4.1.5",
+    "nyc": "15.0.0",
     "prettier": "1.19.1",
     "rimraf": "3.0.0",
     "rollup": "1.29.0",
@@ -64,5 +65,15 @@
     "ts-node": "8.6.1",
     "typescript": "3.7.4",
     "webpack": "4.41.5"
+  },
+  "mocha": {
+    "require": "ts-node/register"
+  },
+  "nyc": {
+    "reporter": [
+      "lcovonly"
+    ],
+    "report-dir": "./coverage/node",
+    "temp-dir": "./node_modules/.temp/.nyc_output"
   }
 }

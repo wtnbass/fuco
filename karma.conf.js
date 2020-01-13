@@ -46,13 +46,9 @@ module.exports = function(config) {
       stats: "errors-only"
     },
     coverageIstanbulReporter: {
-      dir: "coverage",
-      reports: ["html", "lcovonly", "text-summary"],
-      "report-config": {
-        html: {
-          subdir: "html"
-        }
-      }
+      dir: "coverage/browser",
+      combineBrowserReports: true,
+      reports: ["lcovonly"]
     }
   });
 };
