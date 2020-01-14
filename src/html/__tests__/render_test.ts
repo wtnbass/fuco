@@ -227,7 +227,7 @@ describe("render", () => {
 
   it("unsafe html", () => {
     const app = html`
-      <div unsafe-html=${"<p>unsafe</p>"}>
+      <div .innerHTML=${"<p>unsafe</p>"}>
         ignored
       </div>
     `;

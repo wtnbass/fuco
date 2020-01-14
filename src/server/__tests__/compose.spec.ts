@@ -120,7 +120,7 @@ describe("compose", () => {
         @evnt=${() => !1}
         ?bool-true=${true}
         ?bool-false=${false}
-        unsafe-html=${"<p>unsafe</p>"}
+        .innerHTML=${"<p>unsafe</p>"}
         key=${"ignored"}
         ref=${() => !1}
         ...=${{ "spread-attr": "spread", ".spreadProp": "baz" }}
