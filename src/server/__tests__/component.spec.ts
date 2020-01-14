@@ -105,7 +105,7 @@ describe("component", () => {
         @evnt=${() => !1}
         ?bool-true=${true}
         ?bool-false=${false}
-        unsafe-html=${"ignored"}
+        .innerHTML=${"ignored"}
         key=${"ignored"}
         ref=${() => !1}
         ...=${{ "spread-attr": "spread", ".spreadProp": "baz" }}

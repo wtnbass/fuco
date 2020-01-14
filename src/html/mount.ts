@@ -28,8 +28,6 @@ export function mount(
           node.setAttribute(name, props[name] as VText);
         }
       });
-    if (!props || !props["unsafe-html"]) {
-      mount(children, node, mutations);
-    }
+    mount(children, node, mutations);
   }
 }

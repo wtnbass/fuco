@@ -9,18 +9,13 @@ export function compose(vnode: VNode, args: ArgValues | undefined): VNode {
   }
   const { tag, props, children } = vnode;
   const c = new Component(fc, props, args);
-  const nextProps = props
-    ? Object.keys(props)
-        .filter(key => key !== "unsafe-html" && key !== "ref" && key !== "key")
-        .reduce((acc, key) => ({ ...acc, [key]: props[key] }), {})
-    : undefined;
-  const nextChildren = replaceSlot(1, [, c.result], children);
+  props && delete props[".innerHTML"];
   const template = {
     tag: "template",
     props: { "shadow-root": "" },
-    children: Array.isArray(nextChildren) ? nextChildren : [nextChildren]
+    children: replaceSlot(1, [, c.result], children) as VDOM[]
   };
-  return { tag, props: nextProps, children: [template] };
+  return { tag, props, children: [template] };
 }
 
 function replaceSlot(

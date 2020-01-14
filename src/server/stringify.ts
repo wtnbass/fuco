@@ -36,10 +36,9 @@ export function stringify(
           if (typeof v === "number" && args) v = args[v];
           if (name === "...") {
             propsToString(v as VProps);
-          } else if (name === "unsafe-html") {
-            html = v as string;
           } else if ((r = name.match(/^(@|\.|\?)([a-zA-Z1-9-]+)/))) {
             if (r[1] === "?" && v) attrs += ` ${r[2]}`;
+            else if (r[1] === "." && r[2] === "innerHTML") html = v as string;
           } else if (v != null) {
             attrs += ` ${name}="${v}"`;
           }

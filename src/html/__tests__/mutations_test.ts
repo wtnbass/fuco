@@ -403,7 +403,7 @@ describe("mutations", () => {
 
   it("unsafe html", () => {
     const app = () => html`
-      <div unsafe-html=${"<span>unsafe</span>"}>
+      <div .innerHTML=${"<span>unsafe</span>"}>
         ignored
       </div>
     `;

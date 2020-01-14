@@ -78,8 +78,6 @@ function commitAttribute(
     typeof next === "function"
       ? next(node)
       : ((next as ChProp<typeof next>).current = node);
-  } else if (name === "unsafe-html") {
-    node.innerHTML = next as string;
   } else {
     next != null && node.setAttribute(name, next as string);
   }
