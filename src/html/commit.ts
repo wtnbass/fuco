@@ -44,7 +44,7 @@ function commitMutation(m: Mutation, arg: unknown) {
   }
 }
 
-type ChProp<T> = T & { [key: string]: unknown };
+type AnyProp<T> = T & { [key: string]: unknown };
 
 function commitAttribute(
   node: Element,
@@ -52,8 +52,19 @@ function commitAttribute(
   next: unknown,
   prev?: unknown
 ) {
-  const r = name.match(/^(@|\.|\?)([a-zA-Z1-9-]+)/);
-  if (r) {
+  let r;
+  if (name === "...") {
+    if (typeof next === "object" && next) {
+      Object.keys(next).forEach(key =>
+        commitAttribute(
+          node,
+          key,
+          (next as AnyProp<typeof next>)[key],
+          prev && (prev as AnyProp<typeof prev>)[key]
+        )
+      );
+    }
+  } else if ((r = name.match(/^(@|\.|\?|:)([a-zA-Z1-9-]+)/))) {
     /* istanbul ignore else */
     if (r[1] === "?") {
       next ? node.setAttribute(r[2], "") : node.removeAttribute(r[2]);
@@ -62,25 +73,49 @@ function commitAttribute(
     } else if (r[1] === "@") {
       prev && node.removeEventListener(r[2], prev as EventListener);
       node.addEventListener(r[2], next as EventListener);
+    } else if (r[1] === ":") {
+      if (r[2] === "ref") {
+        typeof next === "function"
+          ? next(node)
+          : ((next as AnyProp<typeof next>).current = node);
+      } else if (r[2] === "style" && typeof next === "object") {
+        const { style } = node as HTMLElement;
+        setStyles(
+          style as AnyProp<typeof style>,
+          prev as AnyProp<typeof prev>,
+          next as AnyProp<typeof next>
+        );
+      } else if (r[2] === "class" && typeof next === "object") {
+        const prevClassNames = classNames(prev);
+        const nextClassNames = classNames(next);
+        prevClassNames.forEach(
+          p => nextClassNames.includes(p) || node.classList.remove(p)
+        );
+        nextClassNames.forEach(
+          n => prevClassNames.includes(n) || node.classList.add(n)
+        );
+      }
     }
-  } else if (name === "...") {
-    if (typeof next === "object" && next) {
-      Object.keys(next).forEach(key =>
-        commitAttribute(
-          node,
-          key,
-          (next as ChProp<typeof next>)[key],
-          prev && (prev as ChProp<typeof prev>)[key]
-        )
-      );
-    }
-  } else if (name === "ref") {
-    typeof next === "function"
-      ? next(node)
-      : ((next as ChProp<typeof next>).current = node);
   } else {
-    next != null && node.setAttribute(name, next as string);
+    next != null
+      ? node.setAttribute(name, next as string)
+      : node.removeAttribute(name);
   }
+}
+
+function setStyles(
+  style: AnyProp<CSSStyleDeclaration>,
+  prev: AnyProp<object>,
+  next: AnyProp<object>
+) {
+  for (const i in prev) if (!next || !(i in next)) style[i] = null;
+  for (const i in next) if (!prev || prev[i] !== next[i]) style[i] = next[i];
+}
+
+function classNames(o: unknown): string[] {
+  if (o == null) return [];
+  if (Array.isArray(o)) return o;
+  return Object.keys(o as object).filter(i => !!(o as AnyProp<object>)[i]);
 }
 
 function commitNode(

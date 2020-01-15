@@ -13,7 +13,7 @@ const fixture = () => {
   const prevValue = prevRef.current;
 
   return html`
-    <input type="text" id="input" ref=${inputRef} />
+    <input type="text" id="input" :ref=${inputRef} />
     <button @click=${() => set(inputRef.current!.value)}>push</button>
     <div id="value">${value}</div>
     <div id="prev-value">${prevValue}</div>

@@ -4,7 +4,7 @@ import { Mutation } from "./mutations";
 export function mount(
   vdom: VDOM | VDOM[],
   parent: Node,
-  mutations: Mutation[]
+  mutations: Mutation[] = []
 ) {
   if (Array.isArray(vdom)) {
     vdom.forEach(v => mount(v, parent, mutations));
@@ -21,7 +21,7 @@ export function mount(
     const node = parent.appendChild(document.createElement(tag));
     props &&
       Object.keys(props).forEach(name => {
-        if (name === "key") return;
+        if (name === ":key") return;
         if (typeof props[name] === "number") {
           mutations[props[name] as VArg] = { node, name };
         } else {
@@ -30,4 +30,5 @@ export function mount(
       });
     mount(children, node, mutations);
   }
+  return mutations;
 }

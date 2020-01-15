@@ -51,7 +51,7 @@ function createCmpProps(
         if (typeof value === "number" && args) {
           value = args[value];
         }
-        if (key[0] === "@" || key === "key" || key === "ref") {
+        if (key[0] === "@" || key === ":key" || key === ":ref") {
           continue;
         } else if (key === "...") {
           resolveArgs(value as VProps);

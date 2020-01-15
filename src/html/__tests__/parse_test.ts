@@ -1,19 +1,16 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-empty-function */
 import { expect } from "chai";
 import { html } from "..";
-import { items } from "../template";
+import { items, HtmlTemplate } from "../template";
 
 describe("parse", () => {
   let container!: HTMLDivElement;
 
-  function test(tmpl: any, vdom?: unknown, args?: unknown[], key?: unknown) {
-    const [actualVdom, actualArgs, actualKey] = items(tmpl);
+  function test(tmpl: HtmlTemplate, vdom?: unknown, args?: unknown[]) {
+    const [actualVdom, actualArgs] = items(tmpl);
     expect(vdom).to.deep.equal(actualVdom, "vdom");
     if (args) {
       expect(args).to.deep.equal(Array.from(actualArgs).slice(1), "variables");
-    }
-    if (key != null) {
-      expect(key).to.equal(actualKey, "key");
     }
   }
 
@@ -118,27 +115,25 @@ describe("parse", () => {
 
   it("has static key", () => {
     const app = html`
-      <div key="99">hello</div>
+      <div :key="99">hello</div>
     `;
 
     test(
       app,
-      [{ tag: "div", props: { key: "99" }, children: ["hello"] }],
-      [],
-      "99"
+      [{ tag: "div", props: { ":key": "99" }, children: ["hello"] }],
+      []
     );
   });
 
   it("has variable key", () => {
     const app = html`
-      <div key=${80}>hello</div>
+      <div :key=${80}>hello</div>
     `;
 
     test(
       app,
-      [{ tag: "div", props: { key: 1 }, children: ["hello"] }],
-      [80],
-      80
+      [{ tag: "div", props: { ":key": 1 }, children: ["hello"] }],
+      [80]
     );
   });
 
