@@ -1,11 +1,21 @@
-/* eslint-disable prefer-rest-params */
-
 import { parse } from "./parse";
 import { mount } from "./mount";
 import { commit } from "./commit";
-import { createTemplate, HtmlTemplate } from "./template";
+import { createTemplate, HtmlTemplate, VDOM } from "./template";
 
-export * from "./template";
+export {
+  HtmlTemplate,
+  VDOM,
+  VNode,
+  VProps,
+  VPropValue,
+  VText,
+  VArg,
+  ArgValues,
+  items,
+  isTemplate,
+  isVNode
+} from "./template";
 
 const Cache = new WeakMap();
 
@@ -13,20 +23,14 @@ export function html(
   strings: TemplateStringsArray,
   ..._: unknown[]
 ): HtmlTemplate {
-  let vdom = Cache.get(strings);
+  let vdom: VDOM[] = Cache.get(strings);
   vdom || Cache.set(strings, (vdom = parse(strings.raw)));
-  let key = vdom[0] && vdom[0].props && vdom[0].props.key;
-  if (typeof key === "number") key = arguments[key];
-
-  return createTemplate(vdom, arguments, key);
+  /* eslint-disable-next-line prefer-rest-params */
+  return createTemplate(vdom, arguments);
 }
 
 export function render(template: unknown, container: Node) {
-  const [vdom, args] = [1, [, template]];
   let mutations = Cache.get(container);
-  if (!mutations) {
-    mount(vdom, container, (mutations = []));
-    Cache.set(container, mutations);
-  }
-  commit(mutations, args);
+  mutations || Cache.set(container, (mutations = mount(1, container)));
+  commit(mutations, [, template]);
 }

@@ -194,7 +194,7 @@ function Input() {
   const [value, setValue] = useState("");
   const inputRef = useRef(null);
   return html`
-    <input ref=${inputRef} />
+    <input :ref=${inputRef} />
     <button @click=${() => setValue(inputRef.current.value)}>push</button>
   `;
 }
@@ -250,7 +250,7 @@ function Box() {
     ref.current.style.top = "100px";
   });
   return html`
-    <div ref=${ref}></div>
+    <div :ref=${ref}></div>
   `;
 }
 ```

@@ -121,8 +121,8 @@ describe("compose", () => {
         ?bool-true=${true}
         ?bool-false=${false}
         .innerHTML=${"<p>unsafe</p>"}
-        key=${"ignored"}
-        ref=${() => !1}
+        :key=${"ignored"}
+        :ref=${() => !1}
         ...=${{ "spread-attr": "spread", ".spreadProp": "baz" }}
       >
         ignored

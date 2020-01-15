@@ -1,7 +1,7 @@
 const Template = Symbol();
 
 export type HtmlTemplate = {
-  [Template]: [VDOM, ArgValues, Key?];
+  [Template]: [VDOM[], ArgValues];
 };
 
 export type VDOM = VNode | VText | VArg;
@@ -22,14 +22,8 @@ export type VArg = number;
 
 export type ArgValues = IArguments | Array<unknown>;
 
-export type Key = unknown;
-
-export function createTemplate(
-  vdom: VDOM,
-  args: ArgValues,
-  key?: Key
-): HtmlTemplate {
-  return { [Template]: [vdom, args, key] };
+export function createTemplate(vdom: VDOM[], args: ArgValues): HtmlTemplate {
+  return { [Template]: [vdom, args] };
 }
 
 export function isTemplate(t: unknown): t is HtmlTemplate {
@@ -37,7 +31,7 @@ export function isTemplate(t: unknown): t is HtmlTemplate {
 }
 
 export function isTemplateHavingKey(t: HtmlTemplate) {
-  return t[Template][2] != null;
+  return getKey(t) != null;
 }
 
 export function isVNode(vdom: unknown): vdom is VNode {
@@ -52,8 +46,11 @@ export function getArgs(t: HtmlTemplate): ArgValues {
   return items(t)[1];
 }
 
-export function getKey(t: HtmlTemplate): Key {
-  return items(t)[2];
+export function getKey(t: HtmlTemplate): unknown {
+  const [vdom, args] = items(t);
+  let key = isVNode(vdom[0]) && vdom[0]?.props?.[":key"];
+  if (typeof key === "number") key = args[key];
+  return key;
 }
 
 export function equalsTemplate(t1: HtmlTemplate, t2: HtmlTemplate) {

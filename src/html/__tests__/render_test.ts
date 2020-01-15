@@ -2,10 +2,7 @@
 import { expect } from "chai";
 import * as sinon from "sinon";
 import { html, render } from "..";
-
-function stripComments(html: string) {
-  return html.replace(/<!---->/g, "");
-}
+import { stripComments } from "./utils";
 
 describe("render", () => {
   let container!: HTMLDivElement;
@@ -78,7 +75,7 @@ describe("render", () => {
         data-NaN=${NaN}
         data-null=${null}
         data-undefined=${undefined}
-        key=${1}
+        :key=${1}
       ></div>
     `;
     test(
@@ -98,7 +95,7 @@ describe("render", () => {
   it("ref function attribute", () => {
     let refNode!: HTMLDivElement;
     const app = html`
-      <div ref=${(node: HTMLDivElement) => (refNode = node)}></div>
+      <div :ref=${(node: HTMLDivElement) => (refNode = node)}></div>
     `;
     render(app, container);
     expect(container.querySelector("div")).to.equal(refNode);
@@ -107,10 +104,31 @@ describe("render", () => {
   it("ref object attribute", () => {
     const ref = { current: null };
     const app = html`
-      <div ref=${ref}></div>
+      <div :ref=${ref}></div>
     `;
     render(app, container);
     expect(container.querySelector("div")).to.equal(ref.current);
+  });
+
+  it("style object attribute", () => {
+    const app = html`
+      <div :style=${{ color: "red", backgroundColor: "grey" }}></div>
+    `;
+    test(app, '<div style="color: red; background-color: grey;"></div>');
+  });
+
+  it("class array attribute", () => {
+    const app = html`
+      <div :class=${["foo", "bar"]}></div>
+    `;
+    test(app, '<div class="foo bar"></div>');
+  });
+
+  it("class object attribute", () => {
+    const app = html`
+      <div :class=${{ foo: true, bar: false, baz: true }}></div>
+    `;
+    test(app, '<div class="foo baz"></div>');
   });
 
   it("spread attribute", () => {

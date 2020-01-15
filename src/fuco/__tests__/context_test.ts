@@ -151,7 +151,7 @@ function ValueChanged() {
   return html`
     <button @click=${() => setValue("light")}>light</button>
     <button @click=${() => setValue("dark")}>dark</button>
-    <theme-context .value=${"dark"} ref=${provier}>
+    <theme-context .value=${"dark"} :ref=${provier}>
       <theme-consumer-count></theme-consumer-count>
     </theme-context>
   `;

@@ -31,7 +31,7 @@ export function stringify(
       let html, r;
       const propsToString = (props: VProps, args?: ArgValues) => {
         for (const name in props) {
-          if (name === "key" || name === "ref") continue;
+          if (name === ":key" || name === ":ref") continue;
           let v = props[name];
           if (typeof v === "number" && args) v = args[v];
           if (name === "...") {

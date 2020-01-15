@@ -6,6 +6,7 @@
 import { expect } from "chai";
 import * as sinon from "sinon";
 import { html, render } from "..";
+import { stripComments } from "./utils";
 
 describe("mutations", () => {
   let container!: HTMLDivElement;
@@ -75,13 +76,13 @@ describe("mutations", () => {
     `;
 
     render(app("foo"), container);
-    expect(container.querySelector("div")!.innerHTML).to.equal(
-      "<!----><p>foo<!----></p><!----><!---->"
+    expect(stripComments(container.querySelector("div")!.innerHTML)).to.equal(
+      "<p>foo</p>"
     );
 
     render(app("bar"), container);
-    expect(container.querySelector("div")!.innerHTML).to.equal(
-      "<!----><p>bar<!----></p><!----><!---->"
+    expect(stripComments(container.querySelector("div")!.innerHTML)).to.equal(
+      "<p>bar</p>"
     );
   });
 
@@ -90,7 +91,7 @@ describe("mutations", () => {
       <ul>
         ${items.map(
           (item: any) => html`
-            <li key=${item.id}>${item.content}</li>
+            <li :key=${item.id}>${item.content}</li>
           `
         )}
       </ul>
@@ -450,16 +451,14 @@ describe("mutations", () => {
       `,
       container
     );
-    expect(container.innerHTML.replace(/<!---->/g, "")).to.equal(
-      "<div>first</div>"
-    );
+    expect(stripComments(container.innerHTML)).to.equal("<div>first</div>");
     render(
       html`
         <section>second</section>
       `,
       container
     );
-    expect(container.innerHTML.replace(/<!---->/g, "")).to.equal(
+    expect(stripComments(container.innerHTML)).to.equal(
       "<section>second</section>"
     );
   });
@@ -481,5 +480,71 @@ describe("mutations", () => {
 
     render(app("a"), container);
     expect(container.querySelector("select")!.value).to.be.equal("a");
+  });
+
+  it(":style attribute", () => {
+    const app = (
+      style: Partial<{ [name in keyof CSSStyleDeclaration]: string }> | null
+    ) => html`
+      <div :style=${style}></div>
+    `;
+    render(app({ color: "red", backgroundColor: "grey" }), container);
+    const div = container.querySelector("div");
+    expect(div?.style.color).to.equal("red");
+    expect(div?.style.backgroundColor).to.equal("grey");
+
+    render(app({ color: "blue", fontWeight: "bold" }), container);
+    expect(div?.style.color).to.equal("blue");
+    expect(div?.style.backgroundColor).to.be.empty;
+    expect(div?.style.fontWeight).to.equal("bold");
+
+    render(app(null), container);
+    expect(div?.style.color).to.be.empty;
+    expect(div?.style.backgroundColor).to.be.empty;
+    expect(div?.style.fontWeight).to.be.empty;
+  });
+
+  it(":class attribute", () => {
+    const app = (classes: string[] | object | null) => html`
+      <div :class=${classes}></div>
+    `;
+    render(app(["foo", "bar"]), container);
+    const div = container.querySelector("div");
+    expect(div?.classList.contains("foo")).to.be.true;
+    expect(div?.classList.contains("bar")).to.be.true;
+
+    render(app(["foo", "baz"]), container);
+    expect(div?.classList.contains("foo")).to.be.true;
+    expect(div?.classList.contains("bar")).to.be.false;
+    expect(div?.classList.contains("baz")).to.be.true;
+
+    // array -> object
+    render(app({ hey: true, foo: true, bar: false }), container);
+    expect(div?.classList.contains("foo")).to.be.true;
+    expect(div?.classList.contains("hey")).to.be.true;
+    expect(div?.classList.contains("baz")).to.be.false;
+
+    // array -> null
+    render(app(["foo", "baz"]), container);
+    render(app(null), container);
+    expect(div?.classList.contains("foo")).to.be.false;
+    expect(div?.classList.contains("hey")).to.be.false;
+    expect(div?.classList.contains("baz")).to.be.false;
+
+    // null -> object
+    render(app({ foo: true, bar: false, baz: true }), container);
+    expect(div?.classList.contains("foo")).to.be.true;
+    expect(div?.classList.contains("bar")).to.be.false;
+    expect(div?.classList.contains("baz")).to.be.true;
+
+    render(app({ foo: false, bar: true }), container);
+    expect(div?.classList.contains("foo")).to.be.false;
+    expect(div?.classList.contains("bar")).to.be.true;
+    expect(div?.classList.contains("baz")).to.be.false;
+
+    render(app(null), container);
+    expect(div?.classList.contains("foo")).to.be.false;
+    expect(div?.classList.contains("bar")).to.be.false;
+    expect(div?.classList.contains("baz")).to.be.false;
   });
 });

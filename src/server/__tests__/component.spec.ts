@@ -106,8 +106,8 @@ describe("component", () => {
         ?bool-true=${true}
         ?bool-false=${false}
         .innerHTML=${"ignored"}
-        key=${"ignored"}
-        ref=${() => !1}
+        :key=${"ignored"}
+        :ref=${() => !1}
         ...=${{ "spread-attr": "spread", ".spreadProp": "baz" }}
       ></attr-element>
     `);
