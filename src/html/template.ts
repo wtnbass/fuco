@@ -46,8 +46,10 @@ export function getArgs(t: HtmlTemplate): ArgValues {
   return items(t)[1];
 }
 
-export function getKey(t: HtmlTemplate): unknown {
+export function getKey(t: unknown): unknown {
+  if (!isTemplate(t)) return undefined;
   const [vdom, args] = items(t);
+  /* istanbul ignore next */
   let key = isVNode(vdom[0]) && vdom[0]?.props?.[":key"];
   if (typeof key === "number") key = args[key];
   return key;

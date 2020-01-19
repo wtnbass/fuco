@@ -5,13 +5,11 @@ const openTagRegexp = /^\s*<\s*([a-zA-Z1-9-]+)/;
 const closeTagRegexp = /^\s*<\s*\/\s*([a-zA-Z1-9-]+)>/;
 const tagEndRegexp = /^\s*(\/)?>/;
 const voidTagNameRegexp = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;
-const attrNameRegexp = /\s*([.?@:a-zA-Z1-9-]+)\s*=/;
-const quotedAttrValueRegexp = /\s*(["'])((?:.)*?)\1/;
-const rawAttrValueRegexp = /\s*(.+?)[\s>]/;
+const attributeNameRegexp = /^\s*([^\s"'<>\/=]+)(?:\s*(=))?/;
+const attributeValueRegexp = /^\s*(?:\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
 const doctypeRegexp = /^\s*<!DOCTYPE [^>]+>/i;
 const commentStartRegexp = /^\s*<!--/;
 const commentEndRegexp = /-->/;
-const spreadAttrRegexp = /\s*(\.{3})\s*$/;
 
 interface VRoot {
   children: VDOM[];
@@ -55,19 +53,13 @@ export function parse(htmls: readonly string[]) {
             current = stack.pop()!;
           }
           inTag = false;
-        } else if (attrName && (r = html.match(quotedAttrValueRegexp))) {
+        } else if (attrName && (r = html.match(attributeValueRegexp))) {
           html = html.slice(r[0].length);
-          commit(r[2]);
-        } else if (attrName && (r = html.match(rawAttrValueRegexp))) {
-          const p = r[0].indexOf(">");
-          html = html.slice(~p ? p : r[0].length);
-          commit(r[1]);
-        } else if (
-          ((r = html.match(spreadAttrRegexp)) && i < htmls.length - 1) ||
-          (r = html.match(attrNameRegexp))
-        ) {
-          html = html.slice(r[0].length);
+          commit(r[1] || r[2] || r[3] || "");
+        } else if ((r = html.match(attributeNameRegexp))) {
+          html = html.slice(r[0].length).trim();
           attrName = r[1];
+          if (r[1] !== "..." && !r[2]) commit("");
         }
       } else {
         if ((r = html.match(doctypeRegexp))) {

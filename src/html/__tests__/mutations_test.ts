@@ -444,7 +444,7 @@ describe("mutations", () => {
     expect(container.innerText).to.equal("the text");
   });
 
-  it("template - another template", () => {
+  it("template -> another template", () => {
     render(
       html`
         <div>first</div>
@@ -488,16 +488,25 @@ describe("mutations", () => {
     ) => html`
       <div :style=${style}></div>
     `;
+    // first
     render(app({ color: "red", backgroundColor: "grey" }), container);
     const div = container.querySelector("div");
     expect(div?.style.color).to.equal("red");
     expect(div?.style.backgroundColor).to.equal("grey");
 
+    // add, change, and remove properties
     render(app({ color: "blue", fontWeight: "bold" }), container);
     expect(div?.style.color).to.equal("blue");
     expect(div?.style.backgroundColor).to.be.empty;
     expect(div?.style.fontWeight).to.equal("bold");
 
+    // no change
+    render(app({ color: "blue", fontWeight: "bold" }), container);
+    expect(div?.style.color).to.equal("blue");
+    expect(div?.style.backgroundColor).to.be.empty;
+    expect(div?.style.fontWeight).to.equal("bold");
+
+    // null
     render(app(null), container);
     expect(div?.style.color).to.be.empty;
     expect(div?.style.backgroundColor).to.be.empty;

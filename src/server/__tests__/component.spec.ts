@@ -65,7 +65,7 @@ describe("component", () => {
 
     expect(s).to.equal(
       '<hooks-element attribute="ATTR">' +
-        '<template shadow-root="">' +
+        "<shadowroot>" +
         "<div>attribute: ATTR</div>" +
         "<div>property: PROP</div>" +
         "<div>dispatch event</div>" +
@@ -74,7 +74,7 @@ describe("component", () => {
         "<div>reducer: reducer</div>" +
         "<div>context: initial context value</div>" +
         "<div>memo: memo</div>" +
-        "</template>" +
+        "</shadowroot>" +
         "</hooks-element>"
     );
   });
@@ -108,20 +108,20 @@ describe("component", () => {
         .innerHTML=${"ignored"}
         :key=${"ignored"}
         :ref=${() => !1}
-        ...=${{ "spread-attr": "spread", ".spreadProp": "baz" }}
+        ...${{ "spread-attr": "spread", ".spreadProp": "baz" }}
       ></attr-element>
     `);
 
     expect(s).to.equal(
       '<attr-element attr="foo" bool-true spread-attr="spread">' +
-        '<template shadow-root="">' +
+        "<shadowroot>" +
         "<div>attr: foo</div>" +
         "<div>prop: bar</div>" +
         "<div>bool-true: true</div>" +
         "<div>bool-false: false</div>" +
         "<div>spread-attr: spread</div>" +
         "<div>spread-prop: baz</div>" +
-        "</template>" +
+        "</shadowroot>" +
         "</attr-element>"
     );
   });

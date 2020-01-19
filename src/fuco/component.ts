@@ -32,13 +32,8 @@ export abstract class Component extends HTMLElement
 
   protected disconnectedCallback() {
     this._connected = false;
-    const cleanups = this.hooks.cleanup;
-    for (let i = 0, len = cleanups.length; i < len; i++) {
-      if (cleanups[i]) {
-        cleanups[i]();
-        delete cleanups[i];
-      }
-    }
+    let cleanup;
+    while ((cleanup = this.hooks.cleanup.shift())) cleanup();
   }
 
   public update() {

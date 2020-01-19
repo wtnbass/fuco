@@ -10,12 +10,11 @@ export function compose(vnode: VNode, args: ArgValues | undefined): VNode {
   const { tag, props, children } = vnode;
   const c = new Component(fc, props, args);
   props && delete props[".innerHTML"];
-  const template = {
-    tag: "template",
-    props: { "shadow-root": "" },
+  const shadowroot = {
+    tag: "shadowroot",
     children: replaceSlot(1, [, c.result], children) as VDOM[]
   };
-  return { tag, props, children: [template] };
+  return { tag, props, children: [shadowroot] };
 }
 
 function replaceSlot(
