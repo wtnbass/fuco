@@ -112,6 +112,48 @@ describe("compose", () => {
     );
   });
 
+  it("mixed slot", () => {
+    defineElement(
+      "test-slot",
+      () => html`
+        <header><slot name="header"></slot></header>
+        <slot></slot>
+        <footer><slot name="footer"></slot></footer>
+      `
+    );
+
+    const s = renderToString(html`
+      <test-slot>
+        <div slot="header">Header</div>
+        <main>Content</main>
+        <div slot="header">Header2</div>
+        <div slot="footer">Footer A</div>
+        <article>Article</article>
+        <div slot="footer">Footer B</div>
+        <div slot="otherwise">ignored</div>
+      </test-slot>
+    `);
+
+    expect(s).to.equal(
+      "<test-slot>" +
+        "<shadowroot>" +
+        '<header><slot name="header">' +
+        '<div slot="header">Header</div>' +
+        '<div slot="header">Header2</div>' +
+        "</slot></header>" +
+        "<slot>" +
+        "<main>Content</main>" +
+        "<article>Article</article>" +
+        "</slot>" +
+        '<footer><slot name="footer">' +
+        '<div slot="footer">Footer A</div>' +
+        '<div slot="footer">Footer B</div>' +
+        "</slot></footer>" +
+        "</shadowroot>" +
+        "</test-slot>"
+    );
+  });
+
   it("attributes", () => {
     const s = renderToString(html`
       <div

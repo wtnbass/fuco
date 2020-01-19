@@ -3,11 +3,41 @@ import { renderToString } from "..";
 import { html } from "../../html";
 
 describe("render-to-string", () => {
+  it("simple", () => {
+    const s = renderToString(html`
+      <div>Hello</div>
+    `);
+    expect(s).to.equal(`<div>Hello</div>`);
+  });
+
+  it("slash element", () => {
+    const s = renderToString(html`
+      <div />
+    `);
+    expect(s).to.equal(`<div></div>`);
+  });
+
+  it("void element", () => {
+    const s = renderToString(html`
+      <input />
+    `);
+    expect(s).to.equal(`<input>`);
+  });
+
   it("attributes", () => {
     const s = renderToString(html`
-      <div name="a" .foo=${"foo"} @bar=${() => 1} ?baz=${!0}>Hello</div>
+      <div
+        name="a"
+        .foo=${"foo"}
+        @bar=${() => 1}
+        ?baz=${!0}
+        novalue
+        nullvalue=${null}
+      >
+        Hello
+      </div>
     `);
-    expect(s).to.equal(`<div name="a" baz>Hello</div>`);
+    expect(s).to.equal(`<div name="a" baz novalue="">Hello</div>`);
   });
 
   it("text or template", () => {

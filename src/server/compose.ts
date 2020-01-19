@@ -34,11 +34,11 @@ function replaceSlot(
     return replaceSlot(v, a, slottedNodes, hasNamedSlot);
   } else if (isVNode(vdom)) {
     if (vdom.tag === "slot") {
+      const [slots, namedSlots] = getSlotChildren(slottedNodes);
       if (vdom.props && vdom.props.name) {
-        hasNamedSlot = true;
-        vdom.children = findNamedSlot(slottedNodes, vdom.props.name as string);
-      } else if (!hasNamedSlot) {
-        vdom.children = slottedNodes;
+        vdom.children = namedSlots[vdom.props.name as string];
+      } else {
+        vdom.children = slots;
       }
     } else {
       vdom.children = vdom.children.map(
@@ -51,14 +51,20 @@ function replaceSlot(
   }
 }
 
-function findNamedSlot(slotted: VDOM[], slotName: string): VDOM[] {
+function getSlotChildren(slotted: VDOM[]) {
+  const slots: VDOM[] = [];
+  const namedSlots: { [name: string]: VDOM[] } = {};
   for (let i = 0; i < slotted.length; i++) {
     const s = slotted[i];
-    if (!isVNode(s)) continue;
-    if (s.props && s.props.slot && s.props.slot === slotName) {
-      return [s];
+    let slotName: string;
+    if (isVNode(s) && s.props && (slotName = s.props.slot as string)) {
+      if (typeof namedSlots[slotName] === "undefined") {
+        namedSlots[slotName] = [];
+      }
+      namedSlots[slotName].push(s);
+    } else {
+      slots.push(s);
     }
-    findNamedSlot(s.children, slotName);
   }
-  return [];
+  return [slots, namedSlots] as const;
 }
