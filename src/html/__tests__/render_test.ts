@@ -7,7 +7,7 @@ import { stripComments } from "./utils";
 describe("render", () => {
   let container!: HTMLDivElement;
 
-  function test(tmpl: unknown, innerHTML: string) {
+  function assertHtml(tmpl: unknown, innerHTML: string) {
     render(tmpl, container);
     expect(stripComments(container.innerHTML)).to.equal(innerHTML, "render");
   }
@@ -24,14 +24,14 @@ describe("render", () => {
     const app = html`
       <div>Hello</div>
     `;
-    test(app, `<div>Hello</div>`);
+    assertHtml(app, `<div>Hello</div>`);
   });
 
   it("slash elements", () => {
     const app = html`
       <div />
     `;
-    test(app, "<div></div>");
+    assertHtml(app, "<div></div>");
   });
 
   it("void elements", () => {
@@ -40,11 +40,11 @@ describe("render", () => {
       <input><input /><INPUT>
     `;
 
-    test(app, "<input><input><input>");
+    assertHtml(app, "<input><input><input>");
   });
 
   it("empty", () => {
-    test(html``, "");
+    assertHtml(html``, "");
   });
 
   it("text", () => {
@@ -54,7 +54,7 @@ describe("render", () => {
       <div>true, ${true}</div>
       <div>false, ${false}</div>
     `;
-    test(
+    assertHtml(
       app,
       "<div>Hello, world</div>" +
         "<div>number, 100</div>" +
@@ -75,10 +75,9 @@ describe("render", () => {
         data-NaN=${NaN}
         data-null=${null}
         data-undefined=${undefined}
-        :key=${1}
       ></div>
     `;
-    test(
+    assertHtml(
       app,
       "<div" +
         ' name="World"' +
@@ -90,6 +89,21 @@ describe("render", () => {
         ' data-nan="NaN"' +
         "></div>"
     );
+  });
+
+  it("no value attribute", () => {
+    const app = html`
+      <div foo bar="bar" baz></div>
+    `;
+
+    assertHtml(app, `<div foo="" bar="bar" baz=""></div>`);
+  });
+
+  it("key attribute", () => {
+    const app = html`
+      <div :key=${"a"}></div>
+    `;
+    assertHtml(app, `<div></div>`);
   });
 
   it("ref function attribute", () => {
@@ -110,25 +124,39 @@ describe("render", () => {
     expect(container.querySelector("div")).to.equal(ref.current);
   });
 
-  it("style object attribute", () => {
+  it(":style object attribute", () => {
     const app = html`
       <div :style=${{ color: "red", backgroundColor: "grey" }}></div>
     `;
-    test(app, '<div style="color: red; background-color: grey;"></div>');
+    assertHtml(app, '<div style="color: red; background-color: grey;"></div>');
   });
 
-  it("class array attribute", () => {
+  it(":style non object attribute", () => {
+    const app = html`
+      <div :style=${"color:red"}></div>
+    `;
+    assertHtml(app, "<div></div>");
+  });
+
+  it(":class array attribute", () => {
     const app = html`
       <div :class=${["foo", "bar"]}></div>
     `;
-    test(app, '<div class="foo bar"></div>');
+    assertHtml(app, '<div class="foo bar"></div>');
   });
 
-  it("class object attribute", () => {
+  it(":class object attribute", () => {
     const app = html`
       <div :class=${{ foo: true, bar: false, baz: true }}></div>
     `;
-    test(app, '<div class="foo baz"></div>');
+    assertHtml(app, '<div class="foo baz"></div>');
+  });
+
+  it(":class non object attribute", () => {
+    const app = html`
+      <div :class=${"foo bar"}></div>
+    `;
+    assertHtml(app, "<div></div>");
   });
 
   it("spread attribute", () => {
@@ -137,14 +165,49 @@ describe("render", () => {
     const app = html`
       <div ...${props}></div>
     `;
-    test(app, '<div a="1" b=""></div>');
+    assertHtml(app, '<div a="1" b=""></div>');
+  });
+
+  it("spread attribute should ignore string", () => {
+    const app = html`
+      <div ...${"props"}></div>
+    `;
+    assertHtml(app, "<div></div>");
+  });
+
+  it("spread attribute should ignore number", () => {
+    const app = html`
+      <div ...${1000}></div>
+    `;
+    assertHtml(app, "<div></div>");
+  });
+
+  it("spread attribute should ignore boolean", () => {
+    const app = html`
+      <div ...${true}></div>
+    `;
+    assertHtml(app, "<div></div>");
+  });
+
+  it("spread attribute should ignore array", () => {
+    const app = html`
+      <div ...${["a", "b", "c"]}></div>
+    `;
+    assertHtml(app, "<div></div>");
+  });
+
+  it("spread attribute should ignore template", () => {
+    const app = html`
+      <div ...${html``}></div>
+    `;
+    assertHtml(app, "<div></div>");
   });
 
   it("boolean attribute", () => {
     const app = html`
       <div ?yes=${true} ?no=${false}>Hello</div>
     `;
-    test(app, `<div yes="">Hello</div>`);
+    assertHtml(app, `<div yes="">Hello</div>`);
   });
 
   it("property ", () => {
@@ -152,7 +215,7 @@ describe("render", () => {
     const app = html`
       <div .value=${value}>Hello</div>
     `;
-    test(app, `<div>Hello</div>`);
+    assertHtml(app, `<div>Hello</div>`);
     expect((container.querySelector("div")! as any).value).to.equal(value);
   });
 
@@ -161,16 +224,40 @@ describe("render", () => {
     const app = html`
       <button @click=${cb}>click</button>
     `;
-    test(app, `<button>click</button>`);
+    assertHtml(app, `<button>click</button>`);
     container.querySelector("button")!.click();
     expect(cb.calledOnce).to.be.true;
+  });
+
+  it("event object", () => {
+    const listener = {
+      handleEvent: sinon.spy()
+    };
+    const app = html`
+      <button @click=${listener}>click</button>
+    `;
+    assertHtml(app, `<button>click</button>`);
+    container.querySelector("button")!.click();
+    expect(listener.handleEvent.calledOnce).to.be.true;
+  });
+
+  it("bind not envent listener", () => {
+    const listener = {
+      foo: sinon.spy()
+    };
+    const app = html`
+      <button @click=${listener}>click</button>
+    `;
+    assertHtml(app, `<button>click</button>`);
+    container.querySelector("button")!.click();
+    expect(listener.foo.called).to.be.false;
   });
 
   it("array", () => {
     const app = html`
       <div>${["a", "b", "c"]}</div>
     `;
-    test(app, `<div>abc</div>`);
+    assertHtml(app, `<div>abc</div>`);
   });
 
   it("template", () => {
@@ -184,7 +271,7 @@ describe("render", () => {
         )}
       </div>
     `;
-    test(
+    assertHtml(
       app,
       "<div>" +
         '<input value="a">' +
@@ -201,7 +288,7 @@ describe("render", () => {
       <div>null, ${null}</div>
       <div>undefined, ${undefined}</div>
     `;
-    test(
+    assertHtml(
       app,
       "<div>0, 0</div>" +
         "<div>NaN, NaN</div>" +
@@ -210,28 +297,50 @@ describe("render", () => {
     );
   });
 
+  it("symbol", () => {
+    const app = html`
+      <div>${Symbol("test")}</div>
+    `;
+    assertHtml(app, "<div></div>");
+  });
+
+  it("symbol attriubte", () => {
+    const app = html`
+      <div
+        foo=${Symbol("foo")}
+        ?bar=${Symbol("bar")}
+        .baz=${Symbol("baz")}
+      ></div>
+    `;
+    assertHtml(app, "<div></div>");
+  });
+
   it("raw string", () => {
-    test("string", `string`);
+    assertHtml("string", `string`);
   });
 
   it("raw number", () => {
-    test(100, `100`);
+    assertHtml(100, `100`);
   });
 
   it("raw boolean", () => {
-    test(false, `false`);
+    assertHtml(false, `false`);
   });
 
   it("raw array", () => {
-    test(["a", "b", "c"], `abc`);
+    assertHtml(["a", "b", "c"], `abc`);
   });
 
   it("raw null", () => {
-    test(null, ``);
+    assertHtml(null, ``);
   });
 
   it("raw undefined", () => {
-    test(undefined, ``);
+    assertHtml(undefined, ``);
+  });
+
+  it("raw symbol", () => {
+    assertHtml(Symbol(), "");
   });
 
   it("escaped value in template", () => {
@@ -240,7 +349,7 @@ describe("render", () => {
       <div>\n</div>
       <div>\2</div>
     `;
-    test(app, "<div>\\n</div><div>\\2</div>");
+    assertHtml(app, "<div>\\n</div><div>\\2</div>");
   });
 
   it("unsafe html", () => {
@@ -250,7 +359,7 @@ describe("render", () => {
       </div>
     `;
 
-    test(app, "<div><p>unsafe</p></div>");
+    assertHtml(app, "<div><p>unsafe</p></div>");
   });
 
   it("default value of <select>", () => {
@@ -267,5 +376,59 @@ describe("render", () => {
 
     render(app, container);
     expect(container.querySelector("select")!.value).to.be.equal(defaultValue);
+  });
+
+  it("ignore variable in comment", () => {
+    const app = html`
+      <!-- ${"ignore"} -->
+      <div>${"foo"}</div>
+    `;
+
+    assertHtml(app, "<div>foo</div>");
+  });
+
+  it("XSS in node", () => {
+    const XSS = ((window as any).XSS = sinon.spy());
+    const app = html`
+      <div>${"<script>XSS();</script>"}</div>
+    `;
+    render(app, container);
+    expect(XSS.called).to.be.false;
+  });
+
+  it("XSS in attribute", () => {
+    const XSS = ((window as any).XSS = sinon.spy());
+    const app = html`
+      <div foo=${"bar><script>XSS();</script><div"}></div>
+    `;
+    render(app, container);
+    expect(XSS.called).to.be.false;
+  });
+
+  it("script in static string", () => {
+    const NoXSS = ((window as any).NoXSS = sinon.spy());
+    const app = html`
+      <div>
+        <script>
+          NoXSS();
+        </script>
+      </div>
+    `;
+    render(app, container);
+    expect(NoXSS.called).to.be.true;
+  });
+
+  it("start tag variable", () => {
+    const app = html`
+    <${"div"}></div>
+    `;
+    assertHtml(app, "&lt;div&gt;");
+  });
+
+  it("end tag variable", () => {
+    const app = html`
+    <div></${"div"}>
+    `;
+    assertHtml(app, "<div>&lt;/div&gt;</div>");
   });
 });

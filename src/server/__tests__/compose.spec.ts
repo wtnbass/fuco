@@ -22,9 +22,9 @@ describe("compose", () => {
 
     expect(s).to.equal(
       "<test-element>" +
-        '<template shadow-root="">' +
+        "<shadowroot>" +
         "<div>fuco element</div>" +
-        "</template>" +
+        "</shadowroot>" +
         "</test-element>"
     );
   });
@@ -50,13 +50,13 @@ describe("compose", () => {
 
     expect(s).to.equal(
       "<test-1>" +
-        '<template shadow-root="">' +
+        "<shadowroot>" +
         "<test-2>" +
-        '<template shadow-root="">' +
+        "<shadowroot>" +
         "<div>test</div>" +
-        "</template>" +
+        "</shadowroot>" +
         "</test-2>" +
-        "</template>" +
+        "</shadowroot>" +
         "</test-1>"
     );
   });
@@ -75,9 +75,9 @@ describe("compose", () => {
 
     expect(s).to.equal(
       "<test-slot>" +
-        '<template shadow-root="">' +
+        "<shadowroot>" +
         "<div>Hello, <slot>World</slot></div>" +
-        "</template>" +
+        "</shadowroot>" +
         "</test-slot>"
     );
   });
@@ -100,14 +100,14 @@ describe("compose", () => {
 
     expect(s).to.equal(
       "<test-slot>" +
-        '<template shadow-root="">' +
+        "<shadowroot>" +
         '<header><slot name="header">' +
         '<div slot="header">Header</div>' +
         "</slot></header>" +
         '<footer><slot name="footer">' +
         '<div slot="footer">Footer</div>' +
         "</slot></footer>" +
-        "</template>" +
+        "</shadowroot>" +
         "</test-slot>"
     );
   });
@@ -123,7 +123,7 @@ describe("compose", () => {
         .innerHTML=${"<p>unsafe</p>"}
         :key=${"ignored"}
         :ref=${() => !1}
-        ...=${{ "spread-attr": "spread", ".spreadProp": "baz" }}
+        ...${{ "spread-attr": "spread", ".spreadProp": "baz" }}
       >
         ignored
       </div>

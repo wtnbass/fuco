@@ -137,6 +137,16 @@ describe("parse", () => {
     );
   });
 
+  it("no value attribute", () => {
+    const app = html`
+      <div foo bar="bar" baz></div>
+    `;
+
+    test(app, [
+      { tag: "div", props: { foo: "", bar: "bar", baz: "" }, children: [] }
+    ]);
+  });
+
   it("closed elements", () => {
     const app = html`
       <div class="test" />

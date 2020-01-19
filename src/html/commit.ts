@@ -54,7 +54,7 @@ function commitAttribute(
 ) {
   let r;
   if (name === "...") {
-    if (typeof next === "object" && next) {
+    if (typeof next === "object" && !Array.isArray(next) && next) {
       Object.keys(next).forEach(key =>
         commitAttribute(
           node,
@@ -66,12 +66,16 @@ function commitAttribute(
     }
   } else if ((r = name.match(/^(@|\.|\?|:)([a-zA-Z1-9-]+)/))) {
     /* istanbul ignore else */
-    if (r[1] === "?") {
+    if (r[1] === "?" && isAttributeValue(next)) {
       next ? node.setAttribute(r[2], "") : node.removeAttribute(r[2]);
     } else if (r[1] === ".") {
       (node as Element & { [name: string]: unknown })[r[2]] = next;
-    } else if (r[1] === "@") {
-      prev && node.removeEventListener(r[2], prev as EventListener);
+    } else if (r[1] === "@" && isEventListener(next)) {
+      prev &&
+        node.removeEventListener(
+          r[2],
+          prev as EventListenerOrEventListenerObject
+        );
       node.addEventListener(r[2], next as EventListener);
     } else if (r[1] === ":") {
       if (r[2] === "ref") {
@@ -96,11 +100,31 @@ function commitAttribute(
         );
       }
     }
-  } else {
+  } else if (isAttributeValue(next)) {
     next != null
       ? node.setAttribute(name, next as string)
       : node.removeAttribute(name);
   }
+}
+
+function isAttributeValue(arg: unknown): arg is string | number | boolean {
+  return (
+    typeof arg === "string" ||
+    typeof arg === "number" ||
+    typeof arg === "boolean" ||
+    arg == null
+  );
+}
+
+function isEventListener(
+  arg: unknown
+): arg is EventListenerOrEventListenerObject {
+  return (
+    typeof arg === "function" ||
+    (typeof arg === "object" &&
+      arg != null &&
+      "handleEvent" in (arg as EventListenerObject))
+  );
 }
 
 function setStyles(
@@ -125,7 +149,7 @@ function commitNode(
   index: number
 ) {
   const base = next != null ? next : prev;
-  if (base == null) return;
+  if (base == null || typeof base === "symbol") return;
   if (Array.isArray(base)) {
     prev = prev || [];
     if (isTemplateMutation(mutation) && isTemplateHavingKey(base[0])) {
