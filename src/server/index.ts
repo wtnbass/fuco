@@ -1,3 +1,5 @@
+export { html } from "../html";
+
 import { stringify } from "./stringify";
 
 export function renderToString(value: unknown) {
