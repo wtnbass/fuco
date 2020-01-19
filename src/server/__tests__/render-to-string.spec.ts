@@ -1,6 +1,8 @@
 import { expect } from "chai";
 import { renderToString } from "..";
 import { html } from "../../html";
+import { defineElement } from "../../fuco";
+import { rehydrateScript } from "../rehydrate";
 
 describe("render-to-string", () => {
   it("simple", () => {
@@ -108,5 +110,21 @@ describe("render-to-string", () => {
         `<option value="c">c</option>` +
         `</select>`
     );
+  });
+
+  it("with rehydrate", () => {
+    defineElement(
+      "ssr-app",
+      () => html`
+        <div>ssr</div>
+      `
+    );
+    const s = renderToString(
+      html`
+        <ssr-app></ssr-app>
+      `,
+      { hydrate: true }
+    );
+    expect(s).to.include(rehydrateScript());
   });
 });
