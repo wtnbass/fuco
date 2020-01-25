@@ -4,21 +4,28 @@ import { Mutation } from "./mutations";
 export function mount(
   vdom: VDOM | VDOM[],
   parent: Node,
+  isSvg: boolean,
   mutations: Mutation[] = []
 ) {
   if (Array.isArray(vdom)) {
-    vdom.forEach(v => mount(v, parent, mutations));
+    vdom.forEach(v => mount(v, parent, isSvg, mutations));
   } else if (!isVNode(vdom)) {
     if (typeof vdom === "number") {
       mutations[vdom] = {
-        node: parent.appendChild(document.createComment(""))
+        node: parent.appendChild(document.createComment("")),
+        isSvg
       };
     } else {
       parent.appendChild(document.createTextNode(vdom as VText));
     }
   } else {
     const { tag, props, children } = vdom;
-    const node = parent.appendChild(document.createElement(tag));
+    isSvg = tag === "svg" || isSvg;
+    const node = parent.appendChild(
+      isSvg
+        ? document.createElementNS("http://www.w3.org/2000/svg", tag)
+        : document.createElement(tag)
+    );
     props &&
       Object.keys(props).forEach(name => {
         if (name === ":key") return;
@@ -28,7 +35,7 @@ export function mount(
           node.setAttribute(name, props[name] as VText);
         }
       });
-    mount(children, node, mutations);
+    mount(children, node, isSvg, mutations);
   }
   return mutations;
 }
