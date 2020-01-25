@@ -1,31 +1,28 @@
 export type Mutation = AttributeMutation | NodeMutation;
 
-export type NodeMutation =
-  | TemplateMutation
-  | TextMutation
-  | { node: Node; prev?: unknown };
+export interface NodeMutation {
+  node: Node;
+  isSvg: boolean;
+  prev?: unknown;
+}
 
-export type AttributeMutation = {
+export interface AttributeMutation {
   node: Node;
   name: string;
   prev?: unknown;
-};
+}
 
-export type TemplateMutation = {
-  node: Node;
+export interface TemplateMutation extends NodeMutation {
   _mutations: ChildMutations[];
-  prev?: unknown;
-};
+}
 
-export type ChildMutations = Mutation[] & {
+export type ChildMutations = NodeMutation[] & {
   _marks: readonly [Node, Node];
 };
 
-export type TextMutation = {
-  node: Node;
+export interface TextMutation extends NodeMutation {
   _texts: Text[];
-  prev?: unknown;
-};
+}
 
 export function isAttributeMutation(m: Mutation): m is AttributeMutation {
   return !!(m as AttributeMutation).name;

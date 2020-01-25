@@ -556,4 +556,34 @@ describe("mutations", () => {
     expect(div?.classList.contains("bar")).to.be.false;
     expect(div?.classList.contains("baz")).to.be.false;
   });
+
+  it("chanage listener", () => {
+    let count = 0;
+    let listener: Function | null = null;
+
+    listener = () => count++;
+    const app = () => html`
+      <div @click=${listener}></div>
+    `;
+    render(app(), container);
+    const div = container.querySelector("div");
+    div?.click();
+
+    expect(count).to.equal(1);
+
+    let count2 = 0;
+    listener = () => count2++;
+    render(app(), container);
+    div?.click();
+
+    expect(count).to.equal(1);
+    expect(count2).to.equal(1);
+
+    listener = null;
+    render(app(), container);
+    div?.click();
+
+    expect(count).to.equal(1);
+    expect(count2).to.equal(1);
+  });
 });

@@ -431,4 +431,76 @@ describe("render", () => {
     `;
     assertHtml(app, "<div>&lt;/div&gt;</div>");
   });
+
+  it("render SVG", () => {
+    const app = html`
+      <svg>
+        <g></g>
+      </svg>
+    `;
+    render(app, container);
+
+    expect(container.querySelector("g")?.namespaceURI).to.equal(
+      "http://www.w3.org/2000/svg"
+    );
+  });
+
+  it("render SVG to bind html tag template in svg.", () => {
+    const app = html`
+      <svg>
+        ${html`
+          <g></g>
+        `}
+      </svg>
+    `;
+    render(app, container);
+
+    expect(container.querySelector("g")?.namespaceURI).to.equal(
+      "http://www.w3.org/2000/svg"
+    );
+  });
+
+  it("render SVG to bind html tag array template in svg.", () => {
+    const app = html`
+      <svg>
+        <g>
+          ${[1, 2, 3].map(
+            i => html`
+              <line x=${i}></line>
+            `
+          )}
+        </g>
+      </svg>
+    `;
+    render(app, container);
+
+    for (const line of container.querySelectorAll("line")) {
+      expect(line.namespaceURI).to.equal("http://www.w3.org/2000/svg");
+    }
+  });
+
+  it("render SVG append to svg tag", () => {
+    const app = html`
+      <g></g>
+    `;
+    const svgcontainer = document.body.appendChild(
+      document.createElement("svg")
+    );
+    render(app, svgcontainer);
+
+    expect(svgcontainer.querySelector("g")?.namespaceURI).to.equal(
+      "http://www.w3.org/2000/svg"
+    );
+
+    document.body.removeChild(svgcontainer);
+  });
+
+  it("SVG with variable", () => {
+    const app = html`
+      <svg>
+        <g fill=${"white"}></g>
+      </svg>
+    `;
+    assertHtml(app, `<svg><g fill="white"></g></svg>`);
+  });
 });

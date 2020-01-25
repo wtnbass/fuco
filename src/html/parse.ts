@@ -2,7 +2,7 @@
 
 import { VDOM, VNode, VPropValue } from "./template";
 const openTagRegexp = /^\s*<\s*([a-zA-Z1-9-]+)/;
-const closeTagRegexp = /^\s*<\s*\/\s*([a-zA-Z1-9-]+)>/;
+const closeTagRegexp = /^<\s*\/\s*([a-zA-Z1-9-]+)>/;
 const tagEndRegexp = /^\s*(\/)?>/;
 const voidTagNameRegexp = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;
 const attributeNameRegexp = /^\s*([^\s"'<>\/=]+)(?:\s*(=))?/;

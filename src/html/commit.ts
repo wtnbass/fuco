@@ -66,17 +66,13 @@ function commitAttribute(
     }
   } else if ((r = name.match(/^(@|\.|\?|:)([a-zA-Z1-9-]+)/))) {
     /* istanbul ignore else */
-    if (r[1] === "?" && isAttributeValue(next)) {
+    if (r[1] === "?" && isRenderableValue(next)) {
       next ? node.setAttribute(r[2], "") : node.removeAttribute(r[2]);
     } else if (r[1] === ".") {
       (node as Element & { [name: string]: unknown })[r[2]] = next;
-    } else if (r[1] === "@" && isEventListener(next)) {
-      prev &&
-        node.removeEventListener(
-          r[2],
-          prev as EventListenerOrEventListenerObject
-        );
-      node.addEventListener(r[2], next as EventListener);
+    } else if (r[1] === "@") {
+      isEventListener(prev) && node.removeEventListener(r[2], prev);
+      isEventListener(next) && node.addEventListener(r[2], next);
     } else if (r[1] === ":") {
       if (r[2] === "ref") {
         typeof next === "function"
@@ -100,30 +96,27 @@ function commitAttribute(
         );
       }
     }
-  } else if (isAttributeValue(next)) {
-    next != null
+  } else {
+    isRenderableValue(next)
       ? node.setAttribute(name, next as string)
       : node.removeAttribute(name);
   }
 }
 
-function isAttributeValue(arg: unknown): arg is string | number | boolean {
+function isRenderableValue(value: unknown) {
   return (
-    typeof arg === "string" ||
-    typeof arg === "number" ||
-    typeof arg === "boolean" ||
-    arg == null
+    value != null && typeof value !== "function" && typeof value !== "symbol"
   );
 }
 
 function isEventListener(
-  arg: unknown
-): arg is EventListenerOrEventListenerObject {
+  value: unknown
+): value is EventListenerOrEventListenerObject {
   return (
-    typeof arg === "function" ||
-    (typeof arg === "object" &&
-      arg != null &&
-      "handleEvent" in (arg as EventListenerObject))
+    typeof value === "function" ||
+    (typeof value === "object" &&
+      value != null &&
+      "handleEvent" in (value as EventListenerObject))
   );
 }
 
@@ -136,10 +129,12 @@ function setStyles(
   for (const i in next) if (!prev || prev[i] !== next[i]) style[i] = next[i];
 }
 
-function classNames(o: unknown): string[] {
-  if (o == null) return [];
-  if (Array.isArray(o)) return o;
-  return Object.keys(o as object).filter(i => !!(o as AnyProp<object>)[i]);
+function classNames(value: unknown): string[] {
+  if (value == null) return [];
+  if (Array.isArray(value)) return value;
+  return Object.keys(value as object).filter(
+    i => !!(value as AnyProp<object>)[i]
+  );
 }
 
 function commitNode(
@@ -149,7 +144,7 @@ function commitNode(
   index: number
 ) {
   const base = next != null ? next : prev;
-  if (base == null || typeof base === "symbol") return;
+  if (!isRenderableValue(base)) return;
   if (Array.isArray(base)) {
     prev = prev || [];
     if (isTemplateMutation(mutation) && isTemplateHavingKey(base[0])) {
@@ -205,7 +200,8 @@ function commitTemplatesWithKey(
         next,
         mutations[prevIndex]
           ? mutations[prevIndex]._marks[0]
-          : parentMutation.node
+          : parentMutation.node,
+        parentMutation.isSvg
       );
     } else if (
       prevKeys[prevIndex] != null &&
@@ -229,8 +225,12 @@ function commitTemplate(
   index: number
 ) {
   if (!prev) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    (m._mutations = m._mutations || [])[index] = insertTemplate(next!, m.node);
+    (m._mutations = m._mutations || [])[index] = insertTemplate(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      next!,
+      m.node,
+      m.isSvg
+    );
   } else if (!next) {
     removeTemplate(m._mutations[index]);
     delete m._mutations[index];
@@ -238,7 +238,7 @@ function commitTemplate(
     commit(m._mutations[index], getArgs(next));
   } else {
     removeTemplate(m._mutations[index]);
-    m._mutations[index] = insertTemplate(next, m.node);
+    m._mutations[index] = insertTemplate(next, m.node, m.isSvg);
   }
 }
 
@@ -263,13 +263,17 @@ function commitText(
   }
 }
 
-function insertTemplate(template: HtmlTemplate, refNode: Node): ChildMutations {
+function insertTemplate(
+  template: HtmlTemplate,
+  refNode: Node,
+  isSvg: boolean
+): ChildMutations {
   const [vdom, args] = items(template);
   const fragment = document.createDocumentFragment();
-  const mutations = Object.assign([] as Mutation[], {
+  const mutations = Object.assign([] as NodeMutation[], {
     _marks: [document.createComment(""), document.createComment("")] as const
   });
-  mount(vdom, fragment, mutations);
+  mount(vdom, fragment, isSvg, mutations);
   commit(mutations, args);
   insertNode(mutations._marks[0], refNode);
   insertNode(fragment, refNode);

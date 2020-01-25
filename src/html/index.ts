@@ -31,6 +31,14 @@ export function html(
 
 export function render(template: unknown, container: Node) {
   let mutations = Cache.get(container);
-  mutations || Cache.set(container, (mutations = mount(1, container)));
+  mutations ||
+    Cache.set(
+      container,
+      (mutations = mount(
+        1,
+        container,
+        container.nodeName.toLowerCase() === "svg"
+      ))
+    );
   commit(mutations, [, template]);
 }
