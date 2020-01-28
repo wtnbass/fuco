@@ -1,15 +1,12 @@
 import {
   isTemplate,
-  isTemplateHavingKey,
   items,
   getKey,
   getArgs,
   equalsTemplate,
   HtmlTemplate,
-  VText,
   ArgValues
 } from "./template";
-import { mount } from "./mount";
 import {
   isAttributeMutation,
   Mutation,
@@ -19,6 +16,9 @@ import {
   TextMutation,
   ChildMutations
 } from "./mutations";
+import { mount } from "./mount";
+
+type AnyProp<T> = T & { [key: string]: unknown };
 
 export function commit(mutations: Mutation[], args: ArgValues) {
   const q = [];
@@ -36,23 +36,20 @@ export function commit(mutations: Mutation[], args: ArgValues) {
 }
 
 function commitMutation(m: Mutation, arg: unknown) {
-  if (m.prev !== arg) {
+  if (m._prev !== arg) {
     isAttributeMutation(m)
-      ? commitAttribute(m.node as Element, m.name, arg, m.prev)
-      : commitNode(m, arg, m.prev, 0);
-    m.prev = arg;
+      ? commitAttribute(m.node as HTMLElement, m.name, arg, m._prev)
+      : commitNode(m, arg, m._prev, 0);
+    m._prev = arg;
   }
 }
 
-type AnyProp<T> = T & { [key: string]: unknown };
-
 function commitAttribute(
-  node: Element,
+  node: HTMLElement,
   name: string,
   next: unknown,
   prev?: unknown
 ) {
-  let r;
   if (name === "...") {
     if (typeof next === "object" && !Array.isArray(next) && next) {
       Object.keys(next).forEach(key =>
@@ -64,37 +61,38 @@ function commitAttribute(
         )
       );
     }
-  } else if ((r = name.match(/^(@|\.|\?|:)([a-zA-Z1-9-]+)/))) {
-    /* istanbul ignore else */
-    if (r[1] === "?" && isRenderableValue(next)) {
-      next ? node.setAttribute(r[2], "") : node.removeAttribute(r[2]);
-    } else if (r[1] === ".") {
-      (node as Element & { [name: string]: unknown })[r[2]] = next;
-    } else if (r[1] === "@") {
-      isEventListener(prev) && node.removeEventListener(r[2], prev);
-      isEventListener(next) && node.addEventListener(r[2], next);
-    } else if (r[1] === ":") {
-      if (r[2] === "ref") {
-        typeof next === "function"
-          ? next(node)
-          : ((next as AnyProp<typeof next>).current = node);
-      } else if (r[2] === "style" && typeof next === "object") {
-        const { style } = node as HTMLElement;
-        setStyles(
-          style as AnyProp<typeof style>,
-          prev as AnyProp<typeof prev>,
-          next as AnyProp<typeof next>
-        );
-      } else if (r[2] === "class" && typeof next === "object") {
-        const prevClassNames = classNames(prev);
-        const nextClassNames = classNames(next);
-        prevClassNames.forEach(
-          p => nextClassNames.includes(p) || node.classList.remove(p)
-        );
-        nextClassNames.forEach(
-          n => prevClassNames.includes(n) || node.classList.add(n)
-        );
-      }
+  } else if (name[0] === "?" && isRenderableValue(next)) {
+    name = name.slice(1);
+    next ? node.setAttribute(name, "") : node.removeAttribute(name);
+  } else if (name[0] === ".") {
+    (node as AnyProp<typeof node>)[name.slice(1)] = next;
+  } else if (name[0] === "@") {
+    name = name.slice(1);
+    isEventListener(prev) && node.removeEventListener(name, prev);
+    isEventListener(next) && node.addEventListener(name, next);
+  } else if (name === ":key") {
+    // no render
+  } else if (name === ":ref") {
+    typeof next === "function"
+      ? next(node)
+      : ((next as AnyProp<typeof next>).current = node);
+  } else if (name === ":style") {
+    typeof next === "object" &&
+      setStyles(
+        node.style as AnyProp<typeof node.style>,
+        prev as AnyProp<typeof prev>,
+        next as AnyProp<typeof next>
+      );
+  } else if (name === ":class") {
+    if (typeof next === "object") {
+      const prevClassNames = classNames(prev);
+      const nextClassNames = classNames(next);
+      prevClassNames.forEach(
+        p => nextClassNames.includes(p) || node.classList.remove(p)
+      );
+      nextClassNames.forEach(
+        n => prevClassNames.includes(n) || node.classList.add(n)
+      );
     }
   } else {
     isRenderableValue(next)
@@ -143,41 +141,90 @@ function commitNode(
   prev: unknown,
   index: number
 ) {
-  const base = next != null ? next : prev;
-  if (!isRenderableValue(base)) return;
-  if (Array.isArray(base)) {
-    prev = prev || [];
-    if (isTemplateMutation(mutation) && isTemplateHavingKey(base[0])) {
-      commitTemplatesWithKey(
-        mutation,
-        next as HtmlTemplate[],
-        prev as HtmlTemplate[]
-      );
-    } else {
-      const ns = next as unknown[];
-      const ps = prev as unknown[];
-      for (let i = 0; i < ps.length || i < ns.length; i++) {
-        commitNode(mutation, ns[i], ps[i], i);
-      }
-    }
-  } else if (prev && next && !isTemplate(prev) && isTemplate(next)) {
-    commitText(mutation as TextMutation, null, prev as string, index);
-    commitTemplate(mutation as TemplateMutation, next, null, index);
-  } else if (prev && next && isTemplate(prev) && !isTemplate(next)) {
-    commitTemplate(mutation as TemplateMutation, null, prev, index);
-    commitText(mutation as TextMutation, next as string, null, index);
-  } else if (isTemplate(base)) {
-    commitTemplate(
-      mutation as TemplateMutation,
-      next as HtmlTemplate,
-      prev as HtmlTemplate,
-      index
+  next = isRenderableValue(next) ? next : null;
+  prev = isRenderableValue(prev) ? prev : null;
+
+  if (isIterable(next) || isIterable(prev)) {
+    commitIterable(
+      mutation,
+      (next || []) as unknown[],
+      (prev || []) as unknown[]
     );
   } else {
-    commitText(mutation as TextMutation, next as string, prev as string, index);
+    const tmpl = mutation as TemplateMutation;
+    const txt = mutation as TextMutation;
+    if (isTemplate(prev) && !isTemplate(next)) {
+      removeTemplate(tmpl._mutations[index]);
+      delete tmpl._mutations[index];
+    }
+    if (isText(prev) && !isText(next)) {
+      removeNode(txt._texts[index]);
+      delete txt._texts[index];
+    }
+    if (isTemplate(next) && !isTemplate(prev)) {
+      (tmpl._mutations = tmpl._mutations || [])[index] = insertTemplate(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        next! as HtmlTemplate,
+        tmpl.node,
+        tmpl.isSvg
+      );
+    }
+    if (isText(next) && !isText(prev)) {
+      insertNode(
+        ((txt._texts = txt._texts || [])[index] = document.createTextNode(
+          next as string
+        )),
+        txt.node
+      );
+    }
+    if (isTemplate(next) && isTemplate(prev)) {
+      if (equalsTemplate(next as HtmlTemplate, prev as HtmlTemplate)) {
+        commit(tmpl._mutations[index], getArgs(next));
+      } else {
+        removeTemplate(tmpl._mutations[index]);
+        tmpl._mutations[index] = insertTemplate(next, tmpl.node, tmpl.isSvg);
+      }
+    }
+    if (isText(next) && isText(prev)) {
+      txt._texts[index].data = next as string;
+    }
   }
 }
 
+function isIterable(value: unknown): value is Iterable<unknown> {
+  return (
+    Array.isArray(value) ||
+    !!(
+      value &&
+      typeof value !== "string" &&
+      (value as Iterable<unknown>)[Symbol.iterator]
+    )
+  );
+}
+
+function isText(t: unknown): t is unknown {
+  return t != null && !isTemplate(t);
+}
+
+function commitIterable(
+  mutation: NodeMutation,
+  next: unknown[],
+  prev: unknown[]
+) {
+  next = isIterable(next) ? next : [next];
+  prev = isIterable(prev) ? prev : [prev];
+  if (isTemplateMutation(mutation) && getKey(next[0]) != null) {
+    commitTemplatesWithKey(
+      mutation,
+      next as HtmlTemplate[],
+      prev as HtmlTemplate[]
+    );
+  } else {
+    for (let i = 0; i < prev.length || i < next.length; i++) {
+      commitNode(mutation, next[i], prev[i], i);
+    }
+  }
+}
 function commitTemplatesWithKey(
   parentMutation: TemplateMutation,
   nexts: HtmlTemplate[],
@@ -216,51 +263,6 @@ function commitTemplatesWithKey(
     }
   }
   parentMutation._mutations = nextMutations;
-}
-
-function commitTemplate(
-  m: TemplateMutation,
-  next: HtmlTemplate | undefined | null,
-  prev: HtmlTemplate | undefined | null,
-  index: number
-) {
-  if (!prev) {
-    (m._mutations = m._mutations || [])[index] = insertTemplate(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      next!,
-      m.node,
-      m.isSvg
-    );
-  } else if (!next) {
-    removeTemplate(m._mutations[index]);
-    delete m._mutations[index];
-  } else if (equalsTemplate(next, prev)) {
-    commit(m._mutations[index], getArgs(next));
-  } else {
-    removeTemplate(m._mutations[index]);
-    m._mutations[index] = insertTemplate(next, m.node, m.isSvg);
-  }
-}
-
-function commitText(
-  m: TextMutation,
-  next: VText | undefined | null,
-  prev: VText | undefined | null,
-  index: number
-) {
-  if (prev == null) {
-    insertNode(
-      ((m._texts = m._texts || [])[index] = document.createTextNode(
-        next as string
-      )),
-      m.node
-    );
-  } else if (next == null) {
-    removeNode(m._texts[index]);
-    delete m._texts[index];
-  } else if (next !== prev) {
-    m._texts[index].data = next;
-  }
 }
 
 function insertTemplate(

@@ -2,11 +2,11 @@ import { Component, AttributeConverter } from "./component";
 import { HasCSSSymbol } from "./css";
 
 export interface Hooks<T> {
-  values: T[];
-  deps: Deps[];
-  effects: EffectFn[];
-  layoutEffects: EffectFn[];
-  cleanup: Cleanup[];
+  _values: T[];
+  _deps: Deps[];
+  _effects: EffectFn[];
+  _layoutEffects: EffectFn[];
+  _cleanup: Cleanup[];
 }
 
 export type Deps = unknown[];
@@ -28,11 +28,11 @@ export interface HookableComponent {
 
 export function defaultHooks(): Hooks<unknown> {
   return {
-    values: [],
-    deps: [],
-    effects: [],
-    layoutEffects: [],
-    cleanup: []
+    _values: [],
+    _deps: [],
+    _effects: [],
+    _layoutEffects: [],
+    _cleanup: []
   };
 }
 
@@ -48,11 +48,11 @@ export function hooks<T>(config: {
   const h = currentComponent.hooks as Hooks<T>;
   const c = currentComponent as Component;
   const index = currentCursor++;
-  if (h.values.length <= index && config.oncreate) {
-    h.values[index] = config.oncreate(h, c, index);
+  if (h._values.length <= index && config.oncreate) {
+    h._values[index] = config.oncreate(h, c, index);
   }
   if (config.onupdate) {
-    h.values[index] = config.onupdate(h, c, index);
+    h._values[index] = config.onupdate(h, c, index);
   }
-  return h.values[index];
+  return h._values[index];
 }

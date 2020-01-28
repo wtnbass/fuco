@@ -27,11 +27,7 @@ export function createTemplate(vdom: VDOM[], args: ArgValues): HtmlTemplate {
 }
 
 export function isTemplate(t: unknown): t is HtmlTemplate {
-  return typeof t === "object" && t != null && Template in t;
-}
-
-export function isTemplateHavingKey(t: HtmlTemplate) {
-  return getKey(t) != null;
+  return !!(t && (t as HtmlTemplate)[Template]);
 }
 
 export function isVNode(vdom: unknown): vdom is VNode {
@@ -57,4 +53,8 @@ export function getKey(t: unknown): unknown {
 
 export function equalsTemplate(t1: HtmlTemplate, t2: HtmlTemplate) {
   return items(t1)[1][0] === items(t2)[1][0];
+}
+
+export function isSvgTag(tag: string) {
+  return tag.toLowerCase() === "svg";
 }

@@ -7,7 +7,7 @@ export interface HasCSSSymbol {
 }
 
 const hasCSSSymbol = (value: unknown): value is HasCSSSymbol => {
-  return typeof value === "object" && value != null && cssSymbol in value;
+  return value && (value as HasCSSSymbol)[cssSymbol] != null;
 };
 
 const resolve = (value: unknown): string => {

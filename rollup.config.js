@@ -10,7 +10,12 @@ const terserOpts = {
   }),
   ecma: 9,
   toplevel: true,
-  warnings: true
+  warnings: true,
+  mangle: {
+    properties: {
+      regex: "^_"
+    }
+  }
 };
 
 const CJS_PROD = file => ({

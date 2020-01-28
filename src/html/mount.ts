@@ -1,4 +1,4 @@
-import { isVNode, VDOM, VText, VArg } from "./template";
+import { isVNode, VDOM, VText, VArg, isSvgTag } from "./template";
 import { Mutation } from "./mutations";
 
 export function mount(
@@ -20,7 +20,7 @@ export function mount(
     }
   } else {
     const { tag, props, children } = vdom;
-    isSvg = tag === "svg" || isSvg;
+    isSvg = isSvgTag(tag) || isSvg;
     const node = parent.appendChild(
       isSvg
         ? document.createElementNS("http://www.w3.org/2000/svg", tag)
@@ -28,7 +28,6 @@ export function mount(
     );
     props &&
       Object.keys(props).forEach(name => {
-        if (name === ":key") return;
         if (typeof props[name] === "number") {
           mutations[props[name] as VArg] = { node, name };
         } else {

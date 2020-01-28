@@ -3,13 +3,13 @@ export type Mutation = AttributeMutation | NodeMutation;
 export interface NodeMutation {
   node: Node;
   isSvg: boolean;
-  prev?: unknown;
+  _prev?: unknown;
 }
 
 export interface AttributeMutation {
   node: Node;
   name: string;
-  prev?: unknown;
+  _prev?: unknown;
 }
 
 export interface TemplateMutation extends NodeMutation {
