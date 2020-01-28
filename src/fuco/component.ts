@@ -1,5 +1,10 @@
 import { adoptCssStyle, HasCSSSymbol } from "./css";
-import { defaultHooks, Hooks, HookableComponent, __setCurrent__ } from "./hook";
+import {
+  defaultHooks,
+  HookableComponent,
+  __setCurrent__,
+  EffectFn
+} from "./hook";
 import {
   enqueueEffects,
   enqueueLayoutEffects,
@@ -33,7 +38,7 @@ export abstract class Component extends HTMLElement
   protected disconnectedCallback() {
     this._connected = false;
     let cleanup;
-    while ((cleanup = this.hooks.cleanup.shift())) cleanup();
+    while ((cleanup = this.hooks._cleanup.shift())) cleanup();
   }
 
   public update() {
@@ -55,11 +60,8 @@ export abstract class Component extends HTMLElement
     this._dirty = false;
   }
 
-  public _flushEffects(
-    effectKey: keyof Pick<Hooks<unknown>, "effects" | "layoutEffects">
-  ) {
-    const effects = this.hooks[effectKey];
-    const cleanups = this.hooks.cleanup;
+  public _flushEffects(effects: EffectFn[]) {
+    const cleanups = this.hooks._cleanup;
     for (let i = 0, len = effects.length; i < len; i++) {
       if (effects[i]) {
         cleanups[i] && cleanups[i]();

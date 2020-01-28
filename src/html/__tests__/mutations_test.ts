@@ -87,13 +87,15 @@ describe("mutations", () => {
   });
 
   it("template array with key", () => {
-    const app = (items: any) => html`
+    const app = (items: unknown[] | null) => html`
       <ul>
-        ${items.map(
-          (item: any) => html`
-            <li :key=${item.id}>${item.content}</li>
-          `
-        )}
+        ${items
+          ? items.map(
+              (item: any) => html`
+                <li :key=${item.id}>${item.content}</li>
+              `
+            )
+          : null}
       </ul>
     `;
 
@@ -206,16 +208,23 @@ describe("mutations", () => {
     expect(li4_8).to.equal(li3_8);
     expect(li4_4).to.equal(li3_4);
     expect(li4_5).to.equal(li3_5);
+
+    // null
+    render(app(null), container);
+    const lis = container.querySelector("ul")?.querySelectorAll("li");
+    expect(lis?.length).to.equal(0);
   });
 
   it("template array without key", () => {
-    const app = (items: any) => html`
+    const app = (items: unknown[] | null) => html`
       <ul>
-        ${items.map(
-          (item: any) => html`
-            <li>${item.content}</li>
-          `
-        )}
+        ${items
+          ? items.map(
+              (item: any) => html`
+                <li>${item.content}</li>
+              `
+            )
+          : null}
       </ul>
     `;
 
@@ -329,6 +338,11 @@ describe("mutations", () => {
     expect(li4_4).to.equal(li3_6);
     expect(li4_9).to.equal(li3_4);
     expect(li4_5).to.equal(li3_5);
+
+    // null
+    render(app(null), container);
+    const lis = container.querySelector("ul")?.querySelectorAll("li");
+    expect(lis?.length).to.equal(0);
   });
 
   it("attribute", () => {
@@ -461,6 +475,26 @@ describe("mutations", () => {
     expect(stripComments(container.innerHTML)).to.equal(
       "<section>second</section>"
     );
+  });
+
+  it("array -> non-array, non-array -> array", () => {
+    const app = (value: any) => html`
+      <div>${value}</div>
+    `;
+
+    render(app(["a", "b", "c"]), container);
+    expect(stripComments(container.innerHTML)).to.equal("<div>abc</div>");
+
+    render(
+      app(html`
+        <i></i>
+      `),
+      container
+    );
+    expect(stripComments(container.innerHTML)).to.equal("<div><i></i></div>");
+
+    render(app(["f", "o", "o"]), container);
+    expect(stripComments(container.innerHTML)).to.equal("<div>foo</div>");
   });
 
   it("default value of <select>", () => {

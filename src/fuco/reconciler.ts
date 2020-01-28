@@ -17,7 +17,7 @@ const batch = <T>(
 
 const fifo = <T>(q: T[]) => q.shift();
 
-const filo = <T>(q: T[]) => q.pop();
+const lifo = <T>(q: T[]) => q.pop();
 
 const microtask = (flush: () => void) => {
   return () => queueMicrotask(flush);
@@ -33,12 +33,12 @@ const task = (flush: () => void) => {
   }
 };
 
-export const enqueueLayoutEffects = batch<Component>(microtask, filo, c =>
-  c._flushEffects("layoutEffects")
+export const enqueueLayoutEffects = batch<Component>(microtask, lifo, c =>
+  c._flushEffects(c.hooks._layoutEffects)
 );
 
-export const enqueueEffects = batch<Component>(task, filo, c =>
-  c._flushEffects("effects")
+export const enqueueEffects = batch<Component>(task, lifo, c =>
+  c._flushEffects(c.hooks._effects)
 );
 
 export const enqueueUpdate = batch<Component>(microtask, fifo, c =>

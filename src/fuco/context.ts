@@ -15,7 +15,7 @@ export abstract class Provider<T> extends HTMLElement {
   protected abstract get context(): Context<T>;
 
   private _value: T | undefined;
-  private listeners: (() => void)[] = [];
+  private _listeners: (() => void)[] = [];
 
   public constructor() {
     super();
@@ -36,10 +36,10 @@ export abstract class Provider<T> extends HTMLElement {
   }
 
   public subscribe(subscriber: () => void) {
-    this.listeners.push(subscriber);
+    this._listeners.push(subscriber);
     return () => {
-      const index = this.listeners.indexOf(subscriber);
-      this.listeners.splice(index, 1);
+      const index = this._listeners.indexOf(subscriber);
+      this._listeners.splice(index, 1);
     };
   }
 
@@ -49,7 +49,7 @@ export abstract class Provider<T> extends HTMLElement {
 
   public set value(newValue) {
     this._value = newValue;
-    this.listeners.forEach(l => l());
+    this._listeners.forEach(l => l());
   }
 }
 

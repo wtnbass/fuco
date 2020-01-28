@@ -310,7 +310,7 @@ describe(
 
     it("unsubscribe when consumer is unmounted", async () => {
       let target!: Element;
-      let provider!: Element & { listeners: [] };
+      let provider!: Element & { _listeners: [] };
       let button!: HTMLButtonElement;
       const setup = async () => {
         target = await fixs[4].setup();
@@ -318,12 +318,12 @@ describe(
         button = selector("button", target);
       };
       await setup();
-      expect(provider.listeners).to.length(1);
+      expect(provider._listeners).to.length(1);
 
       button.click();
 
       await setup();
-      expect(provider.listeners).to.length(0);
+      expect(provider._listeners).to.length(0);
     });
 
     it("count value changed", async () => {

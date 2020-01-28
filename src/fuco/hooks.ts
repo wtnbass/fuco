@@ -16,10 +16,10 @@ export function useAttribute<T>(
 ) {
   return hooks<string | T | null>({
     oncreate(h, c, i) {
-      h.cleanup[i] = c._observeAttr(name, () => {
+      h._cleanup[i] = c._observeAttr(name, () => {
         const newValue = c._attr(name, converter);
-        if (!Object.is(h.values[i], newValue)) {
-          h.values[i] = newValue;
+        if (!Object.is(h._values[i], newValue)) {
+          h._values[i] = newValue;
           c._performUpdate();
         }
       });
@@ -35,11 +35,11 @@ export const useProperty = <T>(name: string) =>
 
       Object.defineProperty(c, name, {
         get() {
-          return h.values[i];
+          return h._values[i];
         },
         set(newValue) {
-          if (!Object.is(h.values[i], newValue)) {
-            h.values[i] = newValue;
+          if (!Object.is(h._values[i], newValue)) {
+            h._values[i] = newValue;
             c.update();
           }
         }
@@ -57,7 +57,7 @@ export const useDispatchEvent = <T>(name: string, eventInit: EventInit = {}) =>
 export const useStyle = (cssStyle: HasCSSSymbol | (() => HasCSSSymbol)) =>
   hooks<void>({
     oncreate(h, c, i) {
-      h.layoutEffects[i] = () =>
+      h._layoutEffects[i] = () =>
         c._adoptStyle(typeof cssStyle === "function" ? cssStyle() : cssStyle);
     }
   });
@@ -74,12 +74,12 @@ export const useState = <T>(initialState: T | (() => T)) =>
         ? (initialState as () => T)()
         : initialState,
       function setState(nextState: T | ((s: T) => T)) {
-        const state = h.values[i][0];
+        const state = h._values[i][0];
         if (typeof nextState === "function") {
           nextState = (nextState as (s: T) => T)(state);
         }
         if (!Object.is(state, nextState)) {
-          h.values[i][0] = nextState;
+          h._values[i][0] = nextState;
           c.update();
         }
       }
@@ -94,10 +94,10 @@ export const useReducer = <S, A>(
     oncreate: (h, c, i) => [
       initialState,
       function dispatch(action: A) {
-        const state = h.values[i][0];
+        const state = h._values[i][0];
         const nextState = reducer(state, action);
         if (!Object.is(state, nextState)) {
-          h.values[i][0] = nextState;
+          h._values[i][0] = nextState;
           c.update();
         }
       }
@@ -107,24 +107,24 @@ export const useReducer = <S, A>(
 export const useContext = <T>(context: Context<T>) =>
   hooks<T | undefined>({
     oncreate: (h, c, i) => {
-      h.values[i] = context.initialValue;
+      h._values[i] = context.initialValue;
       c._dispatch<Detail<T>>(REQUEST_CONSUME, {
         bubbles: true,
         composed: true,
         detail: {
           context,
           register(provider) {
-            h.values[i] = provider.value;
-            h.cleanup[i] = provider.subscribe(() => {
-              if (!Object.is(h.values[i], provider.value)) {
-                h.values[i] = provider.value;
+            h._values[i] = provider.value;
+            h._cleanup[i] = provider.subscribe(() => {
+              if (!Object.is(h._values[i], provider.value)) {
+                h._values[i] = provider.value;
                 c.update();
               }
             });
           }
         }
       });
-      return h.values[i];
+      return h._values[i];
     }
   });
 
@@ -134,9 +134,9 @@ const depsChanged = (prev: Deps | undefined, next: Deps) =>
 export const useEffect = (handler: EffectFn, deps?: Deps) =>
   hooks<void>({
     onupdate(h, _, i) {
-      if (!deps || depsChanged(h.deps[i], deps)) {
-        h.deps[i] = deps || [];
-        h.effects[i] = handler;
+      if (!deps || depsChanged(h._deps[i], deps)) {
+        h._deps[i] = deps || [];
+        h._effects[i] = handler;
       }
     }
   });
@@ -144,9 +144,9 @@ export const useEffect = (handler: EffectFn, deps?: Deps) =>
 export const useLayoutEffect = (handler: EffectFn, deps?: Deps) =>
   hooks<void>({
     onupdate(h, _, i) {
-      if (!deps || depsChanged(h.deps[i], deps)) {
-        h.deps[i] = deps || [];
-        h.layoutEffects[i] = handler;
+      if (!deps || depsChanged(h._deps[i], deps)) {
+        h._deps[i] = deps || [];
+        h._layoutEffects[i] = handler;
       }
     }
   });
@@ -154,9 +154,9 @@ export const useLayoutEffect = (handler: EffectFn, deps?: Deps) =>
 export const useMemo = <T>(fn: () => T, deps?: Deps) =>
   hooks<T>({
     onupdate(h, _, i) {
-      let value = h.values[i];
-      if (!deps || depsChanged(h.deps[i], deps)) {
-        h.deps[i] = deps || [];
+      let value = h._values[i];
+      if (!deps || depsChanged(h._deps[i], deps)) {
+        h._deps[i] = deps || [];
         value = fn();
       }
       return value;
