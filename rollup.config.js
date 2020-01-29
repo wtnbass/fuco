@@ -20,13 +20,14 @@ const terserOpts = {
     props: {
       cname: 6,
       props: {
-        $_listeners: "__l",
+        // Component
         $_performUpdate: "__u",
         $_flushEffects: "__f",
         $_attr: "__a",
         $_observeAttr: "__o",
         $_dispatch: "__d",
         $_adoptStyle: "__s",
+        // hooks
         $_values: "_v",
         $_deps: "_d",
         $_effects: "_e",

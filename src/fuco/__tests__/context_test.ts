@@ -10,7 +10,7 @@ import {
   useContext,
   useCallback
 } from "..";
-import { Provider } from "../context";
+import { Component } from "../component";
 
 type Theme = "light" | "dark";
 type Theme2 = "green" | "red";
@@ -310,20 +310,23 @@ describe(
 
     it("unsubscribe when consumer is unmounted", async () => {
       let target!: Element;
-      let provider!: Element & { _listeners: [] };
+      let provider!: Component;
       let button!: HTMLButtonElement;
+      let subs!: { current: unknown[] };
       const setup = async () => {
         target = await fixs[4].setup();
         provider = selector("theme-context", target);
         button = selector("button", target);
+        subs = provider.hooks._values[0] as { current: unknown[] };
       };
       await setup();
-      expect(provider._listeners).to.length(1);
+      console.log(subs.current);
+      expect(subs.current.length).to.equal(1);
 
       button.click();
 
       await setup();
-      expect(provider._listeners).to.length(0);
+      expect(subs.current.length).to.equal(0);
     });
 
     it("count value changed", async () => {
@@ -358,7 +361,7 @@ describe(
 
     it("compare as SameValue", async () => {
       let updated!: HTMLDivElement;
-      let provider!: Provider<number>;
+      let provider!: Component & { value: number };
       const setup = async () => {
         const target = await fixs[6].setup();
         const consumer = selector("num-consumer", target);

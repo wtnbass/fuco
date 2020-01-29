@@ -6,7 +6,8 @@ export {
   __FucoRegistry__
 } from "./define-element";
 export { css, unsafeCSS } from "./css";
-export { createContext } from "./context";
+export { Context } from "./context";
+export { createContext } from "./create-context";
 export { defaultHooks, Hooks, HookableComponent, __setCurrent__ } from "./hook";
 export {
   useAttribute,

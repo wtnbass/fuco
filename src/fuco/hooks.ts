@@ -113,11 +113,11 @@ export const useContext = <T>(context: Context<T>) =>
         composed: true,
         detail: {
           context,
-          register(provider) {
-            h._values[i] = provider.value;
-            h._cleanup[i] = provider.subscribe(() => {
-              if (!Object.is(h._values[i], provider.value)) {
-                h._values[i] = provider.value;
+          register(subscribe, initialValue) {
+            h._values[i] = initialValue;
+            h._cleanup[i] = subscribe(nextValue => {
+              if (!Object.is(h._values[i], nextValue)) {
+                h._values[i] = nextValue;
                 c.update();
               }
             });
