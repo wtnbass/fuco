@@ -15,6 +15,25 @@ const terserOpts = {
     properties: {
       regex: "^_"
     }
+  },
+  nameCache: {
+    props: {
+      cname: 6,
+      props: {
+        $_listeners: "__l",
+        $_performUpdate: "__u",
+        $_flushEffects: "__f",
+        $_attr: "__a",
+        $_observeAttr: "__o",
+        $_dispatch: "__d",
+        $_adoptStyle: "__s",
+        $_values: "_v",
+        $_deps: "_d",
+        $_effects: "_e",
+        $_layoutEffects: "_l",
+        $_cleanup: "_c"
+      }
+    }
   }
 };
 
