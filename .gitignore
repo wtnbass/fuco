@@ -1,5 +1,4 @@
 /node_modules
-/package-lock.json
 
 fuco/**/*.d.ts
 fuco/**/*.production.js
