@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/fuco.svg)](https://www.npmjs.com/package/fuco)
 [![install size](https://packagephobia.now.sh/badge?p=fuco)](https://packagephobia.now.sh/result?p=fuco)
-[![Build Status](https://travis-ci.com/wtnbass/fuco.svg?branch=master)](https://travis-ci.com/wtnbass/fuco)
+[![test](https://github.com/wtnbass/fuco/workflows/test/badge.svg)](https://github.com/wtnbass/fuco/actions)
 [![codecov](https://codecov.io/gh/wtnbass/fuco/branch/master/graph/badge.svg)](https://codecov.io/gh/wtnbass/fuco)
 
 Functional Component like React, but for Web Components.
