@@ -35,7 +35,7 @@ const deleteTodo = (id: string | null) => {
 };
 
 // https://kaihao.dev/posts/Stale-props-and-zombie-children-in-Redux
-const fixtureZonbieChildren = () => {
+const fixtureZombieChildren = () => {
   const [todos, setTodos] = useState(state.todos);
   useEffect(() => {
     listeners.push(() => {
@@ -44,12 +44,12 @@ const fixtureZonbieChildren = () => {
   });
   return todos.map(
     t => html`
-      <zonbie-child-element :key=${t.id} id=${t.id}></zonbie-child-element>
+      <zombie-child-element :key=${t.id} id=${t.id}></zombie-child-element>
     `
   );
 };
 
-defineElement("zonbie-child-element", () => {
+defineElement("zombie-child-element", () => {
   const id = useAttribute("id");
   const content = state.todos.find(t => t.id === id);
   return html`
@@ -66,7 +66,7 @@ describe(
   "component",
   withFixtures(
     fixture,
-    fixtureZonbieChildren
+    fixtureZombieChildren
   )(([f, f2]) => {
     let target: Element;
     let button: HTMLButtonElement;
@@ -88,7 +88,7 @@ describe(
       expect(text(div)).to.equal("1000000");
     });
 
-    it("zonbie children", async () => {
+    it("zombie children", async () => {
       target = await f2.setup();
       let childA = selector("[id=A]", target);
       button = selector("button", childA);
