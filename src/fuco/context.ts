@@ -16,5 +16,4 @@ export interface Detail<T> {
 
 export type ContextSubscriber<T> = (value: T) => void;
 
-export const REQUEST_CONSUME =
-  "context:request-consume:" + String(Math.random()).slice(2);
+export const REQUEST_CONSUME = "fuco:context:" + String(Math.random()).slice(2);
