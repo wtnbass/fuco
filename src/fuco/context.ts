@@ -1,14 +1,14 @@
 import { Cleanup } from "./hook";
 
 export interface Context<T> {
-  readonly initialValue?: T;
+  readonly _defaultValue?: T;
   readonly defineProvider: (name: string) => void;
   readonly Provider: () => unknown;
 }
 
 export interface Detail<T> {
-  context: Context<T>;
-  register(
+  _context: Context<T>;
+  _register(
     subscribe: (s: ContextSubscriber<T>) => Cleanup,
     initialValue: T
   ): void;

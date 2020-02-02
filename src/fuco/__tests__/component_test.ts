@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { withFixtures, selector, text, createFixture } from "./fixture";
 import { html, useState, useCallback } from "..";
 import { defineElement } from "../define-element";
-import { useAttribute, useEffect } from "../hooks";
+import { useAttribute, useEffect, useRef } from "../hooks";
 
 const fixture = () => {
   const [count, setCount] = useState(0);
@@ -62,6 +62,14 @@ const fixtureHasError = createFixture(() => {
   throw new Error();
 });
 
+let cleanupCounts = [0, 0];
+const fixtureCleanup = createFixture(() => {
+  useEffect(() => () => cleanupCounts[0]++);
+  useRef(null); // hook has no cleanup
+  useEffect(() => () => cleanupCounts[1]++);
+  return html``;
+});
+
 describe(
   "component",
   withFixtures(
@@ -105,6 +113,16 @@ describe(
       fixtureHasError.mount();
       const target = await fixtureHasError.setup();
       expect(target.innerHTML).to.equal("");
+    });
+
+    it("cleanup", async () => {
+      cleanupCounts = [0, 0];
+      fixtureCleanup.define();
+      fixtureCleanup.mount();
+      await fixtureCleanup.setup();
+      fixtureCleanup.unmount();
+      await fixtureCleanup.setup();
+      expect(cleanupCounts).to.deep.equal([1, 1]);
     });
   })
 );

@@ -3,7 +3,7 @@
 import {
   AttributeConverter,
   FunctionalComponent,
-  HookableComponent,
+  FucoComponent,
   defaultHooks,
   __setCurrent__
 } from "../fuco";
@@ -11,9 +11,9 @@ import { VProps, ArgValues } from "../html";
 
 type CmpProps = { [key: string]: unknown };
 
-export class Component implements HookableComponent {
+export class Component implements FucoComponent {
+  _hooks = defaultHooks();
   props: CmpProps;
-  hooks = defaultHooks();
   result: unknown;
 
   constructor(

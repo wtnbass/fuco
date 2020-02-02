@@ -3,11 +3,11 @@ import { terser } from "rollup-plugin-terser";
 
 const tsOpts = { useTsconfigDeclarationDir: true };
 const terserOpts = {
-  compress: Object.assign({
+  compress: {
     keep_infinity: true,
     pure_getters: true,
     passes: 10
-  }),
+  },
   ecma: 9,
   toplevel: true,
   warnings: true,
@@ -21,12 +21,13 @@ const terserOpts = {
       cname: 6,
       props: {
         // Component
-        $_performUpdate: "__u",
-        $_flushEffects: "__f",
-        $_attr: "__a",
-        $_observeAttr: "__o",
-        $_dispatch: "__d",
-        $_adoptStyle: "__s",
+        $_hooks: "_h",
+        $_performUpdate: "_u",
+        $_flushEffects: "_f",
+        $_attr: "_a",
+        $_observeAttr: "_o",
+        $_dispatch: "_d",
+        $_adoptStyle: "_s",
         // hooks
         $_values: "_v",
         $_deps: "_d",
