@@ -11,8 +11,8 @@ export function defineElement(name: string, fn: FunctionalComponent) {
     customElements.define(
       name,
       class extends Component {
-        public render() {
-          render(fn(), this.$root);
+        renderer(container: Node) {
+          render(fn(), container);
         }
       }
     );

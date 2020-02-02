@@ -1,4 +1,4 @@
-import { isBrowser } from "./env";
+import { supportsAdoptedStyleSheets } from "./env";
 
 const cssSymbol = Symbol("css");
 
@@ -25,21 +25,14 @@ export const css = (strings: readonly string[], ...values: unknown[]) => ({
 
 export const unsafeCSS = (css: string) => ({ [cssSymbol]: css });
 
-const enabledAdoptedStyleSheets =
-  isBrowser &&
-  "adoptedStyleSheets" in Document.prototype &&
-  "replace" in CSSStyleSheet.prototype;
-
 export const adoptCssStyle = (root: ShadowRoot, css: HasCSSSymbol) => {
   const cssStyle = css[cssSymbol];
-  if (enabledAdoptedStyleSheets) {
+  if (supportsAdoptedStyleSheets) {
     const styleSheet = new CSSStyleSheet();
     styleSheet.replace(cssStyle);
     root.adoptedStyleSheets = [...root.adoptedStyleSheets, styleSheet];
   } else {
-    const style = document.createElement("style");
-    style.textContent = cssStyle;
-    root.appendChild(style);
+    root.appendChild(document.createElement("style")).textContent = cssStyle;
   }
 };
 

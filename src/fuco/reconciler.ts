@@ -1,8 +1,7 @@
 import { Component } from "./component";
-import { isBrowser } from "./env";
 
 const batch = <T>(
-  runner: (f: () => void) => () => void,
+  queue: (f: () => void) => void,
   pick: (p: T[]) => T | undefined,
   callback: (p: T) => void
 ) => {
@@ -11,36 +10,32 @@ const batch = <T>(
     let p;
     while ((p = pick(q))) callback(p);
   };
-  const run = runner(flush);
-  return (c: T) => q.push(c) === 1 && run();
+  return (c: T) => q.push(c) === 1 && queue(flush);
 };
 
 const fifo = <T>(q: T[]) => q.shift();
 
 const lifo = <T>(q: T[]) => q.pop();
 
-const microtask = (flush: () => void) => {
-  return () => queueMicrotask(flush);
-};
-
-const task = (flush: () => void) => {
-  if (isBrowser) {
+const queueTask = (callback: () => void) => {
+  try {
     const ch = new MessageChannel();
-    ch.port1.onmessage = flush;
-    return () => ch.port2.postMessage(null);
-  } else {
-    return () => setImmediate(flush);
+    ch.port1.onmessage = callback;
+    ch.port2.postMessage(null);
+  } catch (_) {
+    /* istanbul ignore next */
+    setImmediate(callback);
   }
 };
 
-export const enqueueLayoutEffects = batch<Component>(microtask, lifo, c =>
-  c._flushEffects(c.hooks._layoutEffects)
+export const enqueueLayoutEffects = batch<Component>(queueMicrotask, lifo, c =>
+  c._flushEffects(c._hooks._layoutEffects)
 );
 
-export const enqueueEffects = batch<Component>(task, lifo, c =>
-  c._flushEffects(c.hooks._effects)
+export const enqueueEffects = batch<Component>(queueTask, lifo, c =>
+  c._flushEffects(c._hooks._effects)
 );
 
-export const enqueueUpdate = batch<Component>(microtask, fifo, c =>
+export const enqueueUpdate = batch<Component>(queueMicrotask, fifo, c =>
   c._performUpdate()
 );

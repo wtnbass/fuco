@@ -16,10 +16,10 @@ export type EffectFn = () => void | Cleanup;
 export type Cleanup = () => void;
 
 let currentCursor: number;
-let currentComponent: HookableComponent;
+let currentComponent: FucoComponent;
 
-export interface HookableComponent {
-  hooks: Hooks<unknown>;
+export interface FucoComponent {
+  _hooks: Hooks<unknown>;
   _attr<T>(name: string, converter?: AttributeConverter<T>): T | string | null;
   _observeAttr(name: string, callback: () => void): void;
   _dispatch<T>(name: string, init: CustomEventInit<T>): void;
@@ -36,23 +36,23 @@ export function defaultHooks(): Hooks<unknown> {
   };
 }
 
-export function __setCurrent__(c: HookableComponent) {
+export function __setCurrent__(c: FucoComponent) {
   currentComponent = c;
   currentCursor = 0;
 }
 
 export function hooks<T>(config: {
-  oncreate?: (h: Hooks<T>, c: Component, i: number) => T;
-  onupdate?: (h: Hooks<T>, c: Component, i: number) => T;
+  _onmount?: (h: Hooks<T>, c: Component, i: number) => T;
+  _onupdate?: (h: Hooks<T>, c: Component, i: number) => void;
 }): T {
-  const h = currentComponent.hooks as Hooks<T>;
+  const h = currentComponent._hooks as Hooks<T>;
   const c = currentComponent as Component;
   const index = currentCursor++;
-  if (h._values.length <= index && config.oncreate) {
-    h._values[index] = config.oncreate(h, c, index);
+  if (h._values.length <= index && config._onmount) {
+    h._values[index] = config._onmount(h, c, index);
   }
-  if (config.onupdate) {
-    h._values[index] = config.onupdate(h, c, index);
+  if (config._onupdate) {
+    config._onupdate(h, c, index);
   }
   return h._values[index];
 }

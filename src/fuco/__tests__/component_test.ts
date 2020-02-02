@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { withFixtures, selector, text, createFixture } from "./fixture";
 import { html, useState, useCallback } from "..";
 import { defineElement } from "../define-element";
-import { useAttribute, useEffect } from "../hooks";
+import { useAttribute, useEffect, useRef } from "../hooks";
 
 const fixture = () => {
   const [count, setCount] = useState(0);
@@ -35,7 +35,7 @@ const deleteTodo = (id: string | null) => {
 };
 
 // https://kaihao.dev/posts/Stale-props-and-zombie-children-in-Redux
-const fixtureZonbieChildren = () => {
+const fixtureZombieChildren = () => {
   const [todos, setTodos] = useState(state.todos);
   useEffect(() => {
     listeners.push(() => {
@@ -44,12 +44,12 @@ const fixtureZonbieChildren = () => {
   });
   return todos.map(
     t => html`
-      <zonbie-child-element :key=${t.id} id=${t.id}></zonbie-child-element>
+      <zombie-child-element :key=${t.id} id=${t.id}></zombie-child-element>
     `
   );
 };
 
-defineElement("zonbie-child-element", () => {
+defineElement("zombie-child-element", () => {
   const id = useAttribute("id");
   const content = state.todos.find(t => t.id === id);
   return html`
@@ -62,11 +62,19 @@ const fixtureHasError = createFixture(() => {
   throw new Error();
 });
 
+let cleanupCounts = [0, 0];
+const fixtureCleanup = createFixture(() => {
+  useEffect(() => () => cleanupCounts[0]++);
+  useRef(null); // hook has no cleanup
+  useEffect(() => () => cleanupCounts[1]++);
+  return html``;
+});
+
 describe(
   "component",
   withFixtures(
     fixture,
-    fixtureZonbieChildren
+    fixtureZombieChildren
   )(([f, f2]) => {
     let target: Element;
     let button: HTMLButtonElement;
@@ -88,7 +96,7 @@ describe(
       expect(text(div)).to.equal("1000000");
     });
 
-    it("zonbie children", async () => {
+    it("zombie children", async () => {
       target = await f2.setup();
       let childA = selector("[id=A]", target);
       button = selector("button", childA);
@@ -105,6 +113,16 @@ describe(
       fixtureHasError.mount();
       const target = await fixtureHasError.setup();
       expect(target.innerHTML).to.equal("");
+    });
+
+    it("cleanup", async () => {
+      cleanupCounts = [0, 0];
+      fixtureCleanup.define();
+      fixtureCleanup.mount();
+      await fixtureCleanup.setup();
+      fixtureCleanup.unmount();
+      await fixtureCleanup.setup();
+      expect(cleanupCounts).to.deep.equal([1, 1]);
     });
   })
 );

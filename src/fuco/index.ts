@@ -8,7 +8,7 @@ export {
 export { css, unsafeCSS } from "./css";
 export { Context } from "./context";
 export { createContext } from "./create-context";
-export { defaultHooks, Hooks, HookableComponent, __setCurrent__ } from "./hook";
+export { defaultHooks, Hooks, FucoComponent, __setCurrent__ } from "./hook";
 export {
   useAttribute,
   useProperty,

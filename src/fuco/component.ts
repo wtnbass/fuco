@@ -1,10 +1,5 @@
 import { adoptCssStyle, HasCSSSymbol } from "./css";
-import {
-  defaultHooks,
-  HookableComponent,
-  __setCurrent__,
-  EffectFn
-} from "./hook";
+import { defaultHooks, __setCurrent__, EffectFn, FucoComponent } from "./hook";
 import {
   enqueueEffects,
   enqueueLayoutEffects,
@@ -21,14 +16,13 @@ if (!isBrowser) {
   (global as any).HTMLElement = Function;
 }
 
-export abstract class Component extends HTMLElement
-  implements HookableComponent {
-  public _dirty = false;
-  public _connected = false;
-  public $root = this.attachShadow({ mode: "open" });
-  public hooks = defaultHooks();
+export abstract class Component extends HTMLElement implements FucoComponent {
+  private _dirty = false;
+  private _connected = false;
+  private _container = this.attachShadow({ mode: "open" });
+  public _hooks = defaultHooks();
 
-  public abstract render(): void;
+  public abstract renderer(node: Node): void;
 
   protected connectedCallback() {
     this._connected = true;
@@ -37,8 +31,13 @@ export abstract class Component extends HTMLElement
 
   protected disconnectedCallback() {
     this._connected = false;
-    let cleanup;
-    while ((cleanup = this.hooks._cleanup.shift())) cleanup();
+    const cleanups = this._hooks._cleanup;
+    for (let i = 0; i < cleanups.length; i++) {
+      if (cleanups[i]) {
+        cleanups[i]();
+        delete cleanups[i];
+      }
+    }
   }
 
   public update() {
@@ -51,7 +50,7 @@ export abstract class Component extends HTMLElement
     if (!this._connected) return;
     try {
       __setCurrent__(this);
-      this.render();
+      this.renderer(this._container);
       enqueueLayoutEffects(this);
       enqueueEffects(this);
     } catch (e) {
@@ -61,12 +60,12 @@ export abstract class Component extends HTMLElement
   }
 
   public _flushEffects(effects: EffectFn[]) {
-    const cleanups = this.hooks._cleanup;
+    const cleanups = this._hooks._cleanup;
     for (let i = 0, len = effects.length; i < len; i++) {
       if (effects[i]) {
         cleanups[i] && cleanups[i]();
         const cleanup = effects[i]();
-        if (cleanup) {
+        if (typeof cleanup === "function") {
           cleanups[i] = cleanup;
         }
         delete effects[i];
@@ -80,7 +79,7 @@ export abstract class Component extends HTMLElement
       : this.getAttribute(name);
   }
   public _observeAttr(name: string, callback: () => void) {
-    const m = new MutationObserver(() => callback());
+    const m = new MutationObserver(callback);
     m.observe(this, { attributes: true, attributeFilter: [name] });
     return () => m.disconnect();
   }
@@ -90,6 +89,6 @@ export abstract class Component extends HTMLElement
   }
 
   public _adoptStyle(css: HasCSSSymbol) {
-    adoptCssStyle(this.$root, css);
+    adoptCssStyle(this._container, css);
   }
 }

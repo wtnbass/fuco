@@ -317,10 +317,9 @@ describe(
         target = await fixs[4].setup();
         provider = selector("theme-context", target);
         button = selector("button", target);
-        subs = provider.hooks._values[0] as { current: unknown[] };
+        subs = provider._hooks._values[0] as { current: unknown[] };
       };
       await setup();
-      console.log(subs.current);
       expect(subs.current.length).to.equal(1);
 
       button.click();

@@ -4,9 +4,9 @@ import { defineElement } from "./define-element";
 import { useProperty, useRef, useEffect } from "./hooks";
 import { Context, ContextSubscriber, Detail, REQUEST_CONSUME } from "./context";
 
-export function createContext<T>(initialValue?: T): Context<T> {
+export function createContext<T>(defaultValue?: T): Context<T> {
   const context = {
-    initialValue,
+    _defaultValue: defaultValue,
     Provider() {
       const subs = useRef<ContextSubscriber<T>[]>([]);
       const subscribe = (s: ContextSubscriber<T>) => {
@@ -23,9 +23,9 @@ export function createContext<T>(initialValue?: T): Context<T> {
       useEffect(() => subs.current!.forEach(f => f(value)), [value]);
 
       const request = (e: CustomEvent<Detail<T>>) => {
-        if (context === e.detail.context) {
+        if (context === e.detail._context) {
           e.stopPropagation();
-          e.detail.register(subscribe, value);
+          e.detail._register(subscribe, value);
         }
       };
       return h`<slot ...${{ [`@${REQUEST_CONSUME}`]: request }}/>`;
