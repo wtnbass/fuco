@@ -3,6 +3,9 @@ import { expect } from "chai";
 import { html } from "..";
 import { items, HtmlTemplate } from "../template";
 
+// to ignore prettier format
+const h = html;
+
 describe("parse", () => {
   let container!: HTMLDivElement;
 
@@ -97,8 +100,7 @@ describe("parse", () => {
 
   it("spread attribute", () => {
     const props = { a: 1, "?b": 2, ".c": 3, "@d": () => {} };
-    // prettier-ignore
-    const app = html`
+    const app = h`
       <div ...${props}></div>
       <div ...  ${props}   ></div>
     `;
@@ -189,10 +191,9 @@ describe("parse", () => {
   });
 
   it("ugly attributes", () => {
-    // prettier-ignore
-    const app = html`
+    const app = h`
       <div name  =  "a" id  = 'b' class = c  color =  d></div>
-    `
+    `;
     test(app, [
       {
         tag: "div",
@@ -241,5 +242,20 @@ describe("parse", () => {
       <!-- ${0} -->
     `;
     test(app, [], [0]);
+  });
+
+  it("Capital node name", () => {
+    const app = h`
+      <DIV></DIV>
+      <Div></Div>
+      <DIV></div>
+      <div></DIV>
+    `;
+    test(app, [
+      { tag: "div", children: [] },
+      { tag: "div", children: [] },
+      { tag: "div", children: [] },
+      { tag: "div", children: [] }
+    ]);
   });
 });

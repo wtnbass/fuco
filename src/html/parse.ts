@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { VDOM, VNode, VPropValue } from "./template";
-const openTagRegexp = /^\s*<\s*([a-zA-Z1-9-]+)/;
-const closeTagRegexp = /^<\s*\/\s*([a-zA-Z1-9-]+)>/;
+const openTagRegexp = /^\s*<\s*([a-z1-9-]+)/i;
+const closeTagRegexp = /^<\s*\/\s*([a-z1-9-]+)>/i;
 const tagEndRegexp = /^\s*(\/)?>/;
 const voidTagNameRegexp = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;
 const attributeNameRegexp = /^\s*([^\s"'<>\/=]+)(?:\s*(=))?/;
@@ -69,9 +69,10 @@ export function parse(htmls: readonly string[]) {
           inComment = true;
         } else if ((r = html.match(closeTagRegexp))) {
           html = html.slice(r[0].length);
-          if (current.tag !== r[1]) {
+          const t = r[1].toLowerCase();
+          if (current.tag !== t) {
             let j = stack.length;
-            while (j > 0 && stack[j - 1].tag !== r[1]) j--;
+            while (j > 0 && stack[j - 1].tag !== t) j--;
             if (j) {
               stack.length = j - 1;
               current = stack.pop()!;
@@ -83,7 +84,9 @@ export function parse(htmls: readonly string[]) {
           html = html.slice(r[0].length);
 
           stack.push(current);
-          current.children.push((current = { tag: r[1], children: [] }));
+          current.children.push(
+            (current = { tag: r[1].toLowerCase(), children: [] })
+          );
           inTag = true;
         } else {
           r = html.indexOf("<") || html.indexOf("<", 1);
