@@ -1,5 +1,4 @@
 import { Component } from "./component";
-import { supportsMessageChannel } from "./env";
 
 const batch = <T>(
   queue: (f: () => void) => void,
@@ -19,11 +18,12 @@ const fifo = <T>(q: T[]) => q.shift();
 const lifo = <T>(q: T[]) => q.pop();
 
 const queueTask = (callback: () => void) => {
-  if (supportsMessageChannel) {
+  try {
     const ch = new MessageChannel();
     ch.port1.onmessage = callback;
     ch.port2.postMessage(null);
-  } else {
+  } catch (_) {
+    /* istanbul ignore next */
     setImmediate(callback);
   }
 };
