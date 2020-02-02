@@ -12,8 +12,8 @@ export function mount(
   } else if (!isVNode(vdom)) {
     if (typeof vdom === "number") {
       mutations[vdom] = {
-        node: parent.appendChild(document.createComment("")),
-        isSvg
+        _node: parent.appendChild(document.createComment("")),
+        _isSvg: isSvg
       };
     } else {
       parent.appendChild(document.createTextNode(vdom as VText));
@@ -29,7 +29,7 @@ export function mount(
     props &&
       Object.keys(props).forEach(name => {
         if (typeof props[name] === "number") {
-          mutations[props[name] as VArg] = { node, name };
+          mutations[props[name] as VArg] = { _node: node, _name: name };
         } else {
           node.setAttribute(name, props[name] as VText);
         }
