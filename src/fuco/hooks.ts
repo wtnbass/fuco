@@ -1,7 +1,7 @@
 import { AttributeConverter, Component } from "./component";
 import { Context, Detail, REQUEST_CONSUME } from "./context";
 import { HasCSSSymbol } from "./css";
-import { Deps, EffectFn, hooks } from "./hook";
+import { hooks, Deps, EffectFn } from "./hook";
 
 export function useAttribute(name: string): string | null;
 
@@ -56,9 +56,8 @@ export const useDispatchEvent = <T>(name: string, eventInit: EventInit = {}) =>
 
 export const useStyle = (cssStyle: HasCSSSymbol | (() => HasCSSSymbol)) =>
   hooks<void>({
-    _onmount(h, c, i) {
-      h._layoutEffects[i] = () =>
-        c._adoptStyle(typeof cssStyle === "function" ? cssStyle() : cssStyle);
+    _onmount(_, c) {
+      c._adoptStyle(typeof cssStyle === "function" ? cssStyle() : cssStyle);
     }
   });
 
@@ -67,24 +66,18 @@ export const useRef = <T>(initialValue: T | null) =>
     _onmount: (_h, _c) => ({ current: initialValue })
   });
 
-export const useState = <T>(initialState: T | (() => T)) =>
-  hooks<[T, (t: T | ((s: T) => T)) => void]>({
-    _onmount: (h, c, i) => [
-      typeof initialState === "function"
-        ? (initialState as () => T)()
-        : initialState,
-      function setState(nextState: T | ((s: T) => T)) {
-        const state = h._values[i][0];
-        if (typeof nextState === "function") {
-          nextState = (nextState as (s: T) => T)(state);
-        }
-        if (!Object.is(state, nextState)) {
-          h._values[i][0] = nextState;
-          c.update();
-        }
-      }
-    ]
-  });
+export const useState = <T>(
+  initialState: T | (() => T)
+): [T, (t: T | ((s: T) => T)) => void] =>
+  useReducer<T, T | ((s: T) => T)>(
+    (state, nextState) =>
+      typeof nextState === "function"
+        ? (nextState as (s: T) => T)(state)
+        : nextState,
+    typeof initialState === "function"
+      ? (initialState as () => T)()
+      : initialState
+  );
 
 export const useReducer = <S, A>(
   reducer: (state: S, action: A) => S,

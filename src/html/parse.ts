@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { VDOM, VNode } from "./template";
 
-import { VDOM, VNode, VPropValue } from "./template";
 const openTagRegexp = /^\s*<\s*([a-z1-9-]+)/i;
 const closeTagRegexp = /^<\s*\/\s*([a-z1-9-]+)>/i;
 const tagEndRegexp = /^\s*(\/)?>/;
-const voidTagNameRegexp = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;
+const voidTagNameRegexp = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
 const attributeNameRegexp = /^\s*([^\s"'<>\/=]+)(?:\s*(=))?/;
 const attributeValueRegexp = /^\s*(?:\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
 const doctypeRegexp = /^\s*<!DOCTYPE [^>]+>/i;
@@ -14,22 +13,23 @@ const commentEndRegexp = /-->/;
 interface VRoot {
   children: VDOM[];
 }
+
 export function parse(htmls: readonly string[]) {
   const root: VRoot = { children: [] };
-  const stack: VNode[] = [];
+  const stack: VNode[] = [root as VNode];
+  let curr = 0;
   let inTag = false;
   let inComment = false;
-  let current: VNode = root as VNode;
   let attrName = "";
 
-  function commit(value: VDOM) {
+  function commit(value: string | number) {
     if (inComment) return;
     /* istanbul ignore else */
     if (inTag && attrName) {
-      (current.props || (current.props = {}))[attrName] = value as VPropValue;
+      (stack[curr].props || (stack[curr].props = {}))[attrName] = value;
       attrName = "";
-    } else if (!inTag) {
-      value && current.children.push(value as VDOM);
+    } else if (!inTag && value) {
+      stack[curr].children.push(value);
     }
   }
 
@@ -40,7 +40,7 @@ export function parse(htmls: readonly string[]) {
     let r;
     while (html) {
       /* istanbul ignore next */
-      if (last === html) throw new Error("parse error:\n\t" + last);
+      if (last === html) throw new Error("parse error");
       last = html;
       if (inComment) {
         if ((r = ~html.search(commentEndRegexp))) inComment = false;
@@ -49,9 +49,8 @@ export function parse(htmls: readonly string[]) {
         /* istanbul ignore else */
         if ((r = html.match(tagEndRegexp))) {
           html = html.slice(r[0].length);
-          if (r[1] || voidTagNameRegexp.test(current.tag)) {
-            current = stack.pop()!;
-          }
+          if (r[1] || voidTagNameRegexp.test(stack[curr].tag))
+            stack.length = curr--;
           inTag = false;
         } else if (attrName && (r = html.match(attributeValueRegexp))) {
           html = html.slice(r[0].length);
@@ -69,30 +68,18 @@ export function parse(htmls: readonly string[]) {
           inComment = true;
         } else if ((r = html.match(closeTagRegexp))) {
           html = html.slice(r[0].length);
-          const t = r[1].toLowerCase();
-          if (current.tag !== t) {
-            let j = stack.length;
-            while (j > 0 && stack[j - 1].tag !== t) j--;
-            if (j) {
-              stack.length = j - 1;
-              current = stack.pop()!;
-            }
-          } else {
-            current = stack.pop()!;
-          }
+          while (curr > 0 && stack[curr].tag !== r[1].toLowerCase())
+            stack.length = curr--;
+          if (curr) stack.length = curr--;
         } else if ((r = html.match(openTagRegexp))) {
           html = html.slice(r[0].length);
-
-          stack.push(current);
-          current.children.push(
-            (current = { tag: r[1].toLowerCase(), children: [] })
-          );
+          curr = stack.push({ tag: r[1].toLowerCase(), children: [] }) - 1;
+          stack[curr - 1].children.push(stack[curr]);
           inTag = true;
         } else {
           r = html.indexOf("<") || html.indexOf("<", 1);
-          const text = html.slice(0, ~r ? r : html.length);
-          html = html.slice(text.length);
-          commit(text.replace(/^\s*\n\s*|\s*\n\s*$/g, ""));
+          html = html.slice((r = html.slice(0, ~r ? r : html.length)).length);
+          commit(r.replace(/^\s*\n\s*|\s*\n\s*$/g, ""));
         }
       }
     }

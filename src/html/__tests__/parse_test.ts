@@ -250,12 +250,16 @@ describe("parse", () => {
       <Div></Div>
       <DIV></div>
       <div></DIV>
+      <BR>
+      <BR/>
     `;
     test(app, [
       { tag: "div", children: [] },
       { tag: "div", children: [] },
       { tag: "div", children: [] },
-      { tag: "div", children: [] }
+      { tag: "div", children: [] },
+      { tag: "br", children: [] },
+      { tag: "br", children: [] }
     ]);
   });
 });

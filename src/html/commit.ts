@@ -112,9 +112,7 @@ function isEventListener(
 ): value is EventListenerOrEventListenerObject {
   return (
     typeof value === "function" ||
-    (typeof value === "object" &&
-      value != null &&
-      "handleEvent" in (value as EventListenerObject))
+    !!(value && (value as EventListenerObject).handleEvent)
   );
 }
 
@@ -178,7 +176,7 @@ function commitNode(
       );
     }
     if (isTemplate(next) && isTemplate(prev)) {
-      if (equalsTemplate(next as HtmlTemplate, prev as HtmlTemplate)) {
+      if (equalsTemplate(next, prev)) {
         commit(tmpl._mutations[index], getArgs(next));
       } else {
         removeTemplate(tmpl._mutations[index]);
