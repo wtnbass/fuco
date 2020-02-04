@@ -1,14 +1,14 @@
-import { __FucoRegistry__ } from "../fuco";
+import { __def__ } from "../fuco";
 import { VNode, VDOM, isVNode, ArgValues, isTemplate, items } from "../html";
-import { Component } from "./component";
+import { DummyComponent } from "./component";
 
 export function compose(vnode: VNode, args: ArgValues | undefined): VNode {
   let fc;
-  if (!(fc = __FucoRegistry__[vnode.tag])) {
+  if (!(fc = __def__[vnode.tag])) {
     return vnode;
   }
   const { tag, props, children } = vnode;
-  const c = new Component(fc, props, args);
+  const c = new DummyComponent(fc, props, args);
   props && delete props[".innerHTML"];
   const shadowroot = {
     tag: "shadowroot",

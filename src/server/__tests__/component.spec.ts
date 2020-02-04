@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { renderToString } from "..";
 import {
-  __FucoRegistry__,
+  __def__,
   html,
   css,
   createContext,
@@ -22,7 +22,7 @@ import {
 
 describe("component", () => {
   afterEach(() => {
-    for (const key in __FucoRegistry__) delete __FucoRegistry__[key];
+    for (const key in __def__) delete __def__[key];
   });
 
   it("hooks ", () => {
