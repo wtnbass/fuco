@@ -1,20 +1,10 @@
-import { __def__ } from "../fuco";
 import { VNode, VDOM, isVNode, ArgValues, isTemplate, items } from "../html";
-import { DummyComponent } from "./component";
 
-export function compose(vnode: VNode, args: ArgValues | undefined): VNode {
-  let fc;
-  if (!(fc = __def__[vnode.tag])) {
-    return vnode;
-  }
-  const { tag, props, children } = vnode;
-  const c = new DummyComponent(fc, props, args);
-  props && delete props[".innerHTML"];
-  const shadowroot = {
+export function compose(result: unknown, children: VDOM[]): VNode {
+  return {
     tag: "shadowroot",
-    children: replaceSlot(1, [, c.result], children) as VDOM[]
+    children: replaceSlot(1, [, result], children) as VDOM[]
   };
-  return { tag, props, children: [shadowroot] };
 }
 
 function replaceSlot(
@@ -33,10 +23,19 @@ function replaceSlot(
     const [v, a] = items(vdom);
     return replaceSlot(v, a, slottedNodes, hasNamedSlot);
   } else if (isVNode(vdom)) {
+    vdom = { ...vdom };
+    const { props } = vdom;
+    props &&
+      Object.keys(props).forEach(name => {
+        const value = props[name];
+        if (typeof value === "number" && args) {
+          props[name] = args[value];
+        }
+      });
     if (vdom.tag === "slot") {
       const [slots, namedSlots] = getSlotChildren(slottedNodes);
-      if (vdom.props && vdom.props.name) {
-        vdom.children = namedSlots[vdom.props.name as string];
+      if (props && props.name) {
+        vdom.children = namedSlots[props.name as string];
       } else {
         vdom.children = slots;
       }

@@ -15,11 +15,6 @@ module.exports = function(config) {
     autoWatch: false,
     browsers: ["FirefoxHeadless", "ChromeHeadless"],
     singleRun: true,
-    client: {
-      jasmine: {
-        timeoutInterval: 3000
-      }
-    },
     webpack: {
       mode: "development",
       devtool: "inline-source-map",

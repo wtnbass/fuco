@@ -2,28 +2,79 @@
 
 import {
   AttributeConverter,
-  FunctionalComponent,
   Component,
   defaultHooks,
-  __scope__
+  __scope__,
+  __def__
 } from "../fuco";
-import { VProps, ArgValues } from "../html";
+import { VProps, ArgValues, VNode } from "../html";
+import { compose } from "./compose";
 
-type CmpProps = { [key: string]: unknown };
+const noop = () => {};
 
-export class DummyComponent implements Component {
+const Contexts = new WeakMap<object, unknown>();
+
+export function setContext(component: ServerComponent) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const context = (component.__fc__ as any)._context;
+  if (context && context.Provider === component.__fc__) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Contexts.set(context, (component as any).value);
+  }
+}
+
+export function deleteContext(component: ServerComponent) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const context = (component.__fc__ as any)._context;
+  context && Contexts.delete(context);
+}
+
+export function isComponent(vnode: VNode) {
+  return !!__def__[vnode.tag];
+}
+
+export class ServerComponent implements Component {
   _hooks = defaultHooks();
-  props: CmpProps;
-  result: unknown;
+  origVNode: VNode;
+  args: ArgValues | undefined;
 
-  constructor(
-    fc: FunctionalComponent,
-    props: VProps | undefined,
-    args: ArgValues | undefined
-  ) {
-    this.props = createCmpProps(this, props, args);
+  constructor(vnode: VNode, args: ArgValues | undefined) {
+    this.origVNode = vnode;
+    this.args = args;
+    if (vnode.props) {
+      const assignProperty = (props: VProps) => {
+        for (const key in props) {
+          if (key === "...") {
+            let spread = props["..."];
+            /* istanbul ignore else */
+            if (typeof spread === "number" && args) {
+              spread = args[spread];
+            }
+            assignProperty(spread as VProps);
+          } else if (key[0] === "." && key !== ".innerHTML") {
+            let value = props[key];
+            if (typeof value === "number" && args) {
+              value = args[value];
+            }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (this as any)[key.slice(1)] = value;
+          }
+        }
+      };
+      assignProperty(vnode.props);
+    }
+  }
+  get __fc__() {
+    return __def__[this.origVNode.tag];
+  }
+
+  getComposedVDOM(): VNode {
     __scope__(this);
-    this.result = fc();
+    const result = this.__fc__();
+
+    const { tag, props, children } = this.origVNode;
+    props && delete props[".innerHTML"];
+    return { tag, props, children: [compose(result, children)] };
   }
 
   update() {}
@@ -33,48 +84,51 @@ export class DummyComponent implements Component {
   _flushEffects() {}
 
   _attr<T>(name: string, converter: AttributeConverter<T>) {
-    const value = this.props[name] != null ? String(this.props[name]) : null;
+    let value: string | null = null;
+    /* istanbul ignore else */
+    if (this.origVNode.props) {
+      const setValue = (props: VProps) => {
+        if (name in props) {
+          let pvalue = props[name];
+          if (typeof pvalue === "number" && this.args) {
+            pvalue = this.args[pvalue];
+          }
+          value = String(pvalue);
+        } else if (`?${name}` in props) {
+          let pvalue = props[`?${name}`];
+          /* istanbul ignore else */
+          if (typeof pvalue === "number" && this.args) {
+            pvalue = this.args[pvalue];
+          }
+          if (pvalue) value = "";
+        } else if ("..." in props) {
+          let spread = props["..."];
+          /* istanbul ignore else */
+          if (typeof spread === "number" && this.args) {
+            spread = this.args[spread];
+          }
+          setValue(spread as VProps);
+        }
+      };
+      setValue(this.origVNode.props);
+    }
     return converter ? converter(value) : value;
   }
 
   _observeAttr() {
-    return () => {};
+    return noop;
   }
 
-  _dispatch() {}
+  _dispatch(name: string, init: CustomEventInit) {
+    /* istanbul ignore else */
+    if (/^fuco:context:[0-9]+$/.test(name)) {
+      const context = init.detail._context;
+      const register = init.detail._register;
+      if (Contexts.has(context)) {
+        register(noop)(Contexts.get(context));
+      }
+    }
+  }
 
   _adoptStyle() {}
-}
-
-function createCmpProps(
-  component: Component,
-  props: VProps | undefined,
-  args: ArgValues | undefined
-) {
-  const cmpProps: CmpProps = {};
-  if (props) {
-    const resolveArgs = (_props: VProps) => {
-      for (const key in _props) {
-        let value = _props[key];
-        if (typeof value === "number" && args) {
-          value = args[value];
-        }
-        if (key[0] === "@" || key === ":key" || key === ":ref") {
-          continue;
-        } else if (key === "...") {
-          resolveArgs(value as VProps);
-        } else if (key[0] === "?") {
-          cmpProps[key.slice(1)] = value ? "" : null;
-        } else if (key[0] === ".") {
-          (component as Component & { [k: string]: unknown })[
-            key.slice(1)
-          ] = value;
-        } else {
-          cmpProps[key] = value;
-        }
-      }
-    };
-    resolveArgs(props);
-  }
-  return cmpProps;
 }

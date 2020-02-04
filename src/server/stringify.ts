@@ -1,5 +1,10 @@
 import { isTemplate, items, isVNode, VDOM, VProps, ArgValues } from "../html";
-import { compose } from "./compose";
+import {
+  ServerComponent,
+  isComponent,
+  deleteContext,
+  setContext
+} from "./component";
 
 const voidTagNameRegexp = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;
 
@@ -23,22 +28,48 @@ export function stringify(
   } else if (!isVNode(vdom)) {
     return String(vdom);
   } else {
-    let s = "";
+    let c;
+    if (isComponent(vdom)) {
+      c = new ServerComponent(vdom, args);
+      vdom = c.getComposedVDOM();
+    }
+    c && setContext(c);
 
-    const { tag, props, children } = compose(vdom, args);
+    let s;
+    const { tag, props, children } = vdom;
     if (props) {
       let attrs = "";
-      let html, r;
+      let html;
       const propsToString = (props: VProps, args?: ArgValues) => {
         for (const name in props) {
-          if (name === ":key" || name === ":ref") continue;
-          let v = props[name];
+          let v = props[name] as unknown;
           if (typeof v === "number" && args) v = args[v];
           if (name === "...") {
             propsToString(v as VProps);
-          } else if ((r = name.match(/^(@|\.|\?)([a-zA-Z1-9-]+)/))) {
-            if (r[1] === "?" && v) attrs += ` ${r[2]}`;
-            else if (r[1] === "." && r[2] === "innerHTML") html = v as string;
+          } else if (/^[.?@:]/.test(name)) {
+            if (name[0] === "?" && v) attrs += ` ${name.slice(1)}`;
+            else if (name === ".innerHTML") html = v as string;
+            else if (name === ":class" && typeof v === "object" && v != null) {
+              if (!Array.isArray(v))
+                v = Object.keys(v).filter(
+                  i => (v as { [i: string]: unknown })[i]
+                );
+              attrs += ` class="${(v as unknown[]).join(" ")}"`;
+            } else if (
+              name === ":style" &&
+              typeof v === "object" &&
+              v != null
+            ) {
+              v = Object.keys(v)
+                .map(
+                  i =>
+                    `${i.replace(/[A-Z]/g, c => "-" + c.toLowerCase())}: ${
+                      (v as { [i: string]: unknown })[i]
+                    };`
+                )
+                .join(" ");
+              attrs += ` style="${v}"`;
+            }
           } else if (v != null) {
             attrs += ` ${name}="${v}"`;
           }
@@ -64,6 +95,8 @@ export function stringify(
     if (!voidTagNameRegexp.test(tag)) {
       s += `${stringify(children, args, selectValue)}</${tag}>`;
     }
+    c && deleteContext(c);
+
     return s;
   }
 }

@@ -28,6 +28,7 @@ const terserOpts = {
         $_observeAttr: "_o",
         $_dispatch: "_d",
         $_adoptStyle: "_s",
+        $_context: "_c",
         // hooks
         $_values: "_v",
         $_deps: "_d",
