@@ -1,20 +1,18 @@
+import { FunctionalComponent } from "./define-element";
 import { Cleanup } from "./hook";
 
 export interface Context<T> {
   readonly _defaultValue?: T;
-  readonly defineProvider: (name: string) => void;
-  readonly Provider: () => unknown;
+  readonly Provider: FunctionalComponent;
 }
 
 export interface Detail<T> {
   _context: Context<T>;
   _register(
-    subscribe: (s: ContextSubscriber<T>) => Cleanup,
-    initialValue: T
-  ): void;
+    subscribe: (s: ContextSubscriber<T>) => Cleanup
+  ): ContextSubscriber<T>;
 }
 
 export type ContextSubscriber<T> = (value: T) => void;
 
-export const REQUEST_CONSUME =
-  "context:request-consume:" + String(Math.random()).slice(2);
+export const REQUEST_CONSUME = "fuco:context:" + String(Math.random()).slice(2);

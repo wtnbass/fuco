@@ -25,7 +25,7 @@ export function commit(mutations: Mutation[], args: ArgValues) {
   for (let i = 1; i < mutations.length; i++) {
     const m = mutations[i];
     if (m) {
-      if (isAttributeMutation(m) && m.name[0] === ".") {
+      if (isAttributeMutation(m) && m._name[0] === ".") {
         q.push(() => commitMutation(m, args[i]));
       } else {
         commitMutation(m, args[i]);
@@ -38,7 +38,7 @@ export function commit(mutations: Mutation[], args: ArgValues) {
 function commitMutation(m: Mutation, arg: unknown) {
   if (m._prev !== arg) {
     isAttributeMutation(m)
-      ? commitAttribute(m.node as HTMLElement, m.name, arg, m._prev)
+      ? commitAttribute(m._node as HTMLElement, m._name, arg, m._prev)
       : commitNode(m, arg, m._prev, 0);
     m._prev = arg;
   }
@@ -112,9 +112,7 @@ function isEventListener(
 ): value is EventListenerOrEventListenerObject {
   return (
     typeof value === "function" ||
-    (typeof value === "object" &&
-      value != null &&
-      "handleEvent" in (value as EventListenerObject))
+    !!(value && (value as EventListenerObject).handleEvent)
   );
 }
 
@@ -165,8 +163,8 @@ function commitNode(
       (tmpl._mutations = tmpl._mutations || [])[index] = insertTemplate(
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         next! as HtmlTemplate,
-        tmpl.node,
-        tmpl.isSvg
+        tmpl._node,
+        tmpl._isSvg
       );
     }
     if (isText(next) && !isText(prev)) {
@@ -174,15 +172,15 @@ function commitNode(
         ((txt._texts = txt._texts || [])[index] = document.createTextNode(
           next as string
         )),
-        txt.node
+        txt._node
       );
     }
     if (isTemplate(next) && isTemplate(prev)) {
-      if (equalsTemplate(next as HtmlTemplate, prev as HtmlTemplate)) {
+      if (equalsTemplate(next, prev)) {
         commit(tmpl._mutations[index], getArgs(next));
       } else {
         removeTemplate(tmpl._mutations[index]);
-        tmpl._mutations[index] = insertTemplate(next, tmpl.node, tmpl.isSvg);
+        tmpl._mutations[index] = insertTemplate(next, tmpl._node, tmpl._isSvg);
       }
     }
     if (isText(next) && isText(prev)) {
@@ -246,9 +244,9 @@ function commitTemplatesWithKey(
       nextMutations[nextIndex++] = insertTemplate(
         next,
         mutations[prevIndex]
-          ? mutations[prevIndex]._marks[0]
-          : parentMutation.node,
-        parentMutation.isSvg
+          ? mutations[prevIndex]._start
+          : parentMutation._node,
+        parentMutation._isSvg
       );
     } else if (
       prevKeys[prevIndex] != null &&
@@ -272,27 +270,28 @@ function insertTemplate(
 ): ChildMutations {
   const [vdom, args] = items(template);
   const fragment = document.createDocumentFragment();
-  const mutations = Object.assign([] as NodeMutation[], {
-    _marks: [document.createComment(""), document.createComment("")] as const
-  });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mutations: any = [];
+  mutations._start = document.createComment("");
+  mutations._end = document.createComment("");
+
   mount(vdom, fragment, isSvg, mutations);
   commit(mutations, args);
-  insertNode(mutations._marks[0], refNode);
+  insertNode(mutations._start, refNode);
   insertNode(fragment, refNode);
-  insertNode(mutations._marks[1], refNode);
+  insertNode(mutations._end, refNode);
   return mutations;
 }
 
 function removeTemplate(mutations: ChildMutations) {
-  // eslint-disable-next-line prefer-const
-  let [start, end] = mutations._marks;
-  while (start !== end) {
+  let start = mutations._start;
+  while (start !== mutations._end) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const next = start.nextSibling!;
     removeNode(start);
     start = next;
   }
-  removeNode(end);
+  removeNode(mutations._end);
 }
 
 function insertNode(newNode: Node, refNode: Node) {

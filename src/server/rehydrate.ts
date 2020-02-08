@@ -1,4 +1,4 @@
-import { __FucoRegistry__ } from "../fuco";
+import { __def__ } from "../fuco";
 
 export function rehydrateScript() {
   let scripts = "";
@@ -13,7 +13,7 @@ export function rehydrateScript() {
     "d(__ssr__)" +
     "};};";
 
-  for (const elementName in __FucoRegistry__) {
+  for (const elementName in __def__) {
     scripts += `customElements.whenDefined("${elementName}").then(r("${elementName}"));`;
   }
 

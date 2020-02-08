@@ -52,9 +52,5 @@ export function getKey(t: unknown): unknown {
 }
 
 export function equalsTemplate(t1: HtmlTemplate, t2: HtmlTemplate) {
-  return items(t1)[1][0] === items(t2)[1][0];
-}
-
-export function isSvgTag(tag: string) {
-  return tag.toLowerCase() === "svg";
+  return getArgs(t1)[0] === getArgs(t2)[0];
 }

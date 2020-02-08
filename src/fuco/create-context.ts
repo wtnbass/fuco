@@ -1,7 +1,5 @@
-// import html as h to avoid format by prettier
 import { html as h } from "../html";
-import { defineElement } from "./define-element";
-import { useProperty, useRef, useEffect } from "./hooks";
+import { useProperty, useRef } from "./hooks";
 import { Context, ContextSubscriber, Detail, REQUEST_CONSUME } from "./context";
 
 export function createContext<T>(defaultValue?: T): Context<T> {
@@ -9,29 +7,24 @@ export function createContext<T>(defaultValue?: T): Context<T> {
     _defaultValue: defaultValue,
     Provider() {
       const subs = useRef<ContextSubscriber<T>[]>([]);
-      const subscribe = (s: ContextSubscriber<T>) => {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const len = subs.current!.push(s);
-        return () => {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          subs.current!.splice(len - 1, 1);
-        };
-      };
-
       const value = useProperty<T>("value");
+
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      useEffect(() => subs.current!.forEach(f => f(value)), [value]);
+      subs.current!.forEach(f => f(value));
 
       const request = (e: CustomEvent<Detail<T>>) => {
         if (context === e.detail._context) {
+          const subscribe = (s: ContextSubscriber<T>) => {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const len = subs.current!.push(s);
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            return () => subs.current!.splice(len - 1, 1);
+          };
           e.stopPropagation();
-          e.detail._register(subscribe, value);
+          e.detail._register(subscribe)(value);
         }
       };
       return h`<slot ...${{ [`@${REQUEST_CONSUME}`]: request }}/>`;
-    },
-    defineProvider(name: string) {
-      defineElement(name, context.Provider);
     }
   };
   return context;

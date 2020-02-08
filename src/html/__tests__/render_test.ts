@@ -4,6 +4,8 @@ import * as sinon from "sinon";
 import { html, render } from "..";
 import { stripComments } from "./utils";
 
+const h = html;
+
 describe("render", () => {
   let container!: HTMLDivElement;
 
@@ -35,8 +37,7 @@ describe("render", () => {
   });
 
   it("void elements", () => {
-    // prettier-ignore
-    const app = html`
+    const app = h`
       <input><input /><INPUT>
     `;
 
@@ -344,8 +345,7 @@ describe("render", () => {
   });
 
   it("escaped value in template", () => {
-    // prettier-ignore
-    const app = html`
+    const app = h`
       <div>\n</div>
       <div>\2</div>
     `;

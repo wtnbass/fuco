@@ -3,15 +3,15 @@
 import {
   AttributeConverter,
   FunctionalComponent,
-  FucoComponent,
+  Component,
   defaultHooks,
-  __setCurrent__
+  __scope__
 } from "../fuco";
 import { VProps, ArgValues } from "../html";
 
 type CmpProps = { [key: string]: unknown };
 
-export class Component implements FucoComponent {
+export class DummyComponent implements Component {
   _hooks = defaultHooks();
   props: CmpProps;
   result: unknown;
@@ -22,16 +22,24 @@ export class Component implements FucoComponent {
     args: ArgValues | undefined
   ) {
     this.props = createCmpProps(this, props, args);
-    __setCurrent__(this);
+    __scope__(this);
     this.result = fc();
   }
+
+  update() {}
+
+  _performUpdate() {}
+
+  _flushEffects() {}
 
   _attr<T>(name: string, converter: AttributeConverter<T>) {
     const value = this.props[name] != null ? String(this.props[name]) : null;
     return converter ? converter(value) : value;
   }
 
-  _observeAttr() {}
+  _observeAttr() {
+    return () => {};
+  }
 
   _dispatch() {}
 

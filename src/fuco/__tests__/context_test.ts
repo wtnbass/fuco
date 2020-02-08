@@ -16,7 +16,7 @@ type Theme = "light" | "dark";
 type Theme2 = "green" | "red";
 
 const ThemeContext = createContext<Theme>();
-ThemeContext.defineProvider("theme-context");
+defineElement("theme-context", ThemeContext.Provider);
 defineElement("theme-consumer", () => {
   const theme = useContext(ThemeContext);
   return html`
@@ -27,7 +27,7 @@ defineElement("theme-consumer", () => {
 });
 
 const Theme2Context = createContext<Theme2>();
-Theme2Context.defineProvider("theme2-context");
+defineElement("theme2-context", Theme2Context.Provider);
 defineElement("theme2-consumer", () => {
   const theme = useContext(Theme2Context) || "";
   const theme2 = useContext(Theme2Context) || "";
@@ -158,7 +158,7 @@ function ValueChanged() {
 }
 
 const NumContext = createContext<number>();
-NumContext.defineProvider("num-context");
+defineElement("num-context", NumContext.Provider);
 defineElement("num-consumer", () => {
   useContext(NumContext);
   const updated = useRef(0);
@@ -310,7 +310,7 @@ describe(
 
     it("unsubscribe when consumer is unmounted", async () => {
       let target!: Element;
-      let provider!: Component;
+      let provider!: Component & HTMLElement;
       let button!: HTMLButtonElement;
       let subs!: { current: unknown[] };
       const setup = async () => {
@@ -360,7 +360,7 @@ describe(
 
     it("compare as SameValue", async () => {
       let updated!: HTMLDivElement;
-      let provider!: Component & { value: number };
+      let provider!: Component & HTMLElement & { value: number };
       const setup = async () => {
         const target = await fixs[6].setup();
         const consumer = selector("num-consumer", target);

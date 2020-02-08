@@ -1,11 +1,11 @@
 import { expect } from "chai";
 import { renderToString } from "..";
 import { html } from "../../html";
-import { defineElement, __FucoRegistry__ } from "../../fuco";
+import { defineElement, __def__ } from "../../fuco";
 
 describe("compose", () => {
   afterEach(() => {
-    for (const key in __FucoRegistry__) delete __FucoRegistry__[key];
+    for (const key in __def__) delete __def__[key];
   });
 
   it("simple component", () => {

@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { isBrowser } from "../env";
-import { defineElement, __FucoRegistry__ } from "../define-element";
+import { defineElement, __def__ } from "..";
 
 describe("Node Environment", () => {
   it("is not browser", () => {
@@ -9,12 +9,11 @@ describe("Node Environment", () => {
 
   it("should register", () => {
     const key = "test-class";
-    const Test = {};
+    const Test = () => "test";
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    defineElement(key, Test as any);
+    defineElement(key, Test);
 
-    expect(__FucoRegistry__).has.key(key);
-    expect(__FucoRegistry__[key]).to.equal(Test);
+    expect(__def__).has.key(key);
+    expect(__def__[key]).to.equal(Test);
   });
 });

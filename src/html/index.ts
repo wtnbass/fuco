@@ -1,7 +1,7 @@
 import { parse } from "./parse";
 import { mount } from "./mount";
 import { commit } from "./commit";
-import { createTemplate, HtmlTemplate, VDOM, isSvgTag } from "./template";
+import { createTemplate, HtmlTemplate, VDOM } from "./template";
 
 export {
   HtmlTemplate,
@@ -34,7 +34,7 @@ export function render(template: unknown, container: Node) {
   mutations ||
     Cache.set(
       container,
-      (mutations = mount(1, container, isSvgTag(container.nodeName)))
+      (mutations = mount(1, container, /svg/i.test(container.nodeName)))
     );
   commit(mutations, [, template]);
 }

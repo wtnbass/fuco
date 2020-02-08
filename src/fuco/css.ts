@@ -1,6 +1,6 @@
 import { supportsAdoptedStyleSheets } from "./env";
 
-const cssSymbol = Symbol("css");
+const cssSymbol = Symbol();
 
 export interface HasCSSSymbol {
   [cssSymbol]: string;

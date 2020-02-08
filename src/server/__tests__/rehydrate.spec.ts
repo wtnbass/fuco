@@ -1,10 +1,10 @@
 import { expect } from "chai";
 import { rehydrateScript } from "../rehydrate";
-import { __FucoRegistry__, defineElement } from "../../fuco";
+import { __def__, defineElement } from "../../fuco";
 
 describe("rehydrate", () => {
   afterEach(() => {
-    for (const key in __FucoRegistry__) delete __FucoRegistry__[key];
+    for (const key in __def__) delete __def__[key];
   });
 
   const scriptStatics =
