@@ -7,8 +7,9 @@ import {
   __scope__,
   __def__
 } from "../fuco";
-import { VProps, ArgValues, VNode } from "../html";
+import { ArgValues, VNode } from "../html";
 import { compose } from "./compose";
+import { createParent, propsToParent } from "./props";
 
 const noop = () => {};
 
@@ -37,31 +38,16 @@ export class ServerComponent implements Component {
   _hooks = defaultHooks();
   origVNode: VNode;
   args: ArgValues | undefined;
+  attributes: { [key: string]: string } = {};
 
   constructor(vnode: VNode, args: ArgValues | undefined) {
     this.origVNode = vnode;
     this.args = args;
     if (vnode.props) {
-      const assignProperty = (props: VProps) => {
-        for (const key in props) {
-          if (key === "...") {
-            let spread = props["..."];
-            /* istanbul ignore else */
-            if (typeof spread === "number" && args) {
-              spread = args[spread];
-            }
-            assignProperty(spread as VProps);
-          } else if (key[0] === "." && key !== ".innerHTML") {
-            let value = props[key];
-            if (typeof value === "number" && args) {
-              value = args[value];
-            }
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (this as any)[key.slice(1)] = value;
-          }
-        }
-      };
-      assignProperty(vnode.props);
+      const parent = createParent(this.origVNode.tag);
+      propsToParent(parent, vnode.props, args);
+      this.attributes = parent.attributes;
+      Object.assign(this, parent.properties);
     }
   }
   get __fc__() {
@@ -84,34 +70,7 @@ export class ServerComponent implements Component {
   _flushEffects() {}
 
   _attr<T>(name: string, converter: AttributeConverter<T>) {
-    let value: string | null = null;
-    /* istanbul ignore else */
-    if (this.origVNode.props) {
-      const setValue = (props: VProps) => {
-        if (name in props) {
-          let pvalue = props[name];
-          if (typeof pvalue === "number" && this.args) {
-            pvalue = this.args[pvalue];
-          }
-          value = String(pvalue);
-        } else if (`?${name}` in props) {
-          let pvalue = props[`?${name}`];
-          /* istanbul ignore else */
-          if (typeof pvalue === "number" && this.args) {
-            pvalue = this.args[pvalue];
-          }
-          if (pvalue) value = "";
-        } else if ("..." in props) {
-          let spread = props["..."];
-          /* istanbul ignore else */
-          if (typeof spread === "number" && this.args) {
-            spread = this.args[spread];
-          }
-          setValue(spread as VProps);
-        }
-      };
-      setValue(this.origVNode.props);
-    }
+    const value = this.attributes[name];
     return converter ? converter(value) : value;
   }
 

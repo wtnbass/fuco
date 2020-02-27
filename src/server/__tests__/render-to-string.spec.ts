@@ -40,9 +40,7 @@ describe("render-to-string", () => {
         Hello
       </div>
     `);
-    expect(s).to.equal(
-      `<div name="a" baz novalue="" spread="spread">Hello</div>`
-    );
+    expect(s).to.equal(`<div name="a" baz novalue spread="spread">Hello</div>`);
   });
 
   it("class array", () => {
