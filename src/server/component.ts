@@ -9,24 +9,26 @@ import {
 } from "../fuco";
 import { ArgValues, VNode } from "../html";
 import { compose } from "./compose";
-import { createParent, propsToParent } from "./props";
+import { PropsManager } from "./props";
 
 const noop = () => {};
 
 const Contexts = new WeakMap<object, unknown>();
 
-export function setContext(component: ServerComponent) {
+function getContext(component: ServerComponent) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const context = (component.__fc__ as any)._context;
-  if (context && context.Provider === component.__fc__) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Contexts.set(context, (component as any).value);
-  }
+  return (__def__[component.origVNode.tag] as any)._context;
+}
+
+export function setContext(component: ServerComponent) {
+  const context = getContext(component);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  context && Contexts.set(context, (component as any).value);
 }
 
 export function deleteContext(component: ServerComponent) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const context = (component.__fc__ as any)._context;
+  const context = getContext(component);
   context && Contexts.delete(context);
 }
 
@@ -36,31 +38,32 @@ export function isComponent(vnode: VNode) {
 
 export class ServerComponent implements Component {
   _hooks = defaultHooks();
+  _props: PropsManager;
   origVNode: VNode;
-  args: ArgValues | undefined;
-  attributes: { [key: string]: string } = {};
 
   constructor(vnode: VNode, args: ArgValues | undefined) {
     this.origVNode = vnode;
-    this.args = args;
+    this._props = new PropsManager(vnode.tag);
+
     if (vnode.props) {
-      const parent = createParent(this.origVNode.tag);
-      propsToParent(parent, vnode.props, args);
-      this.attributes = parent.attributes;
-      Object.assign(this, parent.properties);
+      this._props.commit(vnode.props, args);
+      delete this._props.properties.innerHTML;
+      Object.assign(this, this._props.properties);
     }
-  }
-  get __fc__() {
-    return __def__[this.origVNode.tag];
   }
 
   getComposedVDOM(): VNode {
-    __scope__(this);
-    const result = this.__fc__();
-
     const { tag, props, children } = this.origVNode;
+
+    __scope__(this);
+    const result = __def__[tag]();
+
     props && delete props[".innerHTML"];
-    return { tag, props, children: [compose(result, children)] };
+    return {
+      tag,
+      props,
+      children: [compose(result, children)]
+    };
   }
 
   update() {}
@@ -70,7 +73,7 @@ export class ServerComponent implements Component {
   _flushEffects() {}
 
   _attr<T>(name: string, converter: AttributeConverter<T>) {
-    const value = this.attributes[name];
+    const value = this._props.attributes[name];
     return converter ? converter(value) : value;
   }
 

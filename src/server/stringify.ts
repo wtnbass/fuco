@@ -5,7 +5,7 @@ import {
   deleteContext,
   setContext
 } from "./component";
-import { createParent, propsToParent } from "./props";
+import { PropsManager } from "./props";
 
 const voidTagNameRegexp = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;
 
@@ -33,30 +33,19 @@ export function stringify(
     if (isComponent(vdom)) {
       c = new ServerComponent(vdom, args);
       vdom = c.getComposedVDOM();
+      setContext(c);
     }
-    c && setContext(c);
 
     let s;
     const { tag, props, children } = vdom;
+    const p = new PropsManager(tag, selectValue);
     if (props) {
-      const parent = createParent(tag, selectValue);
-      propsToParent(parent, props, args);
-      selectValue = parent.selectValue;
-
-      const attrs = Object.entries(parent.attributes).reduce<string>(
-        (acc, [name, value]) => {
-          const attr = value === "" ? name : `${name}="${value}"`;
-          return `${acc} ${attr}`;
-        },
-        ""
-      );
-
-      s = `<${tag}${attrs}>`;
-      if (parent.properties.innerHTML) {
-        return `${s}${parent.properties.innerHTML}</${tag}>`;
-      }
-    } else {
-      s = `<${tag}>`;
+      p.commit(props, args);
+      selectValue = p.selectValue;
+    }
+    s = `<${tag}${p.getAttributeString()}>`;
+    if (p.properties.innerHTML) {
+      return `${s}${p.properties.innerHTML}</${tag}>`;
     }
     if (!voidTagNameRegexp.test(tag)) {
       s += `${stringify(children, args, selectValue)}</${tag}>`;
