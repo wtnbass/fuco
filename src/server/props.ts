@@ -3,6 +3,9 @@ import { VProps, ArgValues } from "../html";
 const camelToKebab = (s: string) =>
   s.replace(/[A-Z]/g, c => "-" + c.toLowerCase());
 
+const getValue = (o: unknown, key: string) =>
+  (o as { [key: string]: unknown })[key];
+
 export class PropsManager {
   tag: string;
   selectValue: string | undefined;
@@ -29,14 +32,14 @@ export class PropsManager {
       } else if (name === ":class") {
         if (typeof value === "object" && value != null) {
           if (!Array.isArray(value)) {
-            value = Object.keys(value).filter(i => (value as any)[i]);
+            value = Object.keys(value).filter(i => getValue(value, i));
           }
           this.attributes.class = (value as unknown[]).join(" ");
         }
       } else if (name === ":style") {
         if (typeof value === "object" && value != null) {
           this.attributes.style = Object.keys(value)
-            .map(key => `${camelToKebab(key)}: ${(value as any)[key]};`)
+            .map(key => `${camelToKebab(key)}: ${getValue(value, key)};`)
             .join(" ");
         }
       } else if (name[0] !== "@" && name[0] !== ":" && value != null) {
