@@ -1,5 +1,11 @@
-import { isTemplate, items, isVNode, VDOM, VProps, ArgValues } from "../html";
-import { compose } from "./compose";
+import { isTemplate, items, isVNode, VDOM, ArgValues } from "../html";
+import {
+  ServerComponent,
+  isComponent,
+  deleteContext,
+  setContext
+} from "./component";
+import { PropsManager } from "./props";
 
 const voidTagNameRegexp = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;
 
@@ -23,47 +29,29 @@ export function stringify(
   } else if (!isVNode(vdom)) {
     return String(vdom);
   } else {
-    let s = "";
+    let c;
+    if (isComponent(vdom)) {
+      c = new ServerComponent(vdom, args);
+      vdom = c.getComposedVDOM();
+      setContext(c);
+    }
 
-    const { tag, props, children } = compose(vdom, args);
+    let s;
+    const { tag, props, children } = vdom;
+    const p = new PropsManager(tag, selectValue);
     if (props) {
-      let attrs = "";
-      let html, r;
-      const propsToString = (props: VProps, args?: ArgValues) => {
-        for (const name in props) {
-          if (name === ":key" || name === ":ref") continue;
-          let v = props[name];
-          if (typeof v === "number" && args) v = args[v];
-          if (name === "...") {
-            propsToString(v as VProps);
-          } else if ((r = name.match(/^(@|\.|\?)([a-zA-Z1-9-]+)/))) {
-            if (r[1] === "?" && v) attrs += ` ${r[2]}`;
-            else if (r[1] === "." && r[2] === "innerHTML") html = v as string;
-          } else if (v != null) {
-            attrs += ` ${name}="${v}"`;
-          }
-
-          if (tag === "option" && name === "value" && v === selectValue) {
-            attrs += " selected";
-            selectValue = undefined;
-          }
-          if (tag === "select" && name === ".value" && v != null) {
-            selectValue = v as string;
-          }
-        }
-      };
-      propsToString(props, args);
-
-      s = `<${tag}${attrs}>`;
-      if (html) {
-        return `${s}${html}</${tag}>`;
-      }
-    } else {
-      s = `<${tag}>`;
+      p.commit(props, args);
+      selectValue = p.selectValue;
+    }
+    s = `<${tag}${p.getAttributeString()}>`;
+    if (p.properties.innerHTML) {
+      return `${s}${p.properties.innerHTML}</${tag}>`;
     }
     if (!voidTagNameRegexp.test(tag)) {
       s += `${stringify(children, args, selectValue)}</${tag}>`;
     }
+    c && deleteContext(c);
+
     return s;
   }
 }

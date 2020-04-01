@@ -2,28 +2,68 @@
 
 import {
   AttributeConverter,
-  FunctionalComponent,
   Component,
   defaultHooks,
-  __scope__
+  __scope__,
+  __def__
 } from "../fuco";
-import { VProps, ArgValues } from "../html";
+import { ArgValues, VNode } from "../html";
+import { compose } from "./compose";
+import { PropsManager } from "./props";
 
-type CmpProps = { [key: string]: unknown };
+const noop = () => {};
 
-export class DummyComponent implements Component {
+const Contexts = new WeakMap<object, unknown>();
+
+function getContext(component: ServerComponent) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (__def__[component.origVNode.tag] as any)._context;
+}
+
+export function setContext(component: ServerComponent) {
+  const context = getContext(component);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  context && Contexts.set(context, (component as any).value);
+}
+
+export function deleteContext(component: ServerComponent) {
+  const context = getContext(component);
+  context && Contexts.delete(context);
+}
+
+export function isComponent(vnode: VNode) {
+  return !!__def__[vnode.tag];
+}
+
+export class ServerComponent implements Component {
   _hooks = defaultHooks();
-  props: CmpProps;
-  result: unknown;
+  _props: PropsManager;
+  origVNode: VNode;
 
-  constructor(
-    fc: FunctionalComponent,
-    props: VProps | undefined,
-    args: ArgValues | undefined
-  ) {
-    this.props = createCmpProps(this, props, args);
+  constructor(vnode: VNode, args: ArgValues | undefined) {
+    this.origVNode = vnode;
+    this._props = new PropsManager(vnode.tag);
+
+    if (vnode.props) {
+      this._props.commit(vnode.props, args);
+      delete this._props.properties.innerHTML;
+      Object.assign(this, this._props.properties);
+    }
+  }
+
+  getComposedVDOM(): VNode {
+    const { tag, props, children } = this.origVNode;
+
     __scope__(this);
-    this.result = fc();
+    const result = __def__[tag]();
+
+    props && delete props[".innerHTML"];
+    return {
+      tag,
+      props,
+      children: [compose(result, children)]
+    };
   }
 
   update() {}
@@ -33,48 +73,24 @@ export class DummyComponent implements Component {
   _flushEffects() {}
 
   _attr<T>(name: string, converter: AttributeConverter<T>) {
-    const value = this.props[name] != null ? String(this.props[name]) : null;
+    const value = this._props.attributes[name];
     return converter ? converter(value) : value;
   }
 
   _observeAttr() {
-    return () => {};
+    return noop;
   }
 
-  _dispatch() {}
+  _dispatch(name: string, init: CustomEventInit) {
+    /* istanbul ignore else */
+    if (/^fuco:context:[0-9]+$/.test(name)) {
+      const context = init.detail._context;
+      const register = init.detail._register;
+      if (Contexts.has(context)) {
+        register(noop)(Contexts.get(context));
+      }
+    }
+  }
 
   _adoptStyle() {}
-}
-
-function createCmpProps(
-  component: Component,
-  props: VProps | undefined,
-  args: ArgValues | undefined
-) {
-  const cmpProps: CmpProps = {};
-  if (props) {
-    const resolveArgs = (_props: VProps) => {
-      for (const key in _props) {
-        let value = _props[key];
-        if (typeof value === "number" && args) {
-          value = args[value];
-        }
-        if (key[0] === "@" || key === ":key" || key === ":ref") {
-          continue;
-        } else if (key === "...") {
-          resolveArgs(value as VProps);
-        } else if (key[0] === "?") {
-          cmpProps[key.slice(1)] = value ? "" : null;
-        } else if (key[0] === ".") {
-          (component as Component & { [k: string]: unknown })[
-            key.slice(1)
-          ] = value;
-        } else {
-          cmpProps[key] = value;
-        }
-      }
-    };
-    resolveArgs(props);
-  }
-  return cmpProps;
 }

@@ -35,11 +35,41 @@ describe("render-to-string", () => {
         ?baz=${!0}
         novalue
         nullvalue=${null}
+        ...${{ spread: "spread", ".value": "value" }}
       >
         Hello
       </div>
     `);
-    expect(s).to.equal(`<div name="a" baz novalue="">Hello</div>`);
+    expect(s).to.equal(`<div name="a" baz novalue spread="spread">Hello</div>`);
+  });
+
+  it("class array", () => {
+    const s = renderToString(html`
+      <div :class=${["foo", "bar"]}>
+        Hello
+      </div>
+    `);
+    expect(s).to.equal(`<div class="foo bar">Hello</div>`);
+  });
+
+  it("class object", () => {
+    const s = renderToString(html`
+      <div :class=${{ foo: true, bar: false }}>
+        Hello
+      </div>
+    `);
+    expect(s).to.equal(`<div class="foo">Hello</div>`);
+  });
+
+  it("style object", () => {
+    const s = renderToString(html`
+      <div :style=${{ color: "red", backgroundColor: "grey" }}>
+        Hello
+      </div>
+    `);
+    expect(s).to.equal(
+      `<div style="color: red; background-color: grey;">Hello</div>`
+    );
   });
 
   it("text or template", () => {

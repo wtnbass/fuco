@@ -40,7 +40,6 @@ describe("component", () => {
       const ref = useRef("ref");
       const [state] = useState("state");
       const [state2] = useReducer(() => "REDUCER", "reducer");
-      // TODO: provider
       const context = useContext(Context);
       useEffect(() => console.log("effect"));
       useLayoutEffect(() => console.log("layout effect"));
@@ -87,6 +86,7 @@ describe("component", () => {
       const bfalse = useAttribute("bool-false", value => value != null);
       const spreadAttr = useAttribute("spread-attr");
       const spreadProp = useProperty("spreadProp");
+      const none = useAttribute("xxxxx");
 
       return html`
         <div>attr: ${attr}</div>
@@ -95,6 +95,7 @@ describe("component", () => {
         <div>bool-false: ${bfalse}</div>
         <div>spread-attr: ${spreadAttr}</div>
         <div>spread-prop: ${spreadProp}</div>
+        <div>none: ${none}</div>
       `;
     });
 
@@ -121,8 +122,44 @@ describe("component", () => {
         "<div>bool-false: false</div>" +
         "<div>spread-attr: spread</div>" +
         "<div>spread-prop: baz</div>" +
+        "<div>none: </div>" +
         "</shadowroot>" +
         "</attr-element>"
+    );
+  });
+
+  it("inherits provider value", () => {
+    const Context = createContext("default");
+    defineElement("x-provider", Context.Provider);
+    defineElement("x-consumer", () => {
+      const value = useContext(Context);
+      return html`
+        <div>${value}</div>
+      `;
+    });
+    const s = renderToString(html`
+      <x-provider .value=${"provider"}>
+        <x-consumer></x-consumer>
+      </x-provider>
+      <x-consumer></x-consumer>
+    `);
+    expect(s).to.equal(
+      "<x-provider>" +
+        "<shadowroot>" +
+        "<slot>" +
+        "<x-consumer>" +
+        "<shadowroot>" +
+        "<div>provider</div>" +
+        "</shadowroot>" +
+        "</x-consumer>" +
+        "</slot>" +
+        "</shadowroot>" +
+        "</x-provider>" +
+        "<x-consumer>" +
+        "<shadowroot>" +
+        "<div>default</div>" +
+        "</shadowroot>" +
+        "</x-consumer>"
     );
   });
 });

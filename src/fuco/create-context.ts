@@ -27,5 +27,8 @@ export function createContext<T>(defaultValue?: T): Context<T> {
       return h`<slot ...${{ [`@${REQUEST_CONSUME}`]: request }}/>`;
     }
   };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (context.Provider as any)._context = context;
   return context;
 }
