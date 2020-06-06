@@ -1,4 +1,4 @@
-import { FunctionalComponent } from "./define-element";
+import { FunctionalComponent } from "./component";
 import { Cleanup } from "./hook";
 
 export interface Context<T> {

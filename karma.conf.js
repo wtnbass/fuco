@@ -1,5 +1,5 @@
 module.exports = function(config) {
-  config.set({
+  const options = {
     frameworks: ["mocha"],
     files: [{ pattern: "**/__tests__/**/*_test.ts", watched: false }],
     preprocessors: {
@@ -29,6 +29,12 @@ module.exports = function(config) {
           },
           {
             test: /\.ts$/,
+            enforce: "pre",
+            exclude: /node_modules/,
+            use: [{ loader: "webpack-strip-block" }]
+          },
+          {
+            test: /\.ts$/,
             enforce: "post",
             loader: "istanbul-instrumenter-loader",
             exclude: /(node_modules|__tests__)/,
@@ -45,5 +51,24 @@ module.exports = function(config) {
       combineBrowserReports: true,
       reports: ["lcovonly"]
     }
-  });
+  };
+
+  if (process.env.DEBUG) {
+    Object.assign(options, {
+      browsers: ["Chrome"],
+      singleRun: false
+    });
+  }
+
+  if (process.env.GREP) {
+    Object.assign(options, {
+      client: {
+        mocha: {
+          grep: process.env.GREP
+        }
+      }
+    });
+  }
+
+  config.set(options);
 };

@@ -1,7 +1,13 @@
 import { expect } from "chai";
-import { withFixtures, selector, text, createFixture } from "./fixture";
+import {
+  withFixtures,
+  selector,
+  text,
+  createFixture,
+  createCaughtErrorPromise
+} from "./fixture";
 import { html, useState, useCallback } from "..";
-import { defineElement } from "../define-element";
+import { defineElement } from "../component";
 import { useAttribute, useEffect, useRef } from "../hooks";
 
 const fixture = () => {
@@ -59,7 +65,7 @@ defineElement("zombie-child-element", () => {
 });
 
 const fixtureHasError = createFixture(() => {
-  throw new Error();
+  throw new Error("error in component");
 });
 
 let cleanupCounts = [0, 0];
@@ -109,9 +115,12 @@ describe(
     });
 
     it("has error", async () => {
+      const caughtError = createCaughtErrorPromise();
+
       fixtureHasError.define();
       fixtureHasError.mount();
       const target = await fixtureHasError.setup();
+      await caughtError;
       expect(target.innerHTML).to.equal("");
     });
 

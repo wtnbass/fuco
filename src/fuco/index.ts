@@ -1,6 +1,10 @@
 export { html, render } from "../html";
-export { Component, AttributeConverter } from "./component";
-export { defineElement, FunctionalComponent, __def__ } from "./define-element";
+export {
+  __def__,
+  defineElement,
+  Component,
+  FunctionalComponent
+} from "./component";
 export { css, unsafeCSS } from "./css";
 export { Context } from "./context";
 export { createContext } from "./create-context";
@@ -10,12 +14,16 @@ export {
   Hooks,
   Deps,
   EffectFn,
-  Cleanup
+  Cleanup,
+  AttributeConverter,
+  Listener,
+  WithHooks
 } from "./hook";
 export {
   useAttribute,
   useProperty,
   useDispatchEvent,
+  useListenEvent,
   useStyle,
   useRef,
   useState,
@@ -24,5 +32,6 @@ export {
   useEffect,
   useLayoutEffect,
   useMemo,
-  useCallback
+  useCallback,
+  useErrorBoundary
 } from "./hooks";

@@ -1,4 +1,6 @@
 import { Component } from "./component";
+import { EffectFn, WithHooks } from "./hook";
+import { invokeCatchError } from "./error";
 
 const batch = <T>(
   queue: (f: () => void) => void,
@@ -28,14 +30,49 @@ const queueTask = (callback: () => void) => {
   }
 };
 
-export const enqueueLayoutEffects = batch<Component>(queueMicrotask, lifo, c =>
-  c._flushEffects(c._hooks._layoutEffects)
+export const renderComponent = invokeCatchError(c => {
+  if (!(c as Component)._connected) return;
+  (c as Component)._render();
+  enqueueLayoutEffects(c);
+  enqueueEffects(c);
+  (c as Component)._dirty = false;
+});
+
+const flushEffects = invokeCatchError((c, effects: EffectFn[]) => {
+  const cleanups = c._hooks._cleanup;
+  for (let i = 0, len = effects.length; i < len; i++) {
+    if (effects[i]) {
+      cleanups[i] && cleanups[i]();
+      const cleanup = effects[i]();
+      if (typeof cleanup === "function") {
+        cleanups[i] = cleanup;
+      }
+      delete effects[i];
+    }
+  }
+});
+
+export const unmount = invokeCatchError((c: WithHooks) => {
+  const cleanups = c._hooks._cleanup;
+  for (let i = 0; i < cleanups.length; i++) {
+    if (cleanups[i]) {
+      cleanups[i]();
+      delete cleanups[i];
+    }
+  }
+});
+
+const enqueueLayoutEffects = batch<Component>(queueMicrotask, lifo, c =>
+  flushEffects(c, c._hooks._layoutEffects)
 );
 
-export const enqueueEffects = batch<Component>(queueTask, lifo, c =>
-  c._flushEffects(c._hooks._effects)
+const enqueueEffects = batch<Component>(queueTask, lifo, c =>
+  flushEffects(c, c._hooks._effects)
 );
 
-export const enqueueUpdate = batch<Component>(queueMicrotask, fifo, c =>
-  c._performUpdate()
+const processUpdate = batch<Component>(queueMicrotask, fifo, c =>
+  renderComponent(c as Component)
 );
+
+export const enqueueUpdate = (c: Component) =>
+  !c._dirty && (c._dirty = true) && processUpdate(c);
