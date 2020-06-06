@@ -15,7 +15,6 @@ export interface Component extends WithHooks {
   _connected: boolean;
   _dirty: boolean;
   _render(): void;
-  _parent: HTMLElement | null;
 }
 
 export type FunctionalComponent = () => unknown;
@@ -32,18 +31,15 @@ export function defineElement(name: string, fn: FunctionalComponent) {
         public _connected = false;
         private _container = this.attachShadow({ mode: "open" });
         public _hooks = defaultHooks();
-        public _parent: HTMLElement | null = null;
 
         protected connectedCallback() {
           this._connected = true;
-          this._parent = this.parentElement;
           enqueueUpdate(this);
         }
 
         protected disconnectedCallback() {
           this._connected = false;
           unmount(this);
-          this._parent = null;
         }
 
         public _render() {
