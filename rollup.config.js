@@ -1,5 +1,6 @@
 import typescript from "rollup-plugin-typescript2";
 import { terser } from "rollup-plugin-terser";
+import replace from "@rollup/plugin-replace";
 
 const tsOpts = { useTsconfigDeclarationDir: true };
 const terserOpts = {
@@ -40,51 +41,34 @@ const terserOpts = {
   }
 };
 
-const CJS_PROD = file => ({
-  file: `${file}.production.js`,
-  format: "cjs",
-  plugins: [terser(terserOpts)]
-});
+const template = (moduleName, format, env, options) => {
+  const isProducton = env === "production";
+  const ext = format === "es" ? "mjs" : "js";
 
-const CJS_DEV = file => ({
-  file: `${file}.development.js`,
-  format: "cjs"
-});
-
-const MJS_PROD = file => ({
-  file: `${file}.production.mjs`,
-  format: "esm",
-  plugins: [terser(terserOpts)]
-});
-
-const MJS_DEV = file => ({
-  file: `${file}.development.mjs`,
-  format: "esm"
-});
+  return {
+    input: `./src/${moduleName}/index.ts`,
+    output: {
+      file: `${moduleName}/${moduleName}.${env}.${ext}`,
+      format,
+      plugins: [isProducton && terser(terserOpts)].filter(Boolean)
+    },
+    plugins: [
+      typescript(tsOpts),
+      replace({ "process.env.BUILD_ENV": `"${env}"` })
+    ].filter(Boolean),
+    ...options
+  };
+};
 
 export default [
-  /// mjs
-  {
-    input: "./src/fuco/index.ts",
-    output: [MJS_PROD, MJS_DEV].map(f => f("fuco/fuco")),
-    plugins: [typescript(tsOpts)]
-  },
-  // cjs
-  {
-    input: "./src/fuco/index.ts",
-    output: [CJS_PROD, CJS_DEV].map(f => f("fuco/fuco")),
-    external: ["../html"],
-    plugins: [typescript(tsOpts)]
-  },
-  {
-    input: "./src/html/index.ts",
-    output: [CJS_PROD, CJS_DEV].map(f => f("html/html")),
-    plugins: [typescript(tsOpts)]
-  },
-  {
-    input: "./src/server/index.ts",
-    output: [CJS_PROD, CJS_DEV].map(f => f("server/server")),
-    external: ["../html", "../fuco"],
-    plugins: [typescript(tsOpts)]
-  }
+  template("fuco", "es", "production"),
+  template("fuco", "es", "development"),
+  template("fuco", "cjs", "production", { external: ["../html"] }),
+  template("fuco", "cjs", "development", { external: ["../html"] }),
+  template("html", "cjs", "production"),
+  template("html", "cjs", "development"),
+  template("server", "cjs", "production", { external: ["../html", "../fuco"] }),
+  template("server", "cjs", "development", {
+    external: ["../html", "../fuco"]
+  })
 ];

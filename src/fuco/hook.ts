@@ -1,4 +1,4 @@
-import { Component } from "./component";
+import { HasCSSSymbol } from "./css";
 
 export interface Hooks<T> {
   _values: T[];
@@ -14,10 +14,27 @@ export type EffectFn = () => void | Cleanup;
 
 export type Cleanup = () => void;
 
-let currentCursor: number;
-let currentComponent: Component;
+export interface AttributeConverter<T> {
+  (attr: string | null): T;
+}
 
-export function __scope__(c: Component) {
+export interface Listener<T extends Event> {
+  (evt: T): void;
+}
+
+export interface WithHooks {
+  _hooks: Hooks<unknown>;
+  _attr<T>(name: string, converter?: AttributeConverter<T>): T | string | null;
+  _observeAttr(name: string, callback: () => void): Cleanup;
+  _dispatch<T>(name: string, init: CustomEventInit<T>): void;
+  _listen<T extends Event>(name: string, listener: Listener<T>): Cleanup;
+  _adoptStyle(css: HasCSSSymbol): void;
+}
+
+let currentCursor: number;
+let currentComponent: WithHooks;
+
+export function __scope__(c: WithHooks) {
   currentComponent = c;
   currentCursor = 0;
 }
@@ -33,8 +50,8 @@ export function defaultHooks(): Hooks<unknown> {
 }
 
 export function hooks<T>(config: {
-  _onmount?: (h: Hooks<T>, c: Component, i: number) => T;
-  _onupdate?: (h: Hooks<T>, c: Component, i: number) => void;
+  _onmount?: (h: Hooks<T>, c: WithHooks, i: number) => T;
+  _onupdate?: (h: Hooks<T>, c: WithHooks, i: number) => void;
 }): T {
   const h = currentComponent._hooks as Hooks<T>;
   const index = currentCursor++;

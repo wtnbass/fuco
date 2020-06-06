@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-explicit-any */
 import { defineElement, FunctionalComponent } from "..";
 
 function waitFor() {
@@ -59,4 +59,27 @@ export const withFixtures = (...fixtureFns: FunctionalComponent[]) => (
   });
 
   fn(fixtures);
+};
+
+export const createCaughtErrorPromise = () => {
+  const originalOnError = (global as any).onerror;
+
+  return new Promise((resolve, reject) => {
+    (global as any).onerror = null;
+    function rollbackErrorHandler() {
+      (global as any).onerror = originalOnError;
+      window.removeEventListener("error", handleUncaughtError);
+    }
+    const id = setTimeout(() => {
+      rollbackErrorHandler();
+      reject(new Error("timeout to catch uncaughtError"));
+    }, 1500);
+    function handleUncaughtError(e: Event) {
+      e.preventDefault();
+      clearTimeout(id);
+      rollbackErrorHandler();
+      resolve();
+    }
+    window.addEventListener("error", handleUncaughtError);
+  });
 };

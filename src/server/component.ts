@@ -2,7 +2,7 @@
 
 import {
   AttributeConverter,
-  Component,
+  WithHooks,
   defaultHooks,
   __scope__,
   __def__
@@ -36,7 +36,7 @@ export function isComponent(vnode: VNode) {
   return !!__def__[vnode.tag];
 }
 
-export class ServerComponent implements Component {
+export class ServerComponent implements WithHooks {
   _hooks = defaultHooks();
   _props: PropsManager;
   origVNode: VNode;
@@ -66,12 +66,6 @@ export class ServerComponent implements Component {
     };
   }
 
-  update() {}
-
-  _performUpdate() {}
-
-  _flushEffects() {}
-
   _attr<T>(name: string, converter: AttributeConverter<T>) {
     const value = this._props.attributes[name];
     return converter ? converter(value) : value;
@@ -90,6 +84,10 @@ export class ServerComponent implements Component {
         register(noop)(Contexts.get(context));
       }
     }
+  }
+
+  _listen() {
+    return noop;
   }
 
   _adoptStyle() {}
