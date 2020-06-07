@@ -6,23 +6,17 @@ import { rehydrateScript } from "../rehydrate";
 
 describe("render-to-string", () => {
   it("simple", () => {
-    const s = renderToString(html`
-      <div>Hello</div>
-    `);
+    const s = renderToString(html` <div>Hello</div> `);
     expect(s).to.equal(`<div>Hello</div>`);
   });
 
   it("slash element", () => {
-    const s = renderToString(html`
-      <div />
-    `);
+    const s = renderToString(html` <div /> `);
     expect(s).to.equal(`<div></div>`);
   });
 
   it("void element", () => {
-    const s = renderToString(html`
-      <input />
-    `);
+    const s = renderToString(html` <input /> `);
     expect(s).to.equal(`<input>`);
   });
 
@@ -114,11 +108,7 @@ describe("render-to-string", () => {
 
   it("array", () => {
     const s = renderToString(
-      ["a", "b", "c"].map(
-        v => html`
-          <div>${v}</div>
-        `
-      )
+      ["a", "b", "c"].map((v) => html` <div>${v}</div> `)
     );
     expect(s).to.equal(`<div>a</div><div>b</div><div>c</div>`);
   });
@@ -126,11 +116,7 @@ describe("render-to-string", () => {
   it("select", () => {
     const s = renderToString(html`
       <select .value=${"b"}>
-        ${["a", "b", "c"].map(
-          v => html`
-            <option value=${v}>${v}</option>
-          `
-        )}
+        ${["a", "b", "c"].map((v) => html` <option value=${v}>${v}</option> `)}
       </select>
     `);
     expect(s).to.equal(
@@ -143,18 +129,8 @@ describe("render-to-string", () => {
   });
 
   it("with rehydrate", () => {
-    defineElement(
-      "ssr-app",
-      () => html`
-        <div>ssr</div>
-      `
-    );
-    const s = renderToString(
-      html`
-        <ssr-app></ssr-app>
-      `,
-      { hydrate: true }
-    );
+    defineElement("ssr-app", () => html` <div>ssr</div> `);
+    const s = renderToString(html` <ssr-app></ssr-app> `, { hydrate: true });
     expect(s).to.include(rehydrateScript());
   });
 });

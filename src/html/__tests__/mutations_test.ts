@@ -1,7 +1,6 @@
 /* eslint-disable
   @typescript-eslint/no-non-null-assertion,
-  @typescript-eslint/no-explicit-any,
-  @typescript-eslint/camelcase
+  @typescript-eslint/no-explicit-any
 */
 import { expect } from "chai";
 import * as sinon from "sinon";
@@ -20,9 +19,7 @@ describe("mutations", () => {
   });
 
   it("text", () => {
-    const app = (text: any) => html`
-      <div>${text}</div>
-    `;
+    const app = (text: any) => html` <div>${text}</div> `;
 
     render(app("string"), container);
     expect(container.querySelector("div")!.innerText).to.equal("string");
@@ -41,9 +38,7 @@ describe("mutations", () => {
   });
 
   it("text array", () => {
-    const app = (...args: any[]) => html`
-      <div>${args}</div>
-    `;
+    const app = (...args: any[]) => html` <div>${args}</div> `;
 
     // first
     render(app("a", "b", "c"), container);
@@ -69,9 +64,7 @@ describe("mutations", () => {
   it("template", () => {
     const app = (inner: unknown) => html`
       <div>
-        ${html`
-          <p>${inner}</p>
-        `}
+        ${html` <p>${inner}</p> `}
       </div>
     `;
 
@@ -91,9 +84,7 @@ describe("mutations", () => {
       <ul>
         ${items
           ? items.map(
-              (item: any) => html`
-                <li :key=${item.id}>${item.content}</li>
-              `
+              (item: any) => html` <li :key=${item.id}>${item.content}</li> `
             )
           : null}
       </ul>
@@ -105,7 +96,7 @@ describe("mutations", () => {
         { id: 2, content: "bbb" },
         { id: 3, content: "ccc" },
         { id: 4, content: "ddd" },
-        { id: 5, content: "eee" }
+        { id: 5, content: "eee" },
       ]),
       container
     );
@@ -130,7 +121,7 @@ describe("mutations", () => {
         { id: 6, content: "fff" },
         { id: 4, content: "ddd" },
         { id: 5, content: "eee" },
-        { id: 7, content: "ggg" }
+        { id: 7, content: "ggg" },
       ]),
       container
     );
@@ -142,7 +133,7 @@ describe("mutations", () => {
       li2_6,
       li2_4,
       li2_5,
-      li2_7
+      li2_7,
     ] = container.querySelector("ul")!.querySelectorAll("li");
 
     expect(li2_8.innerText).to.equal("hhh");
@@ -166,7 +157,7 @@ describe("mutations", () => {
         { id: 8, content: "hhh" },
         { id: 6, content: "fff" },
         { id: 4, content: "ddd" },
-        { id: 5, content: "eee" }
+        { id: 5, content: "eee" },
       ]),
       container
     );
@@ -191,7 +182,7 @@ describe("mutations", () => {
         { id: 4, content: "ddd" },
         { id: 9, content: "iii" },
         { id: 5, content: "eee" },
-        { id: 10, content: "jjj" }
+        { id: 10, content: "jjj" },
       ]),
       container
     );
@@ -219,11 +210,7 @@ describe("mutations", () => {
     const app = (items: unknown[] | null) => html`
       <ul>
         ${items
-          ? items.map(
-              (item: any) => html`
-                <li>${item.content}</li>
-              `
-            )
+          ? items.map((item: any) => html` <li>${item.content}</li> `)
           : null}
       </ul>
     `;
@@ -234,7 +221,7 @@ describe("mutations", () => {
         { id: 2, content: "bbb" },
         { id: 3, content: "ccc" },
         { id: 4, content: "ddd" },
-        { id: 5, content: "eee" }
+        { id: 5, content: "eee" },
       ]),
       container
     );
@@ -259,7 +246,7 @@ describe("mutations", () => {
         { id: 6, content: "fff" },
         { id: 4, content: "ddd" },
         { id: 5, content: "eee" },
-        { id: 7, content: "ggg" }
+        { id: 7, content: "ggg" },
       ]),
       container
     );
@@ -271,7 +258,7 @@ describe("mutations", () => {
       li2_6,
       li2_4,
       li2_5,
-      li2_7
+      li2_7,
     ] = container.querySelector("ul")!.querySelectorAll("li");
 
     expect(li2_8.innerText).to.equal("hhh");
@@ -295,7 +282,7 @@ describe("mutations", () => {
         { id: 8, content: "hhh" },
         { id: 6, content: "fff" },
         { id: 4, content: "ddd" },
-        { id: 5, content: "eee" }
+        { id: 5, content: "eee" },
       ]),
       container
     );
@@ -320,7 +307,7 @@ describe("mutations", () => {
         { id: 4, content: "ddd" },
         { id: 9, content: "iii" },
         { id: 5, content: "eee" },
-        { id: 10, content: "jjj" }
+        { id: 10, content: "jjj" },
       ]),
       container
     );
@@ -350,7 +337,7 @@ describe("mutations", () => {
       name: string,
       bool: boolean,
       value: unknown,
-      onclick: Function
+      onclick: () => void
     ) => html`
       <div name=${name} ?bool=${bool} .value=${value} @click=${onclick}>
         attributes
@@ -436,22 +423,12 @@ describe("mutations", () => {
     render("the text", container);
     expect(container.innerText).to.equal("the text");
 
-    render(
-      html`
-        the template
-      `,
-      container
-    );
+    render(html` the template `, container);
     expect(container.innerText).to.equal("the template");
   });
 
   it("template -> text", () => {
-    render(
-      html`
-        the template
-      `,
-      container
-    );
+    render(html` the template `, container);
     expect(container.innerText).to.equal("the template");
 
     render("the text", container);
@@ -459,38 +436,21 @@ describe("mutations", () => {
   });
 
   it("template -> another template", () => {
-    render(
-      html`
-        <div>first</div>
-      `,
-      container
-    );
+    render(html` <div>first</div> `, container);
     expect(stripComments(container.innerHTML)).to.equal("<div>first</div>");
-    render(
-      html`
-        <section>second</section>
-      `,
-      container
-    );
+    render(html` <section>second</section> `, container);
     expect(stripComments(container.innerHTML)).to.equal(
       "<section>second</section>"
     );
   });
 
   it("array -> non-array, non-array -> array", () => {
-    const app = (value: any) => html`
-      <div>${value}</div>
-    `;
+    const app = (value: any) => html` <div>${value}</div> `;
 
     render(app(["a", "b", "c"]), container);
     expect(stripComments(container.innerHTML)).to.equal("<div>abc</div>");
 
-    render(
-      app(html`
-        <i></i>
-      `),
-      container
-    );
+    render(app(html` <i></i> `), container);
     expect(stripComments(container.innerHTML)).to.equal("<div><i></i></div>");
 
     render(app(["f", "o", "o"]), container);
@@ -500,11 +460,7 @@ describe("mutations", () => {
   it("default value of <select>", () => {
     const app = (selectValue: string) => html`
       <select .value=${selectValue}>
-        ${["a", "b", "c"].map(
-          v => html`
-            <option value=${v}>${v}</option>
-          `
-        )}
+        ${["a", "b", "c"].map((v) => html` <option value=${v}>${v}</option> `)}
       </select>
       ${"dummy"}
     `;
@@ -519,9 +475,7 @@ describe("mutations", () => {
   it(":style attribute", () => {
     const app = (
       style: Partial<{ [name in keyof CSSStyleDeclaration]: string }> | null
-    ) => html`
-      <div :style=${style}></div>
-    `;
+    ) => html` <div :style=${style}></div> `;
     // first
     render(app({ color: "red", backgroundColor: "grey" }), container);
     const div = container.querySelector("div");
@@ -548,7 +502,7 @@ describe("mutations", () => {
   });
 
   it(":class attribute", () => {
-    const app = (classes: string[] | object | null) => html`
+    const app = (classes: string[] | Record<string, unknown> | null) => html`
       <div :class=${classes}></div>
     `;
     render(app(["foo", "bar"]), container);
@@ -593,12 +547,10 @@ describe("mutations", () => {
 
   it("chanage listener", () => {
     let count = 0;
-    let listener: Function | null = null;
+    let listener: (() => unknown) | null = null;
 
     listener = () => count++;
-    const app = () => html`
-      <div @click=${listener}></div>
-    `;
+    const app = () => html` <div @click=${listener}></div> `;
     render(app(), container);
     const div = container.querySelector("div");
     div?.click();

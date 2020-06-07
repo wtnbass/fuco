@@ -20,7 +20,7 @@ const resolve = (value: unknown): string => {
 export const css = (strings: readonly string[], ...values: unknown[]) => ({
   [cssSymbol]: strings
     .slice(1)
-    .reduce((acc, s, i) => acc + resolve(values[i]) + s, strings[0])
+    .reduce((acc, s, i) => acc + resolve(values[i]) + s, strings[0]),
 });
 
 export const unsafeCSS = (css: string) => ({ [cssSymbol]: css });

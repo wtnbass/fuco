@@ -12,9 +12,7 @@ const fixture = () => {
   const user: User = useProperty("user");
   const updateCount = useRef(0);
   if (!user) {
-    return html`
-      <div>No user</div>
-    `;
+    return html` <div>No user</div> `;
   }
   return html`
     <div>${user.name} (${user.age})</div>
@@ -36,7 +34,7 @@ describe(
   withFixtures(
     fixture,
     fixtureNumber
-  )(f => {
+  )((f) => {
     let target: Element & { user: User; num: number };
     let div: HTMLDivElement;
     let count: HTMLDivElement;
@@ -57,7 +55,7 @@ describe(
     it("propeties changed", async () => {
       const user = {
         name: "Bob",
-        age: "18"
+        age: "18",
       };
       await setup(0);
       target.user = user;

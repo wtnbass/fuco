@@ -10,11 +10,11 @@ describe(
     const [count, setCount] = useState(0);
     const add = useCallback(() => {
       updateCounts[0]++;
-      setCount(c => c + 1);
+      setCount((c) => c + 1);
     }, [count]);
     const minus = useCallback(() => {
       updateCounts[1]++;
-      setCount(c => c - 1);
+      setCount((c) => c - 1);
     }, []);
     return html`
       <div>${count}</div>

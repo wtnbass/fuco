@@ -4,7 +4,7 @@ import {
   defineElement,
   useAttribute,
   useEffect,
-  useLayoutEffect
+  useLayoutEffect,
 } from "..";
 import { withFixtures } from "./fixture";
 
@@ -23,9 +23,7 @@ const defineWithStack = (name: string, f: () => unknown) => {
 };
 const fixture = () => {
   useAttribute("test");
-  return html`
-    <reconciler-test></reconciler-test>
-  `;
+  return html` <reconciler-test></reconciler-test> `;
 };
 defineWithStack(
   "reconciler-test",
@@ -36,9 +34,7 @@ defineWithStack(
 );
 defineWithStack(
   "reconciler-test-a",
-  () => html`
-    <reconciler-test-a-a></reconciler-test-a-a>
-  `
+  () => html` <reconciler-test-a-a></reconciler-test-a-a> `
 );
 defineWithStack("reconciler-test-b", () => html``);
 defineWithStack("reconciler-test-a-a", () => html``);
@@ -63,7 +59,7 @@ describe(
         "effect:reconciler-test-a-a",
         "effect:reconciler-test-b",
         "effect:reconciler-test-a",
-        "effect:reconciler-test"
+        "effect:reconciler-test",
       ]);
     });
   })

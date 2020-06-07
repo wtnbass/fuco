@@ -9,7 +9,7 @@ export function createContext<T>(defaultValue?: T): Context<T> {
     Provider() {
       const subs = useRef<ContextSubscriber<T>[]>([]);
       const value = useProperty<T>("value");
-      subs.current!.forEach(f => f(value));
+      subs.current!.forEach((f) => f(value));
 
       useListenEvent(REQUEST_CONSUME, (e: CustomEvent<Detail<T>>) => {
         if (context === e.detail._context) {
@@ -23,7 +23,7 @@ export function createContext<T>(defaultValue?: T): Context<T> {
       });
 
       return h`<slot/>`;
-    }
+    },
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

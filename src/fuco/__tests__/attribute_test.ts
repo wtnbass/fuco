@@ -13,7 +13,7 @@ const fixture = () => {
 };
 
 const fixturewithConvert = () => {
-  const user = useAttribute<{ name: string; age: number }>("user", json => {
+  const user = useAttribute<{ name: string; age: number }>("user", (json) => {
     if (!json) return {};
     return JSON.parse(json);
   });
@@ -25,10 +25,8 @@ const fixturewithConvert = () => {
 };
 
 const fixtureBooleanAttribute = () => {
-  const checked = useAttribute("checked", value => value != null);
-  return html`
-    <div>${String(checked)}</div>
-  `;
+  const checked = useAttribute("checked", (value) => value != null);
+  return html` <div>${String(checked)}</div> `;
 };
 
 const fixtureNumberAttribute = () => {
@@ -47,7 +45,7 @@ describe(
     fixturewithConvert,
     fixtureBooleanAttribute,
     fixtureNumberAttribute
-  )(fs => {
+  )((fs) => {
     it("row attribute", async () => {
       let target!: Element;
       let div!: HTMLDivElement;

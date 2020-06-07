@@ -4,7 +4,7 @@ import {
   selector,
   text,
   createFixture,
-  createCaughtErrorPromise
+  createCaughtErrorPromise,
 } from "./fixture";
 import { html, useState, useCallback } from "..";
 import { defineElement } from "../component";
@@ -14,7 +14,7 @@ const fixture = () => {
   const [count, setCount] = useState(0);
   const million = useCallback(() => {
     for (let i = 0; i < 1000000; i++) {
-      setCount(c => c + 1);
+      setCount((c) => c + 1);
     }
   }, []);
   return html`
@@ -26,18 +26,18 @@ const fixture = () => {
 const listeners: (() => void)[] = [];
 const state = new Proxy(
   {
-    todos: [{ id: "A", content: "a" }]
+    todos: [{ id: "A", content: "a" }],
   },
   {
     set(target, name, value) {
       Reflect.set(target, name, value);
-      listeners.forEach(l => l());
+      listeners.forEach((l) => l());
       return true;
-    }
+    },
   }
 );
 const deleteTodo = (id: string | null) => {
-  state.todos = state.todos.filter(t => t.id !== id);
+  state.todos = state.todos.filter((t) => t.id !== id);
 };
 
 // https://kaihao.dev/posts/Stale-props-and-zombie-children-in-Redux
@@ -49,7 +49,7 @@ const fixtureZombieChildren = () => {
     });
   });
   return todos.map(
-    t => html`
+    (t) => html`
       <zombie-child-element :key=${t.id} id=${t.id}></zombie-child-element>
     `
   );
@@ -57,7 +57,7 @@ const fixtureZombieChildren = () => {
 
 defineElement("zombie-child-element", () => {
   const id = useAttribute("id");
-  const content = state.todos.find(t => t.id === id);
+  const content = state.todos.find((t) => t.id === id);
   return html`
     <div>${content}</div>
     <button @click=${() => deleteTodo(id)}>delete</button>

@@ -5,7 +5,7 @@ import {
   getArgs,
   equalsTemplate,
   HtmlTemplate,
-  ArgValues
+  ArgValues,
 } from "./template";
 import {
   isAttributeMutation,
@@ -14,7 +14,7 @@ import {
   isTemplateMutation,
   TemplateMutation,
   TextMutation,
-  ChildMutations
+  ChildMutations,
 } from "./mutations";
 import { mount } from "./mount";
 
@@ -32,7 +32,7 @@ export function commit(mutations: Mutation[], args: ArgValues) {
       }
     }
   }
-  q.forEach(f => f());
+  q.forEach((f) => f());
 }
 
 function commitMutation(m: Mutation, arg: unknown) {
@@ -52,7 +52,7 @@ function commitAttribute(
 ) {
   if (name === "...") {
     if (typeof next === "object" && !Array.isArray(next) && next) {
-      Object.keys(next).forEach(key =>
+      Object.keys(next).forEach((key) =>
         commitAttribute(
           node,
           key,
@@ -88,10 +88,10 @@ function commitAttribute(
       const prevClassNames = classNames(prev);
       const nextClassNames = classNames(next);
       prevClassNames.forEach(
-        p => nextClassNames.includes(p) || node.classList.remove(p)
+        (p) => nextClassNames.includes(p) || node.classList.remove(p)
       );
       nextClassNames.forEach(
-        n => prevClassNames.includes(n) || node.classList.add(n)
+        (n) => prevClassNames.includes(n) || node.classList.add(n)
       );
     }
   } else {
@@ -118,8 +118,8 @@ function isEventListener(
 
 function setStyles(
   style: AnyProp<CSSStyleDeclaration>,
-  prev: AnyProp<object>,
-  next: AnyProp<object>
+  prev: AnyProp<unknown>,
+  next: AnyProp<unknown>
 ) {
   for (const i in prev) if (!next || !(i in next)) style[i] = null;
   for (const i in next) if (!prev || prev[i] !== next[i]) style[i] = next[i];
@@ -128,8 +128,8 @@ function setStyles(
 function classNames(value: unknown): string[] {
   if (value == null) return [];
   if (Array.isArray(value)) return value;
-  return Object.keys(value as object).filter(
-    i => !!(value as AnyProp<object>)[i]
+  return Object.keys(value as Record<string, unknown>).filter(
+    (i) => !!(value as AnyProp<unknown>)[i]
   );
 }
 

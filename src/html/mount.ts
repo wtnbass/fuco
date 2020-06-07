@@ -8,12 +8,12 @@ export function mount(
   mutations: Mutation[] = []
 ) {
   if (Array.isArray(vdom)) {
-    vdom.forEach(v => mount(v, parent, isSvg, mutations));
+    vdom.forEach((v) => mount(v, parent, isSvg, mutations));
   } else if (!isVNode(vdom)) {
     if (typeof vdom === "number") {
       mutations[vdom] = {
         _node: parent.appendChild(document.createComment("")),
-        _isSvg: isSvg
+        _isSvg: isSvg,
       };
     } else {
       parent.appendChild(document.createTextNode(vdom as VText));
@@ -27,7 +27,7 @@ export function mount(
         : document.createElement(tag)
     );
     props &&
-      Object.keys(props).forEach(name => {
+      Object.keys(props).forEach((name) => {
         if (typeof props[name] === "number") {
           mutations[props[name] as VArg] = { _node: node, _name: name };
         } else {

@@ -26,9 +26,7 @@ describe("parse", () => {
   });
 
   it("single", () => {
-    const app = html`
-      <div>hello</div>
-    `;
+    const app = html` <div>hello</div> `;
 
     test(app, [{ tag: "div", children: ["hello"] }]);
   });
@@ -41,22 +39,18 @@ describe("parse", () => {
 
     test(app, [
       { tag: "div", children: ["hello"] },
-      { tag: "div", children: ["world"] }
+      { tag: "div", children: ["world"] },
     ]);
   });
 
   it("has attribute", () => {
-    const app = html`
-      <div name="greet">hello</div>
-    `;
+    const app = html` <div name="greet">hello</div> `;
 
     test(app, [{ tag: "div", props: { name: "greet" }, children: ["hello"] }]);
   });
 
   it("has text variables", () => {
-    const app = html`
-      <div>hello, ${"world"}, ${1000}</div>
-    `;
+    const app = html` <div>hello, ${"world"}, ${1000}</div> `;
 
     test(
       app,
@@ -89,10 +83,10 @@ describe("parse", () => {
             class: 1,
             "@click": 2,
             ".value": 3,
-            "?yes": 4
+            "?yes": 4,
           },
-          children: ["hello"]
-        }
+          children: ["hello"],
+        },
       ],
       ["wrapper", cb, "value", true]
     );
@@ -109,16 +103,14 @@ describe("parse", () => {
       app,
       [
         { tag: "div", props: { "...": 1 }, children: [] },
-        { tag: "div", props: { "...": 2 }, children: [] }
+        { tag: "div", props: { "...": 2 }, children: [] },
       ],
       [props, props]
     );
   });
 
   it("has static key", () => {
-    const app = html`
-      <div :key="99">hello</div>
-    `;
+    const app = html` <div :key="99">hello</div> `;
 
     test(
       app,
@@ -128,9 +120,7 @@ describe("parse", () => {
   });
 
   it("has variable key", () => {
-    const app = html`
-      <div :key=${80}>hello</div>
-    `;
+    const app = html` <div :key=${80}>hello</div> `;
 
     test(
       app,
@@ -140,19 +130,15 @@ describe("parse", () => {
   });
 
   it("no value attribute", () => {
-    const app = html`
-      <div foo bar="bar" baz></div>
-    `;
+    const app = html` <div foo bar="bar" baz></div> `;
 
     test(app, [
-      { tag: "div", props: { foo: "", bar: "bar", baz: "" }, children: [] }
+      { tag: "div", props: { foo: "", bar: "bar", baz: "" }, children: [] },
     ]);
   });
 
   it("closed elements", () => {
-    const app = html`
-      <div class="test" />
-    `;
+    const app = html` <div class="test" /> `;
 
     test(app, [{ tag: "div", props: { class: "test" }, children: [] }]);
   });
@@ -165,8 +151,8 @@ describe("parse", () => {
     test(app, [
       {
         tag: "div",
-        children: [{ tag: "p", children: [{ tag: "b", children: [] }] }]
-      }
+        children: [{ tag: "p", children: [{ tag: "b", children: [] }] }],
+      },
     ]);
   });
 
@@ -183,10 +169,10 @@ describe("parse", () => {
       {
         tag: "div",
         children: [
-          { tag: "b", children: ["unclosed", { tag: "p", children: ["tag"] }] }
-        ]
+          { tag: "b", children: ["unclosed", { tag: "p", children: ["tag"] }] },
+        ],
       },
-      { tag: "small", children: ["end"] }
+      { tag: "small", children: ["end"] },
     ]);
   });
 
@@ -201,10 +187,10 @@ describe("parse", () => {
           name: "a",
           id: "b",
           class: "c",
-          color: "d"
+          color: "d",
         },
-        children: []
-      }
+        children: [],
+      },
     ]);
   });
 
@@ -233,14 +219,12 @@ describe("parse", () => {
     `;
     test(app, [
       { tag: "div", children: [] },
-      { tag: "div", children: ["<!- -->"] }
+      { tag: "div", children: ["<!- -->"] },
     ]);
   });
 
   it("ignore variables in comment", () => {
-    const app = html`
-      <!-- ${0} -->
-    `;
+    const app = html` <!-- ${0} --> `;
     test(app, [], [0]);
   });
 
@@ -259,7 +243,7 @@ describe("parse", () => {
       { tag: "div", children: [] },
       { tag: "div", children: [] },
       { tag: "br", children: [] },
-      { tag: "br", children: [] }
+      { tag: "br", children: [] },
     ]);
   });
 });

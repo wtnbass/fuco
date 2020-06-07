@@ -2,7 +2,7 @@
 import { defineElement, FunctionalComponent } from "..";
 
 function waitFor() {
-  return new Promise(resolve => setTimeout(resolve, 10));
+  return new Promise((resolve) => setTimeout(resolve, 10));
 }
 
 export const selector = <T extends Element>(s: string, hasShadow?: Element) =>
@@ -38,7 +38,7 @@ export function createFixture(fixtureFn: FunctionalComponent) {
       for (const fixture of fixtures) {
         fixture && document.body.removeChild(fixture);
       }
-    }
+    },
   };
 }
 
@@ -47,15 +47,15 @@ export const withFixtures = (...fixtureFns: FunctionalComponent[]) => (
 ) => () => {
   const fixtures = fixtureFns.map(createFixture);
   before(() => {
-    fixtures.forEach(f => f.define());
+    fixtures.forEach((f) => f.define());
   });
 
   beforeEach(() => {
-    fixtures.forEach(f => f.mount());
+    fixtures.forEach((f) => f.mount());
   });
 
   afterEach(() => {
-    fixtures.forEach(f => f.unmount());
+    fixtures.forEach((f) => f.unmount());
   });
 
   fn(fixtures);

@@ -45,7 +45,7 @@ export function defaultHooks(): Hooks<unknown> {
     _deps: [],
     _effects: [],
     _layoutEffects: [],
-    _cleanup: []
+    _cleanup: [],
   };
 }
 

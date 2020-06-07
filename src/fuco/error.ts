@@ -20,6 +20,6 @@ export const invokeCatchError = <T>(
 };
 
 isBrowser &&
-  window.addEventListener(errorType, e => {
+  window.addEventListener(errorType, (e) => {
     throw (e as CustomEvent<Error>).detail;
   });

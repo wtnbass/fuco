@@ -26,7 +26,7 @@ export function useAttribute<T>(
         }
       });
       return c._attr(name, converter);
-    }
+    },
   });
 }
 
@@ -44,16 +44,16 @@ export const useProperty = <T>(name: string) =>
             h._values[i] = newValue;
             enqueueUpdate(c as Component);
           }
-        }
+        },
       });
       return initialValue;
-    }
+    },
   });
 
 export const useDispatchEvent = <T>(name: string, eventInit: EventInit = {}) =>
   hooks<(detail: T) => void>({
     _onmount: (_, c) => (detail: T) =>
-      c._dispatch(name, { ...eventInit, detail })
+      c._dispatch(name, { ...eventInit, detail }),
   });
 
 export const useListenEvent = <T extends Event>(
@@ -63,19 +63,19 @@ export const useListenEvent = <T extends Event>(
   hooks<void>({
     _onmount(h, c, i) {
       h._cleanup[i] = c._listen(name, listener);
-    }
+    },
   });
 
 export const useStyle = (cssStyle: HasCSSSymbol | (() => HasCSSSymbol)) =>
   hooks<void>({
     _onmount(_, c) {
       c._adoptStyle(typeof cssStyle === "function" ? cssStyle() : cssStyle);
-    }
+    },
   });
 
 export const useRef = <T>(initialValue: T | null) =>
   hooks<{ current: T | null }>({
-    _onmount: (_h, _c) => ({ current: initialValue })
+    _onmount: (_h, _c) => ({ current: initialValue }),
   });
 
 export const useState = <T>(
@@ -105,8 +105,8 @@ export const useReducer = <S, A>(
           h._values[i][0] = nextState;
           enqueueUpdate(c as Component);
         }
-      }
-    ]
+      },
+    ],
   });
 
 export const useContext = <T>(context: Context<T>) =>
@@ -127,11 +127,11 @@ export const useContext = <T>(context: Context<T>) =>
             };
             h._cleanup[i] = subscribe(update);
             return update;
-          }
-        }
+          },
+        },
       });
       return h._values[i];
-    }
+    },
   });
 
 const depsChanged = (prev: Deps | undefined, next: Deps) =>
@@ -144,7 +144,7 @@ export const useEffect = (handler: EffectFn, deps?: Deps) =>
         h._deps[i] = deps || [];
         h._effects[i] = handler;
       }
-    }
+    },
   });
 
 export const useLayoutEffect = (handler: EffectFn, deps?: Deps) =>
@@ -154,7 +154,7 @@ export const useLayoutEffect = (handler: EffectFn, deps?: Deps) =>
         h._deps[i] = deps || [];
         h._layoutEffects[i] = handler;
       }
-    }
+    },
   });
 
 export const useMemo = <T>(fn: () => T, deps?: Deps) =>
@@ -164,9 +164,10 @@ export const useMemo = <T>(fn: () => T, deps?: Deps) =>
         h._deps[i] = deps || [];
         h._values[i] = fn();
       }
-    }
+    },
   });
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 export const useCallback = <T extends Function>(callback: T, deps?: Deps) =>
   useMemo(() => callback, deps);
 

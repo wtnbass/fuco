@@ -17,7 +17,7 @@ import {
   useEffect,
   useLayoutEffect,
   useMemo,
-  useCallback
+  useCallback,
 } from "../../fuco";
 
 describe("component", () => {
@@ -82,8 +82,8 @@ describe("component", () => {
     defineElement("attr-element", () => {
       const attr = useAttribute("attr");
       const prop = useProperty("prop");
-      const btrue = useAttribute("bool-true", value => value != null);
-      const bfalse = useAttribute("bool-false", value => value != null);
+      const btrue = useAttribute("bool-true", (value) => value != null);
+      const bfalse = useAttribute("bool-false", (value) => value != null);
       const spreadAttr = useAttribute("spread-attr");
       const spreadProp = useProperty("spreadProp");
       const none = useAttribute("xxxxx");
@@ -133,9 +133,7 @@ describe("component", () => {
     defineElement("x-provider", Context.Provider);
     defineElement("x-consumer", () => {
       const value = useContext(Context);
-      return html`
-        <div>${value}</div>
-      `;
+      return html` <div>${value}</div> `;
     });
     const s = renderToString(html`
       <x-provider .value=${"provider"}>

@@ -5,7 +5,7 @@ import { html, useMemo, useState } from "..";
 let updateCount = 0;
 let updateCount2 = 0;
 
-const input = (fn: Function) => (e: KeyboardEvent) => {
+const input = (fn: (value: string) => void) => (e: KeyboardEvent) => {
   const el = e.target as HTMLInputElement;
   fn(el.value);
 };

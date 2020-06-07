@@ -30,7 +30,7 @@ const queueTask = (callback: () => void) => {
   }
 };
 
-export const renderComponent = invokeCatchError(c => {
+export const renderComponent = invokeCatchError((c) => {
   if (!(c as Component)._connected) return;
   (c as Component)._render();
   enqueueLayoutEffects(c);
@@ -62,15 +62,15 @@ export const unmount = invokeCatchError((c: WithHooks) => {
   }
 });
 
-const enqueueLayoutEffects = batch<Component>(queueMicrotask, lifo, c =>
+const enqueueLayoutEffects = batch<Component>(queueMicrotask, lifo, (c) =>
   flushEffects(c, c._hooks._layoutEffects)
 );
 
-const enqueueEffects = batch<Component>(queueTask, lifo, c =>
+const enqueueEffects = batch<Component>(queueTask, lifo, (c) =>
   flushEffects(c, c._hooks._effects)
 );
 
-const processUpdate = batch<Component>(queueMicrotask, fifo, c =>
+const processUpdate = batch<Component>(queueMicrotask, fifo, (c) =>
   renderComponent(c as Component)
 );
 
