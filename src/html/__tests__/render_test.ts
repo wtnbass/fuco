@@ -23,16 +23,12 @@ describe("render", () => {
   });
 
   it("simple", () => {
-    const app = html`
-      <div>Hello</div>
-    `;
+    const app = html` <div>Hello</div> `;
     assertHtml(app, `<div>Hello</div>`);
   });
 
   it("slash elements", () => {
-    const app = html`
-      <div />
-    `;
+    const app = html` <div /> `;
     assertHtml(app, "<div></div>");
   });
 
@@ -93,17 +89,13 @@ describe("render", () => {
   });
 
   it("no value attribute", () => {
-    const app = html`
-      <div foo bar="bar" baz></div>
-    `;
+    const app = html` <div foo bar="bar" baz></div> `;
 
     assertHtml(app, `<div foo="" bar="bar" baz=""></div>`);
   });
 
   it("key attribute", () => {
-    const app = html`
-      <div :key=${"a"}></div>
-    `;
+    const app = html` <div :key=${"a"}></div> `;
     assertHtml(app, `<div></div>`);
   });
 
@@ -118,9 +110,7 @@ describe("render", () => {
 
   it("ref object attribute", () => {
     const ref = { current: null };
-    const app = html`
-      <div :ref=${ref}></div>
-    `;
+    const app = html` <div :ref=${ref}></div> `;
     render(app, container);
     expect(container.querySelector("div")).to.equal(ref.current);
   });
@@ -133,16 +123,12 @@ describe("render", () => {
   });
 
   it(":style non object attribute", () => {
-    const app = html`
-      <div :style=${"color:red"}></div>
-    `;
+    const app = html` <div :style=${"color:red"}></div> `;
     assertHtml(app, "<div></div>");
   });
 
   it(":class array attribute", () => {
-    const app = html`
-      <div :class=${["foo", "bar"]}></div>
-    `;
+    const app = html` <div :class=${["foo", "bar"]}></div> `;
     assertHtml(app, '<div class="foo bar"></div>');
   });
 
@@ -154,77 +140,57 @@ describe("render", () => {
   });
 
   it(":class non object attribute", () => {
-    const app = html`
-      <div :class=${"foo bar"}></div>
-    `;
+    const app = html` <div :class=${"foo bar"}></div> `;
     assertHtml(app, "<div></div>");
   });
 
   it("spread attribute", () => {
     const cb = sinon.spy();
     const props = { a: 1, "?b": 2, ".c": 3, "@d": cb };
-    const app = html`
-      <div ...${props}></div>
-    `;
+    const app = html` <div ...${props}></div> `;
     assertHtml(app, '<div a="1" b=""></div>');
   });
 
   it("spread attribute should ignore string", () => {
-    const app = html`
-      <div ...${"props"}></div>
-    `;
+    const app = html` <div ...${"props"}></div> `;
     assertHtml(app, "<div></div>");
   });
 
   it("spread attribute should ignore number", () => {
-    const app = html`
-      <div ...${1000}></div>
-    `;
+    const app = html` <div ...${1000}></div> `;
     assertHtml(app, "<div></div>");
   });
 
   it("spread attribute should ignore boolean", () => {
-    const app = html`
-      <div ...${true}></div>
-    `;
+    const app = html` <div ...${true}></div> `;
     assertHtml(app, "<div></div>");
   });
 
   it("spread attribute should ignore array", () => {
-    const app = html`
-      <div ...${["a", "b", "c"]}></div>
-    `;
+    const app = html` <div ...${["a", "b", "c"]}></div> `;
     assertHtml(app, "<div></div>");
   });
 
   it("spread attribute should ignore template", () => {
-    const app = html`
-      <div ...${html``}></div>
-    `;
+    const app = html` <div ...${html``}></div> `;
     assertHtml(app, "<div></div>");
   });
 
   it("boolean attribute", () => {
-    const app = html`
-      <div ?yes=${true} ?no=${false}>Hello</div>
-    `;
+    const app = html` <div ?yes=${true} ?no=${false}>Hello</div> `;
     assertHtml(app, `<div yes="">Hello</div>`);
   });
 
   it("property ", () => {
     const value = { name: "world" };
-    const app = html`
-      <div .value=${value}>Hello</div>
-    `;
+    const app = html` <div .value=${value}>Hello</div> `;
     assertHtml(app, `<div>Hello</div>`);
     expect((container.querySelector("div")! as any).value).to.equal(value);
   });
 
   it("evnet handler", () => {
     const cb = sinon.spy();
-    const app = html`
-      <button @click=${cb}>click</button>
-    `;
+    const app = html` <button @click=${cb}>click</button> `;
     assertHtml(app, `<button>click</button>`);
     container.querySelector("button")!.click();
     expect(cb.calledOnce).to.be.true;
@@ -232,11 +198,9 @@ describe("render", () => {
 
   it("event object", () => {
     const listener = {
-      handleEvent: sinon.spy()
+      handleEvent: sinon.spy(),
     };
-    const app = html`
-      <button @click=${listener}>click</button>
-    `;
+    const app = html` <button @click=${listener}>click</button> `;
     assertHtml(app, `<button>click</button>`);
     container.querySelector("button")!.click();
     expect(listener.handleEvent.calledOnce).to.be.true;
@@ -244,32 +208,23 @@ describe("render", () => {
 
   it("bind not envent listener", () => {
     const listener = {
-      foo: sinon.spy()
+      foo: sinon.spy(),
     };
-    const app = html`
-      <button @click=${listener}>click</button>
-    `;
+    const app = html` <button @click=${listener}>click</button> `;
     assertHtml(app, `<button>click</button>`);
     container.querySelector("button")!.click();
     expect(listener.foo.called).to.be.false;
   });
 
   it("array", () => {
-    const app = html`
-      <div>${["a", "b", "c"]}</div>
-    `;
+    const app = html` <div>${["a", "b", "c"]}</div> `;
     assertHtml(app, `<div>abc</div>`);
   });
 
   it("template", () => {
     const app = html`
       <div>
-        ${["a", "b", "c"].map(
-          s =>
-            html`
-              <input value=${s} />
-            `
-        )}
+        ${["a", "b", "c"].map((s) => html` <input value=${s} /> `)}
       </div>
     `;
     assertHtml(
@@ -299,9 +254,7 @@ describe("render", () => {
   });
 
   it("symbol", () => {
-    const app = html`
-      <div>${Symbol("test")}</div>
-    `;
+    const app = html` <div>${Symbol("test")}</div> `;
     assertHtml(app, "<div></div>");
   });
 
@@ -366,11 +319,7 @@ describe("render", () => {
     const defaultValue = "c";
     const app = html`
       <select .value=${defaultValue}>
-        ${["a", "b", "c"].map(
-          v => html`
-            <option value=${v}>${v}</option>
-          `
-        )}
+        ${["a", "b", "c"].map((v) => html` <option value=${v}>${v}</option> `)}
       </select>
     `;
 
@@ -389,18 +338,14 @@ describe("render", () => {
 
   it("XSS in node", () => {
     const XSS = ((window as any).XSS = sinon.spy());
-    const app = html`
-      <div>${"<script>XSS();</script>"}</div>
-    `;
+    const app = html` <div>${"<script>XSS();</script>"}</div> `;
     render(app, container);
     expect(XSS.called).to.be.false;
   });
 
   it("XSS in attribute", () => {
     const XSS = ((window as any).XSS = sinon.spy());
-    const app = html`
-      <div foo=${"bar><script>XSS();</script><div"}></div>
-    `;
+    const app = html` <div foo=${"bar><script>XSS();</script><div"}></div> `;
     render(app, container);
     expect(XSS.called).to.be.false;
   });
@@ -448,9 +393,7 @@ describe("render", () => {
   it("render SVG to bind html tag template in svg.", () => {
     const app = html`
       <svg>
-        ${html`
-          <g></g>
-        `}
+        ${html` <g></g> `}
       </svg>
     `;
     render(app, container);
@@ -464,11 +407,7 @@ describe("render", () => {
     const app = html`
       <svg>
         <g>
-          ${[1, 2, 3].map(
-            i => html`
-              <line x=${i}></line>
-            `
-          )}
+          ${[1, 2, 3].map((i) => html` <line x=${i}></line> `)}
         </g>
       </svg>
     `;
@@ -480,9 +419,7 @@ describe("render", () => {
   });
 
   it("render SVG append to svg tag", () => {
-    const app = html`
-      <g></g>
-    `;
+    const app = html` <g></g> `;
     const svgcontainer = document.body.appendChild(
       document.createElement("svg")
     );

@@ -3,7 +3,7 @@ import { VNode, VDOM, isVNode, ArgValues, isTemplate, items } from "../html";
 export function compose(result: unknown, children: VDOM[]): VNode {
   return {
     tag: "shadowroot",
-    children: replaceSlot(1, [, result], children) as VDOM[]
+    children: replaceSlot(1, [, result], children) as VDOM[],
   };
 }
 
@@ -15,7 +15,7 @@ function replaceSlot(
 ): VDOM[] | VDOM {
   if (Array.isArray(vdom)) {
     return vdom.map(
-      v => replaceSlot(v, args, slottedNodes, hasNamedSlot) as VDOM
+      (v) => replaceSlot(v, args, slottedNodes, hasNamedSlot) as VDOM
     );
   } else if (typeof vdom === "number") {
     return replaceSlot(args[vdom], args, slottedNodes, hasNamedSlot);
@@ -26,7 +26,7 @@ function replaceSlot(
     vdom = { ...vdom };
     const { props } = vdom;
     props &&
-      Object.keys(props).forEach(name => {
+      Object.keys(props).forEach((name) => {
         const value = props[name];
         if (typeof value === "number" && args) {
           props[name] = args[value];
@@ -41,7 +41,7 @@ function replaceSlot(
       }
     } else {
       vdom.children = vdom.children.map(
-        v => replaceSlot(v, args, slottedNodes, hasNamedSlot) as VDOM
+        (v) => replaceSlot(v, args, slottedNodes, hasNamedSlot) as VDOM
       );
     }
     return vdom;

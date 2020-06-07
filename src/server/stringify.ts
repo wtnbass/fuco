@@ -3,7 +3,7 @@ import {
   ServerComponent,
   isComponent,
   deleteContext,
-  setContext
+  setContext,
 } from "./component";
 import { PropsManager } from "./props";
 

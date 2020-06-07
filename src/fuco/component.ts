@@ -6,7 +6,7 @@ import {
   defaultHooks,
   WithHooks,
   AttributeConverter,
-  Listener
+  Listener,
 } from "./hook";
 import { enqueueUpdate, unmount } from "./reconciler";
 

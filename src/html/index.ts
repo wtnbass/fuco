@@ -14,7 +14,7 @@ export {
   ArgValues,
   items,
   isTemplate,
-  isVNode
+  isVNode,
 } from "./template";
 
 const Cache = new WeakMap();

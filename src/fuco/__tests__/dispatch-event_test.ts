@@ -8,9 +8,7 @@ const fixture = () => {
   const recieve = useCallback((e: CustomEvent<string>) => {
     recievedMessage = e.detail;
   }, []);
-  return html`
-    <event-sender @send-event=${recieve}></event-sender>
-  `;
+  return html` <event-sender @send-event=${recieve}></event-sender> `;
 };
 
 describe(

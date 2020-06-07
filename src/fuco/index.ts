@@ -3,7 +3,7 @@ export {
   __def__,
   defineElement,
   Component,
-  FunctionalComponent
+  FunctionalComponent,
 } from "./component";
 export { css, unsafeCSS } from "./css";
 export { Context } from "./context";
@@ -17,7 +17,7 @@ export {
   Cleanup,
   AttributeConverter,
   Listener,
-  WithHooks
+  WithHooks,
 } from "./hook";
 export {
   useAttribute,
@@ -33,5 +33,5 @@ export {
   useLayoutEffect,
   useMemo,
   useCallback,
-  useErrorBoundary
+  useErrorBoundary,
 } from "./hooks";

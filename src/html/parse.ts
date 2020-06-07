@@ -1,14 +1,14 @@
 import { VDOM, VNode } from "./template";
 
 const openTagRegexp = /^\s*<\s*([a-z1-9-]+)/i;
-const closeTagRegexp = /^<\s*\/\s*([a-z1-9-]+)>/i;
-const tagEndRegexp = /^\s*(\/)?>/;
+const closeTagRegexp = /^<\s*\/\s*([a-z1-9-]+)>\s*/i;
+const tagEndRegexp = /^\s*(\/)?>\s*/;
 const voidTagNameRegexp = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
 const attributeNameRegexp = /^\s*([^\s"'<>\/=]+)(?:\s*(=))?/;
 const attributeValueRegexp = /^\s*(?:\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
 const doctypeRegexp = /^\s*<!DOCTYPE [^>]+>/i;
 const commentStartRegexp = /^\s*<!--/;
-const commentEndRegexp = /-->/;
+const commentEndRegexp = /-->\s*/;
 
 interface VRoot {
   children: VDOM[];

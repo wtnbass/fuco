@@ -3,7 +3,7 @@ import {
   withFixtures,
   selector,
   text,
-  createCaughtErrorPromise
+  createCaughtErrorPromise,
 } from "./fixture";
 import {
   html,
@@ -12,12 +12,12 @@ import {
   useErrorBoundary,
   useEffect,
   useLayoutEffect,
-  useState
+  useState,
 } from "..";
 
 type ErrorKind = "render" | "effect" | "layout-effect" | "cleanup" | "unmount";
 const fixture = () => {
-  const kind = useAttribute<ErrorKind>("error-kind", s => s as ErrorKind);
+  const kind = useAttribute<ErrorKind>("error-kind", (s) => s as ErrorKind);
   const [error, clearError] = useErrorBoundary();
   const [fallback, setFallback] = useState(false);
   if (error) {
@@ -27,31 +27,19 @@ const fixture = () => {
     `;
   }
   if (fallback) {
-    return html`
-      <div>fallback</div>
-    `;
+    return html` <div>fallback</div> `;
   }
   switch (kind) {
     case "render":
-      return html`
-        <render-error />
-      `;
+      return html` <render-error /> `;
     case "effect":
-      return html`
-        <effect-error />
-      `;
+      return html` <effect-error /> `;
     case "layout-effect":
-      return html`
-        <layout-effect-error />
-      `;
+      return html` <layout-effect-error /> `;
     case "cleanup":
-      return html`
-        <cleanup-error />
-      `;
+      return html` <cleanup-error /> `;
     case "unmount":
-      return html`
-        <unmount-error />
-      `;
+      return html` <unmount-error /> `;
     default:
       kind as never;
       return "";

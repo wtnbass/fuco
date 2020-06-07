@@ -20,9 +20,7 @@ const fixture = () => {
     count2[0]++;
     return () => count2[1]++;
   });
-  return html`
-    ${value} ${otherValue}
-  `;
+  return html` ${value} ${otherValue} `;
 };
 
 let countFNum = 0;

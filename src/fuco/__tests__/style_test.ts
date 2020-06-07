@@ -47,7 +47,7 @@ describe(
       useStyle(fontSize(10)());
       return html``;
     }
-  )(fs => {
+  )((fs) => {
     it("number value", async () => {
       const target = await fs[0].setup();
       expect(getCssText(target)).to.equal("div { font-size: 10px; }");

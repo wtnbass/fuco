@@ -7,9 +7,7 @@ const fixtureCustomEvent = () => {
   useListenEvent("custom-event", (e: CustomEvent) => {
     setValue(e.detail);
   });
-  return html`
-    <div>${value}</div>
-  `;
+  return html` <div>${value}</div> `;
 };
 
 const fixtureClickEvent = () => {
@@ -17,9 +15,7 @@ const fixtureClickEvent = () => {
   useListenEvent("click", () => {
     setClicked(true);
   });
-  return html`
-    <div>${clicked}</div>
-  `;
+  return html` <div>${clicked}</div> `;
 };
 
 describe(

@@ -14,13 +14,13 @@ interface Todo {
 const genId = (): ID => Date.now() + Math.random();
 
 const addTodo = (text: string) => ({
-  type: "ADD_TODO" as "ADD_TODO",
-  text
+  type: "ADD_TODO" as const,
+  text,
 });
 
 const toggleComplete = (id: ID) => ({
-  type: "TOGGLE_COMPLETE" as "TOGGLE_COMPLETE",
-  id
+  type: "TOGGLE_COMPLETE" as const,
+  id,
 });
 
 type State = Todo[];
@@ -33,7 +33,7 @@ function reducer(state: State = [], action: Action): State {
     case "ADD_TODO":
       return [...state, { id: genId(), text: action.text, completed: false }];
     case "TOGGLE_COMPLETE":
-      return state.map(todo =>
+      return state.map((todo) =>
         todo.id === action.id ? { ...todo, completed: !todo.completed } : todo
       );
     default:
@@ -89,7 +89,7 @@ describe(
   withFixtures(
     fixture,
     fixtureNumber
-  )(f => {
+  )((f) => {
     it("mount", async () => {
       let input!: HTMLInputElement;
       let list!: NodeListOf<Element>;

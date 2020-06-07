@@ -5,7 +5,7 @@ import {
   WithHooks,
   defaultHooks,
   __scope__,
-  __def__
+  __def__,
 } from "../fuco";
 import { ArgValues, VNode } from "../html";
 import { compose } from "./compose";
@@ -13,7 +13,7 @@ import { PropsManager } from "./props";
 
 const noop = () => {};
 
-const Contexts = new WeakMap<object, unknown>();
+const Contexts = new WeakMap<Record<string, unknown>, unknown>();
 
 function getContext(component: ServerComponent) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,7 +62,7 @@ export class ServerComponent implements WithHooks {
     return {
       tag,
       props,
-      children: [compose(result, children)]
+      children: [compose(result, children)],
     };
   }
 

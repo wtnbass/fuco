@@ -17,9 +17,7 @@ const fixture = () => {
 
 const lazyInitialState = () => {
   const [state] = useState(() => "it's lazy.");
-  return html`
-    <div>${state}</div>
-  `;
+  return html` <div>${state}</div> `;
 };
 
 const fixtureNumber = () => {

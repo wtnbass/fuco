@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
   useContext,
-  useCallback
+  useCallback,
 } from "..";
 import { Component } from "../component";
 
@@ -42,15 +42,13 @@ defineElement("theme-consumer-count", () => {
   useContext(ThemeContext);
   const count = useRef(0);
 
-  return html`
-    <div>${count.current!++}</div>
-  `;
+  return html` <div>${count.current!++}</div> `;
 });
 
 function Single() {
   const [theme, setTheme] = useState<Theme>("dark");
   const toggle = useCallback(() => {
-    setTheme(t => (t === "dark" ? "light" : "dark"));
+    setTheme((t) => (t === "dark" ? "light" : "dark"));
   }, []);
 
   return html`
@@ -65,10 +63,10 @@ function Double() {
   const [theme, setTheme] = useState<Theme>("dark");
   const [theme2, setTheme2] = useState<Theme2>("red");
   const toggle = useCallback(() => {
-    setTheme(t => (t === "dark" ? "light" : "dark"));
+    setTheme((t) => (t === "dark" ? "light" : "dark"));
   }, []);
   const toggle2 = useCallback(() => {
-    setTheme2(t => (t === "red" ? "green" : "red"));
+    setTheme2((t) => (t === "red" ? "green" : "red"));
   }, []);
 
   return html`
@@ -86,11 +84,11 @@ function Double() {
 function Same() {
   const [theme, setTheme] = useState<Theme2>("red");
   const toggle = useCallback(() => {
-    setTheme(t => (t === "red" ? "green" : "red"));
+    setTheme((t) => (t === "red" ? "green" : "red"));
   }, []);
   const [theme2, setTheme2] = useState<Theme2>("red");
   const toggle2 = useCallback(() => {
-    setTheme2(t => (t === "red" ? "green" : "red"));
+    setTheme2((t) => (t === "red" ? "green" : "red"));
   }, []);
 
   return html`
@@ -108,11 +106,11 @@ function Same() {
 function Duplicate() {
   const [theme, setTheme] = useState<Theme>("dark");
   const toggle = useCallback(() => {
-    setTheme(t => (t === "dark" ? "light" : "dark"));
+    setTheme((t) => (t === "dark" ? "light" : "dark"));
   }, []);
   const [theme2, setTheme2] = useState<Theme>("dark");
   const toggle2 = useCallback(() => {
-    setTheme2(t => (t === "dark" ? "light" : "dark"));
+    setTheme2((t) => (t === "dark" ? "light" : "dark"));
   }, []);
 
   return html`
@@ -133,11 +131,7 @@ function Unsubscribe() {
   return html`
     <button @click=${() => setShow(false)}>change</button>
     <theme-context .value=${"dark"}>
-      ${show
-        ? html`
-            <theme-consumer></theme-consumer>
-          `
-        : html``}
+      ${show ? html` <theme-consumer></theme-consumer> ` : html``}
     </theme-context>
   `;
 }
@@ -162,9 +156,7 @@ defineElement("num-context", NumContext.Provider);
 defineElement("num-consumer", () => {
   useContext(NumContext);
   const updated = useRef(0);
-  return html`
-    <div>${updated.current!++}</div>
-  `;
+  return html` <div>${updated.current!++}</div> `;
 });
 
 function Num() {
@@ -185,7 +177,7 @@ describe(
     Unsubscribe,
     ValueChanged,
     Num
-  )(fixs => {
+  )((fixs) => {
     it("single context", async () => {
       let target!: Element;
       let button!: HTMLButtonElement;
