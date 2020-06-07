@@ -8,7 +8,7 @@ const attributeNameRegexp = /^\s*([^\s"'<>\/=]+)(?:\s*(=))?/;
 const attributeValueRegexp = /^\s*(?:\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
 const doctypeRegexp = /^\s*<!DOCTYPE [^>]+>/i;
 const commentStartRegexp = /^\s*<!--/;
-const commentEndRegexp = /-->\s*/;
+const commentEndRegexp = /.*-->\s*/;
 
 interface VRoot {
   children: VDOM[];
@@ -43,8 +43,9 @@ export function parse(htmls: readonly string[]) {
       if (last === html) throw new Error("parse error");
       last = html;
       if (inComment) {
-        if ((r = ~html.search(commentEndRegexp))) inComment = false;
-        html = html.slice(r ? ~r + 3 : html.length);
+        if ((r = html.match(commentEndRegexp))) inComment = false;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        html = html.slice((inComment ? html : r![0]).length);
       } else if (inTag) {
         /* istanbul ignore else */
         if ((r = html.match(tagEndRegexp))) {
@@ -64,7 +65,7 @@ export function parse(htmls: readonly string[]) {
         if ((r = html.match(doctypeRegexp))) {
           html = html.slice(r[0].length);
         } else if ((r = html.match(commentStartRegexp))) {
-          html = html.slice(2);
+          html = html.slice(r[0].length - 2);
           inComment = true;
         } else if ((r = html.match(closeTagRegexp))) {
           html = html.slice(r[0].length);
