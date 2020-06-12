@@ -10,12 +10,10 @@ export const invokeCatchError = <T>(
     callback(c, ...rest);
   } catch (e) {
     c._dispatch(errorType, { bubbles: true, composed: true, detail: e });
-    /* develblock:start */
     if (process.env.BUILD_ENV === "development") {
       console.error(`Error in <${c._name}>`);
       callback(c, ...rest);
     }
-    /* develblock:end */
   }
 };
 

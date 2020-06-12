@@ -1,3 +1,5 @@
+const webpack = require("webpack");
+
 module.exports = function(config) {
   const options = {
     frameworks: ["mocha"],
@@ -21,17 +23,16 @@ module.exports = function(config) {
       resolve: {
         extensions: [".ts", ".js"]
       },
+      plugins: [
+        new webpack.DefinePlugin({
+          "process.env.BUILD_ENV": JSON.stringify("test")
+        })
+      ],
       module: {
         rules: [
           {
             test: /\.ts$/,
             use: [{ loader: "ts-loader" }]
-          },
-          {
-            test: /\.ts$/,
-            enforce: "pre",
-            exclude: /node_modules/,
-            use: [{ loader: "webpack-strip-block" }]
           },
           {
             test: /\.ts$/,
