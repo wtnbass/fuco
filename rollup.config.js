@@ -7,15 +7,15 @@ const terserOpts = {
   compress: {
     keep_infinity: true,
     pure_getters: true,
-    passes: 10
+    passes: 10,
   },
   ecma: 9,
   toplevel: true,
   warnings: true,
   mangle: {
     properties: {
-      regex: "^_"
-    }
+      regex: "^_",
+    },
   },
   nameCache: {
     props: {
@@ -35,13 +35,13 @@ const terserOpts = {
         $_deps: "_d",
         $_effects: "_e",
         $_layoutEffects: "_l",
-        $_cleanup: "_c"
-      }
-    }
-  }
+        $_cleanup: "_c",
+      },
+    },
+  },
 };
 
-const template = (moduleName, format, env, options) => {
+const bundle = (moduleName, format, env, external = []) => {
   const isProducton = env === "production";
   const ext = format === "es" ? "mjs" : "js";
 
@@ -50,25 +50,23 @@ const template = (moduleName, format, env, options) => {
     output: {
       file: `${moduleName}/${moduleName}.${env}.${ext}`,
       format,
-      plugins: [isProducton && terser(terserOpts)].filter(Boolean)
+      plugins: [isProducton && terser(terserOpts)].filter(Boolean),
     },
     plugins: [
       typescript(tsOpts),
-      replace({ "process.env.BUILD_ENV": JSON.stringify(env) })
+      replace({ "process.env.BUILD_ENV": JSON.stringify(env) }),
     ].filter(Boolean),
-    ...options
+    external,
   };
 };
 
 export default [
-  template("fuco", "es", "production"),
-  template("fuco", "es", "development"),
-  template("fuco", "cjs", "production", { external: ["../html"] }),
-  template("fuco", "cjs", "development", { external: ["../html"] }),
-  template("html", "cjs", "production"),
-  template("html", "cjs", "development"),
-  template("server", "cjs", "production", { external: ["../html", "../fuco"] }),
-  template("server", "cjs", "development", {
-    external: ["../html", "../fuco"]
-  })
+  bundle("fuco", "es", "production"),
+  bundle("fuco", "es", "development"),
+  bundle("fuco", "cjs", "production", ["../html"]),
+  bundle("fuco", "cjs", "development", ["../html"]),
+  bundle("html", "cjs", "production"),
+  bundle("html", "cjs", "development"),
+  bundle("server", "cjs", "production", ["../html", "../fuco"]),
+  bundle("server", "cjs", "development", ["../html", "../fuco"]),
 ];
