@@ -54,7 +54,7 @@ const template = (moduleName, format, env, options) => {
     },
     plugins: [
       typescript(tsOpts),
-      replace({ "process.env.BUILD_ENV": `"${env}"` })
+      replace({ "process.env.BUILD_ENV": JSON.stringify(env) })
     ].filter(Boolean),
     ...options
   };
