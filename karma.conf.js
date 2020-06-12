@@ -1,18 +1,18 @@
 const webpack = require("webpack");
 
-module.exports = function(config) {
+module.exports = function (config) {
   const options = {
     frameworks: ["mocha"],
     files: [{ pattern: "**/__tests__/**/*_test.ts", watched: false }],
     preprocessors: {
-      "src/**/*.ts": ["webpack"]
+      "src/**/*.ts": ["webpack"],
     },
     reporters: ["mocha", "coverage-istanbul"],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
     browserConsoleLogOptions: {
-      level: "disable"
+      level: "disable",
     },
     autoWatch: false,
     browsers: ["FirefoxHeadless", "ChromeHeadless"],
@@ -21,43 +21,43 @@ module.exports = function(config) {
       mode: "development",
       devtool: "inline-source-map",
       resolve: {
-        extensions: [".ts", ".js"]
+        extensions: [".ts", ".js"],
       },
       plugins: [
         new webpack.DefinePlugin({
-          "process.env.BUILD_ENV": JSON.stringify("test")
-        })
+          "process.env.BUILD_ENV": JSON.stringify("test"),
+        }),
       ],
       module: {
         rules: [
           {
             test: /\.ts$/,
-            use: [{ loader: "ts-loader" }]
+            use: [{ loader: "ts-loader" }],
           },
           {
             test: /\.ts$/,
             enforce: "post",
             loader: "istanbul-instrumenter-loader",
             exclude: /(node_modules|__tests__)/,
-            options: { esModules: true }
-          }
-        ]
-      }
+            options: { esModules: true },
+          },
+        ],
+      },
     },
     webpackMiddleware: {
-      stats: "errors-only"
+      stats: "errors-only",
     },
     coverageIstanbulReporter: {
       dir: "coverage/browser",
       combineBrowserReports: true,
-      reports: ["lcovonly"]
-    }
+      reports: ["lcovonly"],
+    },
   };
 
   if (process.env.DEBUG) {
     Object.assign(options, {
       browsers: ["Chrome"],
-      singleRun: false
+      singleRun: false,
     });
   }
 
@@ -65,9 +65,9 @@ module.exports = function(config) {
     Object.assign(options, {
       client: {
         mocha: {
-          grep: process.env.GREP
-        }
-      }
+          grep: process.env.GREP,
+        },
+      },
     });
   }
 
