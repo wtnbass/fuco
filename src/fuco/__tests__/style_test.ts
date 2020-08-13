@@ -28,22 +28,6 @@ describe(
     () => (useStyle(fontSize(css`10`)), html``),
     () => (useStyle(fontSize(unsafeCSS("10"))), html``),
     () => {
-      useStyle(
-        () => css`
-          @import url(https://unpkg.com/normalize.css);
-        `
-      );
-      return html``;
-    },
-    () => {
-      useStyle(
-        () => css`
-          @import url(${new URL("./normalize.css", "https://unpkg.com")});
-        `
-      );
-      return html``;
-    },
-    () => {
       useStyle(fontSize(10)());
       return html``;
     }
@@ -61,16 +45,6 @@ describe(
     it("unsafe css", async () => {
       const target = await fs[2].setup();
       expect(getCssText(target)).to.equal("div { font-size: 10px; }");
-    });
-
-    it("import style", async () => {
-      const target = await fs[3].setup();
-      expect(getCssText(target)).not.to.equal("");
-    });
-
-    it("import using url value", async () => {
-      const target = await fs[4].setup();
-      expect(getCssText(target)).not.to.equal("");
     });
 
     it("disallow-type", async () => {
@@ -94,7 +68,7 @@ describe(
     });
 
     it("allows css tag as argument", async () => {
-      const target = await fs[5].setup();
+      const target = await fs[3].setup();
       expect(getCssText(target)).to.equal("div { font-size: 10px; }");
     });
   })
