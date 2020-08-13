@@ -13,7 +13,6 @@ const hasCSSSymbol = (value: unknown): value is HasCSSSymbol => {
 const resolve = (value: unknown): string => {
   if (typeof value === "number") return String(value);
   if (hasCSSSymbol(value)) return value[cssSymbol];
-  if (value instanceof URL) return value.href;
   throw new TypeError(`${value} is not supported type.`);
 };
 
