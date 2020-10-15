@@ -41,32 +41,35 @@ const terserOpts = {
   },
 };
 
-const bundle = (moduleName, format, env, external = []) => {
-  const isProducton = env === "production";
-  const ext = format === "es" ? "mjs" : "js";
-
-  return {
+const bundle = (moduleName, external = []) => {
+  const plugins = [
+    typescript(tsOpts),
+    replace({ "process.env.BUILD_ENV": JSON.stringify("development") }),
+  ];
+  return [
+    {
+      input: `./src/${moduleName}/index.ts`,
+      output: {
+        file: `esm/${moduleName}.development.js`,
+        format: "esm",
+      },
+      plugins,
+      external,
+    },
+    {
     input: `./src/${moduleName}/index.ts`,
     output: {
-      file: `${moduleName}/${moduleName}.${env}.${ext}`,
-      format,
-      plugins: [isProducton && terser(terserOpts)].filter(Boolean),
+      file: `esm/${moduleName}.production.js`,
+      format: "esm",
+      plugins: [terser(terserOpts)],
     },
-    plugins: [
-      typescript(tsOpts),
-      replace({ "process.env.BUILD_ENV": JSON.stringify(env) }),
-    ].filter(Boolean),
+    plugins,
     external,
-  };
+  }];
 };
 
 export default [
-  bundle("fuco", "es", "production"),
-  bundle("fuco", "es", "development"),
-  bundle("fuco", "cjs", "production", ["../html"]),
-  bundle("fuco", "cjs", "development", ["../html"]),
-  bundle("html", "cjs", "production"),
-  bundle("html", "cjs", "development"),
-  bundle("server", "cjs", "production", ["../html", "../fuco"]),
-  bundle("server", "cjs", "development", ["../html", "../fuco"]),
+  ...bundle("fuco", ["../html"]),
+  ...bundle("html"),
+  ...bundle("server", ["../html", "../fuco"]),
 ];

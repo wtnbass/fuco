@@ -1,17 +1,45 @@
 {
   "name": "fuco",
-  "version": "2.0.0-next.1",
-  "description": "Functional Component like React, but for Web Components",
-  "main": "fuco/index.js",
-  "module": "fuco/fuco.production.mjs",
-  "typings": "fuco/index.d.ts",
+  "version": "2.0.0-next.2",
+  "description": "Function Component like React, but for Web Components",
+  "type": "module",
+  "main": "esm/fuco.production.mjs",
+  "module": "esm/fuco.production.mjs",
+  "typings": "dist/fuco/index.d.ts",
+  "exports": {
+    ".": {
+      "development": "./esm/fuco.development.js",
+      "default": "./esm/fuco.production.js"
+    },
+    "./fuco": {
+      "development": "./esm/fuco.development.js",
+      "default": "./esm/fuco.production.js"
+    },
+    "./fuco.js": {
+      "development": "./esm/fuco.development.js",
+      "default": "./esm/fuco.production.js"
+    },
+    "./html": {
+      "development": "./esm/html.development.js",
+      "default": "./esm/html.production.js"
+    },
+    "./html.js": {
+      "development": "./esm/html.development.js",
+      "default": "./esm/html.production.js"
+    },
+    "./server": {
+      "development": "./esm/server.development.js",
+      "default": "./esm/server.production.js"
+    },
+    "./server.js": {
+      "development": "./esm/server.development.js",
+      "default": "./esm/server.production.js"
+    }
+  },
   "files": [
-    "fuco",
-    "html",
-    "server",
-    "!fuco/__tests__",
-    "!html/__tests__",
-    "!server/__tests__"
+    "dist",
+    "esm",
+    "!dist/*/__tests__"
   ],
   "scripts": {
     "build": "rollup -c",
@@ -23,7 +51,7 @@
     "lint:types": "tsc --noEmit",
     "lint:eslint": "eslint src --ext .ts",
     "fmt": "prettier --write 'src/**/*'",
-    "clean": "rimraf '{fuco,html,server}/**/*.{d,development,production}.{ts,js,mjs}' coverage",
+    "clean": "rimraf dist esm coverage",
     "distclean": "npm run clean && rm -fr node_modules package-lock.json",
     "prepare": "run-s clean build",
     "filesize": "cat fuco/fuco.production.mjs | gzip -9 | wc -c",
