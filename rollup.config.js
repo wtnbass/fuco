@@ -41,35 +41,26 @@ const terserOpts = {
   },
 };
 
-const bundle = (moduleName, external = []) => {
-  const plugins = [
-    typescript(tsOpts),
-    replace({ "process.env.BUILD_ENV": JSON.stringify("development") }),
-  ];
-  return [
-    {
-      input: `./src/${moduleName}/index.ts`,
-      output: {
+const bundle = (moduleName) => {
+  return {
+    input: `./src/${moduleName}.ts`,
+    output: [
+      {
         file: `esm/${moduleName}.development.js`,
         format: "esm",
       },
-      plugins,
-      external,
-    },
-    {
-    input: `./src/${moduleName}/index.ts`,
-    output: {
-      file: `esm/${moduleName}.production.js`,
-      format: "esm",
-      plugins: [terser(terserOpts)],
-    },
-    plugins,
-    external,
-  }];
+      {
+        file: `esm/${moduleName}.production.js`,
+        format: "esm",
+        plugins: [terser(terserOpts)],
+      },
+    ],
+    plugins: [
+      typescript(tsOpts),
+      replace({ "process.env.BUILD_ENV": JSON.stringify("development") }),
+    ],
+    treeshake: true,
+  };
 };
 
-export default [
-  ...bundle("fuco", ["../html"]),
-  ...bundle("html"),
-  ...bundle("server", ["../html", "../fuco"]),
-];
+export default ["fuco", "server"].map(bundle);
