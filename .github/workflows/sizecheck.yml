@@ -11,4 +11,4 @@ jobs:
       - uses: preactjs/compressed-size-action@v1
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          pattern: "{fuco,html,server}/**/*.production.{js,mjs}"
+          pattern: "esm/*.js"
