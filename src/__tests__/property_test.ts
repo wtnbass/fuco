@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from "chai";
 import { withFixtures, text, selectorAll } from "./fixture";
 import { html, useProperty, useRef } from "../fuco";

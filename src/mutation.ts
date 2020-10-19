@@ -226,8 +226,7 @@ function commitNode(
     }
     if (isHtmlTemplate(next) && !isHtmlTemplate(prev)) {
       (tmpl._mutations = tmpl._mutations || [])[index] = insertTemplate(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        next! as HtmlTemplate,
+        next as HtmlTemplate,
         tmpl._node,
         tmpl._isSvg
       );

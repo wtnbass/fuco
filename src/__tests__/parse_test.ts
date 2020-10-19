@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-empty-function */
 import { expect } from "chai";
 import { html } from "../fuco";
 import { getHtmlTemplateProperties } from "../utils";

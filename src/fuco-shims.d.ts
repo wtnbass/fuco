@@ -1,7 +1,6 @@
 import { FucoGlobal } from "./global";
 
 declare global {
-  // eslint-disable-next-line no-var
   export var $fucoGlobal: FucoGlobal;
 
   interface ShadowRoot {

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import {
   Holes,
   Component,
@@ -14,6 +13,7 @@ import { SsrProps } from "./ssr-props";
 import "./global";
 
 const contextCache = new WeakMap<Record<string, unknown>, unknown>();
+
 const noop = () => {};
 
 export const isComponent = (vnode: VNode) => !!$fucoGlobal.__defs[vnode.tag];
@@ -52,7 +52,7 @@ export class SsrComponent implements Component {
     ctx && contextCache.delete(ctx);
   }
 
-  _render(): void {}
+  _render = noop
 
   _attr<T>(name: string, converter: AttributeConverter<T>) {
     const value = this._props.attributes[name];
