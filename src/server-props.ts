@@ -6,7 +6,7 @@ const camelToKebab = (s: string) =>
 const getValue = (o: unknown, key: string) =>
   (o as { [key: string]: unknown })[key];
 
-export class SsrProps {
+export class ServerProps {
   tag: string;
   selectValue: string | undefined;
   attributes: { [name: string]: string };

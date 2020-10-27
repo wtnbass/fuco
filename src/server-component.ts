@@ -8,7 +8,7 @@ import {
 import { contextTypePrefix } from "./consts";
 import { defaultHooks, setScope } from "./hooks";
 import { getCssString } from "./css";
-import { SsrProps } from "./ssr-props";
+import { ServerProps } from "./server-props";
 
 import "./global";
 
@@ -18,18 +18,18 @@ const noop = () => {};
 
 export const isComponent = (vnode: VNode) => !!$fucoGlobal.__defs[vnode.tag];
 
-export class SsrComponent implements Component {
+export class ServerComponent implements Component {
   _componentName: string;
   _hooks = defaultHooks();
   _connected = false;
   _dirty = false;
-  _props: SsrProps;
+  _props: ServerProps;
   _result: unknown;
   _style = "";
 
   constructor(vnode: VNode, holes?: Holes) {
     this._componentName = vnode.tag;
-    this._props = new SsrProps(vnode.tag);
+    this._props = new ServerProps(vnode.tag);
     if (vnode.props) {
       this._props.commit(vnode.props, holes);
       delete this._props.properties.innerHTML;
@@ -52,7 +52,7 @@ export class SsrComponent implements Component {
     ctx && contextCache.delete(ctx);
   }
 
-  _render = noop
+  _render = noop;
 
   _attr<T>(name: string, converter: AttributeConverter<T>) {
     const value = this._props.attributes[name];
