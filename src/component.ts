@@ -38,6 +38,7 @@ export function defineElement(componentName: string, fc: FC) {
         public _render() {
           setScope(this);
           render(fc(), this._container);
+          setScope(null);
         }
 
         public _attr<T>(name: string, converter?: AttributeConverter<T>) {

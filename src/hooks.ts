@@ -24,7 +24,7 @@ export function defaultHooks(): Hooks<unknown> {
   };
 }
 
-export function setScope(c: Component) {
+export function setScope(c: Component | null) {
   $fucoGlobal.__currentComponent = c;
   $fucoGlobal.__currentCursor = 0;
 }
@@ -33,17 +33,25 @@ function hooks<T>(config: {
   _onmount?: (h: Hooks<T>, c: Component, i: number) => T;
   _onupdate?: (h: Hooks<T>, c: Component, i: number) => void;
 }): T {
-  const h = $fucoGlobal.__currentComponent._hooks as Hooks<T>;
+  if (
+    process.env.BUILD_ENV === "development" &&
+    !$fucoGlobal.__currentComponent
+  ) {
+    console.error(
+      "Hooks can only be called in the body of function component."
+    );
+  }
+  const h = $fucoGlobal.__currentComponent!._hooks as Hooks<T>;
   const index = $fucoGlobal.__currentCursor++;
   if (h._values.length <= index && config._onmount) {
     h._values[index] = config._onmount(
       h,
-      $fucoGlobal.__currentComponent,
+      $fucoGlobal.__currentComponent!,
       index
     );
   }
   if (config._onupdate) {
-    config._onupdate(h, $fucoGlobal.__currentComponent, index);
+    config._onupdate(h, $fucoGlobal.__currentComponent!, index);
   }
   return h._values[index];
 }
