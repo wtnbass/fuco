@@ -22,11 +22,11 @@ const queueTask = (callback: () => void) => {
 };
 
 export const renderComponent = invokeCatchError((c) => {
-  if (!(c as Component)._connected) return;
-  (c as Component)._render();
+  if (!c._connected) return;
+  c._render();
   enqueueLayoutEffects(c);
   enqueueEffects(c);
-  (c as Component)._dirty = false;
+  c._dirty = false;
 });
 
 const flushEffects = invokeCatchError((c, effects: EffectFn[]) => {
@@ -37,6 +37,12 @@ const flushEffects = invokeCatchError((c, effects: EffectFn[]) => {
       const cleanup = effects[i]();
       if (typeof cleanup === "function") {
         cleanups[i] = cleanup;
+      }
+      // istanbul-ignore-next
+      if (process.env.BUILD_ENV === "development") {
+        if (cleanup != null && typeof cleanup !== "function") {
+          console.warn("An effect function must return a function. You returned:", cleanup);
+        }
       }
       delete effects[i];
     }
