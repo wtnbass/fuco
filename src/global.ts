@@ -4,7 +4,7 @@ const __CssTemplateSymbol = Symbol("css");
 const __HtmlTemplateSymbol = Symbol("html");
 
 export type FucoGlobal = {
-  __currentComponent: Component;
+  __currentComponent: Component | null;
   __currentCursor: number;
   __CssTemplate: typeof __CssTemplateSymbol;
   __HtmlTemplate: typeof __HtmlTemplateSymbol;
@@ -12,7 +12,7 @@ export type FucoGlobal = {
 };
 
 globalThis.$fucoGlobal = globalThis.$fucoGlobal || {
-  __currentComponent: undefined as any,
+  __currentComponent: null,
   __currentCursor: 0,
   __CssTemplate: __CssTemplateSymbol,
   __HtmlTemplate: __HtmlTemplateSymbol,
