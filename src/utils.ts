@@ -3,7 +3,7 @@ import { VDOM, Holes, HtmlKey, HtmlTemplate, VNode } from "./interfaces";
 import "./global";
 
 export function isVNode(vdom: unknown): vdom is VNode {
-  return vdom && !!(vdom as VNode).tag;
+  return !!vdom && !!(vdom as VNode).tag;
 }
 
 export function getHoles(t: HtmlTemplate): Holes {
@@ -22,7 +22,7 @@ export function getHtmlTemplateProperties(
 }
 
 export function isHtmlTemplate(value: unknown): value is HtmlTemplate {
-  return value && getHtmlTemplateProperties(value as HtmlTemplate) != null;
+  return !!value && getHtmlTemplateProperties(value as HtmlTemplate) != null;
 }
 
 export function equalsHtmlTemplate(t1: HtmlTemplate, t2: HtmlTemplate) {

@@ -23,7 +23,7 @@ export const getCssString = (css: CssTemplate) =>
   css[$fucoGlobal.__CssTemplate];
 
 export const isCss = (value: unknown): value is CssTemplate => {
-  return value && getCssString(value as CssTemplate) != null;
+  return !!value && getCssString(value as CssTemplate) != null;
 };
 
 const resolve = (value: unknown): string => {

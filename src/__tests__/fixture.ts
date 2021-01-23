@@ -77,7 +77,7 @@ export const createCaughtErrorPromise = () => {
       e.preventDefault();
       clearTimeout(id);
       rollbackErrorHandler();
-      resolve();
+      resolve(null);
     }
     window.addEventListener("error", handleUncaughtError);
   });

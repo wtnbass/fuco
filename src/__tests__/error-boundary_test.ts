@@ -145,7 +145,6 @@ describe(
       await caughtError;
 
       const div = selector("div", el);
-      console.log(el.shadowRoot?.innerHTML);
       expect(text(div)).to.equal("error on unmount");
     });
 
