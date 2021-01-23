@@ -4,8 +4,8 @@
     "module": "es2015",
     "lib": ["es2017", "dom", "dom.iterable"],
     "moduleResolution": "node",
-    "outDir": "./",
-    "declarationDir": "./",
+    "outDir": "./dist",
+    "declarationDir": "./dist",
     "declaration": true,
     "sourceMap": true,
     "strict": true,
@@ -15,5 +15,11 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": []
+  "exclude": [],
+  "ts-node": {
+    "transpileOnly": true,
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  }
 }

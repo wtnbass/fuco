@@ -2,16 +2,14 @@ import typescript from "rollup-plugin-typescript2";
 import { terser } from "rollup-plugin-terser";
 import replace from "@rollup/plugin-replace";
 
-const tsOpts = { useTsconfigDeclarationDir: true };
 const terserOpts = {
   compress: {
     keep_infinity: true,
     pure_getters: true,
     passes: 10,
   },
-  ecma: 9,
+  ecma: 2017,
   toplevel: true,
-  warnings: true,
   mangle: {
     properties: {
       regex: "^_",
@@ -41,32 +39,23 @@ const terserOpts = {
   },
 };
 
-const bundle = (moduleName, format, env, external = []) => {
-  const isProducton = env === "production";
-  const ext = format === "es" ? "mjs" : "js";
-
+const bundle = (moduleName, env) => {
+  const isProd = env === "production";
   return {
-    input: `./src/${moduleName}/index.ts`,
+    treeshake: true,
+    input: `./src/${moduleName}.ts`,
     output: {
-      file: `${moduleName}/${moduleName}.${env}.${ext}`,
-      format,
-      plugins: [isProducton && terser(terserOpts)].filter(Boolean),
+      file: `dist/${moduleName}.${env}.js`,
+      format: "es",
     },
     plugins: [
-      typescript(tsOpts),
+      typescript(),
       replace({ "process.env.BUILD_ENV": JSON.stringify(env) }),
+      isProd && terser(terserOpts),
     ].filter(Boolean),
-    external,
   };
 };
 
-export default [
-  bundle("fuco", "es", "production"),
-  bundle("fuco", "es", "development"),
-  bundle("fuco", "cjs", "production", ["../html"]),
-  bundle("fuco", "cjs", "development", ["../html"]),
-  bundle("html", "cjs", "production"),
-  bundle("html", "cjs", "development"),
-  bundle("server", "cjs", "production", ["../html", "../fuco"]),
-  bundle("server", "cjs", "development", ["../html", "../fuco"]),
-];
+export default ["fuco", "server"].flatMap((m) =>
+  ["production", "development"].map((e) => bundle(m, e))
+);
