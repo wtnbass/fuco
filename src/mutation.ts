@@ -133,6 +133,10 @@ function commitAttribute(
     (node as AnyProp<typeof node>)[name.slice(1)] = next;
   } else if (name[0] === "@") {
     name = name.slice(1);
+    if (process.env.BUILD_ENV === "development") {
+      isEventListener(next) &&
+        console.warn("An event attribure must bind a function.");
+    }
     isEventListener(prev) && node.removeEventListener(name, prev);
     isEventListener(next) && node.addEventListener(name, next);
   } else if (name === ":key") {
