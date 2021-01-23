@@ -3,35 +3,34 @@
   "version": "2.0.0-next.2",
   "description": "Function Component like React, but for Web Components",
   "type": "module",
-  "main": "esm/fuco.production.mjs",
-  "module": "esm/fuco.production.mjs",
+  "main": "dist/fuco.production.mjs",
+  "module": "dist/fuco.production.mjs",
   "typings": "dist/fuco.d.ts",
   "exports": {
     ".": {
-      "development": "./esm/fuco.development.js",
-      "default": "./esm/fuco.production.js"
+      "development": "./dist/fuco.development.js",
+      "default": "./dist/fuco.production.js"
     },
     "./fuco": {
-      "development": "./esm/fuco.development.js",
-      "default": "./esm/fuco.production.js"
+      "development": "./dist/fuco.development.js",
+      "default": "./dist/fuco.production.js"
     },
     "./fuco.js": {
-      "development": "./esm/fuco.development.js",
-      "default": "./esm/fuco.production.js"
+      "development": "./dist/fuco.development.js",
+      "default": "./dist/fuco.production.js"
     },
     "./server": {
-      "development": "./esm/server.development.js",
-      "default": "./esm/server.production.js"
+      "development": "./dist/server.development.js",
+      "default": "./dist/server.production.js"
     },
     "./server.js": {
-      "development": "./esm/server.development.js",
-      "default": "./esm/server.production.js"
+      "development": "./dist/server.development.js",
+      "default": "./dist/server.production.js"
     }
   },
   "files": [
     "dist",
     "!dist/__tests__",
-    "esm",
     "src",
     "!src/__tests__"
   ],
@@ -45,10 +44,10 @@
     "lint:types": "tsc --noEmit",
     "lint:eslint": "eslint src --ext .ts",
     "fmt": "prettier --write src",
-    "clean": "rimraf dist esm coverage",
+    "clean": "rimraf dist coverage",
     "distclean": "npm run clean && rm -fr node_modules package-lock.json",
     "prepare": "run-s clean build",
-    "filesize": "cat esm/fuco.production.js | gzip -9 | wc -c",
+    "sizecheck": "node scripts/sizecheck.js",
     "mergecover": "lcov-result-merger 'coverage/*/lcov.info' coverage/lcov.log && genhtml -q --branch-coverage -function-coverage -o coverage coverage/lcov.log"
   },
   "keywords": [
@@ -95,6 +94,7 @@
     "rollup-plugin-terser": "7.0.2",
     "rollup-plugin-typescript2": "0.29.0",
     "sinon": "9.2.4",
+    "size-plugin-core": "0.0.9",
     "ts-loader": "8.0.14",
     "ts-node": "9.1.1",
     "typescript": "4.1.3",
